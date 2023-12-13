@@ -2301,7 +2301,7 @@ fit_female_ss_bf21nm_nm %>%
                  ncol = 2) -> p_female_ss_bf21nm_nm_TY_nm
 
 p_female_ss_bf21nm_nm_TY_nm
-# 
+ 
 # ggsave("figures/p_female_ss_bf21nm_nm_TY_nm.png",p_female_ss_bf21nm_nm_TY_nm,
 #        dpi = 600, units = "mm",
 #        width = 400, height = 180)
@@ -2377,9 +2377,9 @@ list_female_ss_trend <- list(len_obs = nrow(nadrop_no_female_trend),
 #               list(phi = 0.01),
 #               list(phi = 0.01)))
 
-m_female_ss_trend$save_object("model/m_female_ss_trend.rds")
-
-m_female_ss_trend <- readRDS("model/m_female_ss_trend.rds")  
+# m_female_ss_trend$save_object("model/m_female_ss_trend.rds")
+# 
+# m_female_ss_trend <- readRDS("model/m_female_ss_trend.rds")  
 ```
 
 #### 2021年非交尾期以前のデータ  
@@ -2416,22 +2416,22 @@ list_female_ss_trend_bf21nm <- list(len_obs = nrow(nadrop_no_female_trend_bf21nm
 
 それでは、以下のようにcmdstanr[@Gabry2023]でモデルを回す。  
 ```{r}
-stan_female_ss_trend_bf21nm <- cmdstan_model("stanfile/m_female_ss_trend.stan")
-
-m_female_ss_trend_bf21nm <- stan_female_ss_trend_bf21nm$sample(
-  data = list_female_ss_trend_bf21nm,
-  seed = 13,
-  iter_sampling = 10000,
-  iter_warmup = 1000,
-  thin = 1,
-  chains = 4,
-  adapt_delta = 0.999,
-  max_treedepth = 20
-)
-
-m_female_ss_trend_bf21nm$save_object("model/m_female_ss_trend_bf21nm.rds")
-
-m_female_ss_trend_bf21nm <- readRDS("model/m_female_ss_trend_bf21nm.rds")  
+# stan_female_ss_trend_bf21nm <- cmdstan_model("stanfile/m_female_ss_trend.stan")
+# 
+# m_female_ss_trend_bf21nm <- stan_female_ss_trend_bf21nm$sample(
+#   data = list_female_ss_trend_bf21nm,
+#   seed = 13,
+#   iter_sampling = 10000,
+#   iter_warmup = 1000,
+#   thin = 1,
+#   chains = 4,
+#   adapt_delta = 0.999,
+#   max_treedepth = 20
+# )
+# 
+# m_female_ss_trend_bf21nm$save_object("model/m_female_ss_trend_bf21nm.rds")
+# 
+# m_female_ss_trend_bf21nm <- readRDS("model/m_female_ss_trend_bf21nm.rds")  
 ```
 
 
@@ -2440,33 +2440,33 @@ m_female_ss_trend_bf21nm <- readRDS("model/m_female_ss_trend_bf21nm.rds")
 
 ## DHARMaでのチェック  
 ```{r}
-draws_female_ss_m_p <-  draws_female_ss2_m %>% 
-  select(starts_with("p")) %>% 
-  select(-phi) %>% 
-  select(any_of(obs_no_m))
-
-
-draws_female_ss_m_p2 <-  draws_female_ss_m_p %>% 
-  mutate(iter = 1:n()) %>% 
-  pivot_longer(cols = starts_with("p"),
-               values_to = "p") %>% 
-  mutate(max_female = rep(nadrop_no_female_m$max_female, times = 20000)) %>% 
-  mutate(phi = rep(draws_female_ss2_m$phi, each = nrow(nadrop_no_female_m)))
-
-pred_sim <- draws_female_ss_m_p2 %>% 
-  mutate(pred = rbetabinom(nrow(.), size = max_female, prob = p, theta = phi)) %>% 
-  select(iter, name, pred) %>% 
-  pivot_wider(names_from = name,
-              values_from = pred) %>% 
-  select(-iter)
-
-model.check_m <- createDHARMa(
-  simulatedResponse = t(pred_sim),
-  observedResponse = nadrop_no_female_m$no_female,
-  fittedPredictedResponse = map_vec(draws_female_ss_m_p, median),
-  integerResponse = TRUE)
-
-plot(model.check_m)
+# draws_female_ss_m_p <-  draws_female_ss2_m %>% 
+#   select(starts_with("p")) %>% 
+#   select(-phi) %>% 
+#   select(any_of(obs_no_m))
+# 
+# 
+# draws_female_ss_m_p2 <-  draws_female_ss_m_p %>% 
+#   mutate(iter = 1:n()) %>% 
+#   pivot_longer(cols = starts_with("p"),
+#                values_to = "p") %>% 
+#   mutate(max_female = rep(nadrop_no_female_m$max_female, times = 20000)) %>% 
+#   mutate(phi = rep(draws_female_ss2_m$phi, each = nrow(nadrop_no_female_m)))
+# 
+# pred_sim <- draws_female_ss_m_p2 %>% 
+#   mutate(pred = rbetabinom(nrow(.), size = max_female, prob = p, theta = phi)) %>% 
+#   select(iter, name, pred) %>% 
+#   pivot_wider(names_from = name,
+#               values_from = pred) %>% 
+#   select(-iter)
+# 
+# model.check_m <- createDHARMa(
+#   simulatedResponse = t(pred_sim),
+#   observedResponse = nadrop_no_female_m$no_female,
+#   fittedPredictedResponse = map_vec(draws_female_ss_m_p, median),
+#   integerResponse = TRUE)
+# 
+# plot(model.check_m)
 ```
 
 
