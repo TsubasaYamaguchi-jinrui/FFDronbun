@@ -1,0 +1,179 @@
+# オスの攻撃と怪我の関連  
+本章では、オスから受けた攻撃の頻度と怪我の有無の関連について検討する。  
+
+## データの加工  
+まず怪我のデータを読み込み、その他のデータと結合する。  
+```{r}
+## 怪我データの読み込み  
+injury18 <- read_excel("../Data/data/2018mating/2018mating_raw.xlsx", sheet = "injury")
+injury19 <- read_excel("../Data/data/2019mating/2019mating_raw.xlsx", sheet = "injury")
+injury20 <- read_excel("../Data/data/2020mating/2020mating_raw.xlsx",sheet = "injury")
+injury21 <- read_excel("../Data/data/2021mating/2021mating_raw.xlsx",sheet = "injury")
+
+injury_all <- bind_rows(injury18,injury19,injury20,injury21) %>% 
+  pivot_longer(Kur:Har, names_to = "femaleID", values_to = "injury") %>% 
+  mutate(injury01 = ifelse(injury >= 1, 1, 0)) %>% 
+  mutate(date = as_date(date))
+
+## データを結合  
+injury_final <- agg_rate_each %>% 
+  filter(presence == "1") %>%
+  filter(age >= 6) %>% 
+  left_join(injury_all, by = c("date", "femaleID")) %>% 
+  left_join(female_all %>% select(date, femaleID, rs2),
+            by = c("date", "femaleID")) %>% 
+  drop_na(injury01, rs2) %>% 
+  mutate(rate_agg_std = standardize(rate_agg))
+```
+
+## 分析  
+### モデリング  
+それでは、モデリングを行う。モデルの詳細は以下のとおりである。  
+事前分布には弱情報事前分布を用いた。  
+
+- 分布: ベルヌーイ分布    
+- リンク関数: ロジット関数    
+- 応答変数: 怪我が確認されたか否か(`injury01`)           
+- 説明変数: オスからの攻撃頻度(`rate_agg`)、メスの発情の有無(`rs2`)、調査期間(`study_period`)  
+- ランダム切片: メスID(`femaleID`)      
+
+```{r}
+m_agginj <- brm(injury01 ~ rate_agg_std*rs2  + study_period + (1|femaleID),
+                family = bernoulli,
+                iter = 11000, warmup = 6000, seed = 13,
+                 prior = c(prior(student_t(4,0,10), class = "b"),
+                           prior(student_t(4,0,10), class = "Intercept"),
+                           prior(student_t(4,0,5), class = "sd")),
+                 control=list(adapt_delta = 0.9999, max_treedepth = 20),
+                 backend = "cmdstanr",
+                 data = injury_final,
+                 file = "model/m_agginj.rds")
+```
+
+### モデルチェック  
+DHARMaパッケージ[@Hartig2022]とDHARMa.helperパッケージ[@Francisco2023]でモデルの前提が満たされているかを確認する。特に問題はないよう。 
+```{r, fig.height = 4}
+## 全個体への攻撃  
+dh_check_brms(m_agginj)
+```
+<br/>  
+
+bayesplotパッケージ[@Gabry2022]の`pp_check`関数で、事後分布からの予測分布と実測値の分布を比較しても大きな乖離はない?     
+```{r, fig.height = 4.5}
+## 全個体への攻撃  
+pp_check(m_agginj, ndraws = 100)+
+  theme_bw()+
+  theme(aspect.ratio = 0.9)
+```  
+<br/>  
+
+多重共線性のチェックもお個あったが、VIFに問題はない。  
+```{r}
+check_collinearity(m_agginj)
+```
+<br/>  
+
+Rhatにも問題はなく、収束の問題はないよう。  
+```{r, fig.dim = c(8,4)}
+## 全個体への攻撃  
+data.frame(Rhat = brms::rhat(m_agginj)) %>% 
+  ggplot(aes(x = Rhat))+
+  geom_histogram(fill = "white",
+                 color = "black")+
+  theme_bw()+
+  theme(aspect.ratio = 1) -> p_rhat_agginj
+
+p_rhat_agginj
+```
+<br/>  
+
+### 結果の確認   
+結果は以下の通り。太字になっている変数は95%確信区間が0をまたいでおらず、有意な影響があるといえる。  
+```{r, echo = FALSE}
+model_parameters(m_agginj) %>% 
+  data.frame() %>% 
+  select(1,2, 4,5,7, 8) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
+  select(c(1,2,7), everything()) %>% 
+  select(-CI_low, -CI_high) %>% 
+  mutate(Parameter = fct_relevel(Parameter,
+                                  "b_Intercept",
+                                  "b_rate_agg_std","b_rs2",
+                                  "b_rate_agg_std:rs2",
+                                  "b_study_periodm19",
+                                  "b_study_periodm20",
+                                  "b_study_periodm21")) %>% 
+  arrange(Parameter) %>% 
+  mutate(Parameter = str_replace_all(Parameter, c("b_Intercept"="切片",
+                                     "b_study_periodm20" = "調査期間\n(m20 vs m18)",
+                                     "b_study_periodm21" = "調査期間\n(m21 vs m18)",
+                                     "b_study_periodm19" = "調査期間\n(m19 vs m18)",
+                                     "^b_rate_agg_std$" = "被攻撃頻度",
+                                     "b_rs2" = "発情の有無(vs 無)",
+                                     "b_rate_agg_std:rs2" = "被攻撃頻度×\n 発情の有無(vs 無)"))) %>% 
+  rename("Explanatory variables"="Parameter") %>% 
+  flextable() %>% 
+  colformat_double(digits=2) %>% 
+  set_table_properties(layout="autofit",width = 0.9) %>% 
+  autofit() %>% 
+  font(part = "header", fontname = "Segoe UI") %>% 
+  font(part = "body", j=2:5, fontname = "Segoe UI") %>% 
+  font(part = "body", j=1, fontname = "Yu Gothic") %>% 
+  bold(j=c(1,2,3),i = c(2,3),bold = TRUE) %>% 
+  theme_zebra() %>% 
+  align(j=2:5,part = "all",align = "center") -> table_agginj
+
+table_agginj
+
+# save_as_image(table_agginj, "tables/table_agginj.tiff",
+#               res = 600)
+```
+<br/>  
+
+交互作用項について検討する。非発情メス、発情メスのいずれについても被攻撃頻度は怪我をする確率と関連しているよう。    
+```{r}
+estimate_slopes(m_agginj,
+                trend = "rate_agg_std",
+                at = "rs2 = c(0,1)")
+```
+
+### 結果の図示  
+```{r}
+nd_agginj <- tidyr::crossing(rate_agg = seq(0, 2, length.out =100),
+                             study_period = c("m18","m19","m20","m21"),
+                             rs2 = c(0,1)) %>% 
+  mutate(rate_agg_std = (rate_agg - mean(injury_final$rate_agg))/sd(injury_final$rate_agg))
+
+fit_agginj <- fitted(m_agginj,
+                         newdata = nd_agginj,
+                         re_formula = NA) %>% 
+               data.frame() %>% 
+               bind_cols(nd_agginj)
+
+
+injury_final %>% 
+  ggplot(aes(x = rate_agg, y = injury01, color = study_period))+
+  geom_point(shape = "|", size = 3)+
+  geom_line(data = fit_agginj,
+            aes(y = Estimate, linetype = as.factor(rs2)),
+            linewidth = 0.7)+
+  theme_bw(base_size = 14)+
+  scale_y_continuous(breaks = seq(0,1,by = 0.2)) +
+  labs(x = "オスからの攻撃頻度", y = "新\nた\nに\n怪\n我\nを\nす\nる\n確\n率",
+       color = "調査期間", linetype = "発情の有無") +
+  scale_color_nejm()+
+  theme(axis.title.y = element_text(angle = 0,
+                                    vjust = 0.5,
+                                    family = "Yu Gothic"),
+        axis.title.x = element_text(family = "Yu Gorhic"),
+        axis.text = element_text(family = "Arial",
+                                   size = 13),
+        legend.title = element_text(family = "Yu Gothic"),
+        aspect.ratio = 1) -> p_agginj_all
+
+p_agginj_all
+
+ggsave("figures/p_agginj_all.png", p_agginj_all,
+       width = 120, height = 100, units = "mm", dpi = 600)
+```
+

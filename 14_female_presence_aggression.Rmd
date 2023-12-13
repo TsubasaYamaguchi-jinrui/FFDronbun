@@ -1,0 +1,281 @@
+# 群れ本体で確認された日数割合と被攻撃頻度   
+第\@ref(c10)章で
+
+## データの加工  
+まず2019年~2021年の交尾期について、各メスの確認日数割合、発情日数割合、平均被攻撃頻度を調査期間ごとに算出する。前章で各観察日の群れ本体における各メスの被攻撃頻度と発情の有無については算出していたので(`agg_daily_each`)、これをそのまま利用できる。  
+
+```{r}
+## 日ごとの被攻撃頻度と発情日数割合の算出  
+agg_daily_each %>% 
+  filter(presence == "1") %>% 
+  group_by(study_period, femaleID) %>% 
+  summarise(mean_agg = mean(rate_agg),
+            prop_rs = mean(rs2),
+            sum_agg = sum(rate_agg),
+            N = n()) -> mean_agg_each
+
+## 各個体が観察された日の群れ観察時間  
+no_female_over0.5 %>% 
+  select(groupID, dur) %>% 
+  left_join(group_all %>% select(-c(TY,IT,KR,LK,KM,TG))) %>% 
+  select(-(start:fin)) %>% 
+  ## 縦型にする  
+  pivot_longer(Kur:Yun,
+               names_to = "femaleID",
+               values_to = "presence") %>% 
+  left_join(att, by = c("femaleID", "study_period")) %>% 
+  ## 2019~2021の交尾期のみ  
+  filter(study_period != "m18" & !str_detect(study_period, "nm")) %>% 
+  ## 6歳以上のメスのみを抽出
+  filter(age >= 6) %>% 
+  filter(presence == 1) %>% 
+  group_by(study_period, femaleID) %>% 
+  summarise(dur_sum = sum(dur)) %>% 
+  ungroup() -> dur_sum
+
+## 各調査期間にTY/ITと共に観察された日数  
+no_female_over0.5 %>% 
+  select(groupID) %>% 
+  left_join(group_all %>% select(-c(TY,IT,KR,LK,KM,TG))) %>% 
+  ## 縦型にする  
+  pivot_longer(Kur:Yun,
+               names_to = "femaleID",
+               values_to = "presence") %>% 
+  left_join(att, by = c("femaleID", "study_period")) %>% 
+  ## 6歳以上のみ抽出  
+  filter(age >= 6) %>% 
+  filter(femaleID != "Kur") %>% 
+  left_join(TYIT_presence %>% mutate(date = as_date(date)),
+            by = c("date", "groupID")) %>% 
+  mutate(WithTY = ifelse(TY == 1 & presence == 1,1,0),
+         WithIT = ifelse(IT == 1 & presence == 1,1,0)) %>% 
+  filter(presence == 1) -> a
+  group_by(study_period, femaleID) %>% 
+  summarise(prop_TY = mean(WithTY),
+            prop_IT = mean(WithIT)) %>% 
+  ungroup() %>% 
+  replace_na(list(prop_IT = 0)) -> prop_TYIT
+
+## 確認日数割合と結合  
+no_female_over0.5 %>% 
+  select(groupID, dur) %>% 
+  left_join(group_all %>% select(-c(TY,IT,KR,LK,KM,TG))) %>% 
+  select(-(start:fin)) %>% 
+  ## 縦型にする  
+  pivot_longer(Kur:Yun,
+               names_to = "femaleID",
+               values_to = "presence") %>% 
+  left_join(att, by = c("femaleID", "study_period")) %>% 
+  ## 2019~2021の交尾期のみ  
+  filter(study_period != "m18" & !str_detect(study_period, "nm")) %>% 
+  ## 6歳以上のメスのみを抽出
+  filter(age >= 6) %>% 
+  ## 個体追跡情報を結合  
+  left_join(focal_summary, by = c("date", "femaleID")) %>% 
+  replace_na(list(dur_focal = 0)) %>% 
+  group_by(study_period, femaleID) %>% 
+  summarise(sum_presence = sum(presence),
+            prop_presence = mean(presence),
+            rank = mean(rank),
+            age = mean(age),
+            sum_dur = sum(dur),
+            sum_focal = sum(dur_focal)) %>% 
+  ungroup() %>% 
+  ## 途中で死亡したKurは除く
+  filter(femaleID != "Kur") %>% 
+  ## 攻撃頻度と発情日数割合などを結合
+  left_join(mean_agg_each,
+            by = c("study_period","femaleID")) %>% 
+  left_join(dur_sum,
+            by = c("study_period","femaleID")) %>% 
+  left_join(prop_TYIT,
+            by = c("study_period","femaleID")) %>% 
+  mutate(prop_focal = sum_focal/dur_sum) %>% 
+  group_by(study_period) %>% 
+  mutate(rank_scaled = rank/max(rank)) %>% 
+  ungroup() %>% 
+  mutate(rs_std = standardize(prop_rs),
+         prop_std = standardize(prop_presence),
+         age_std = standardize(age),
+         rank_std = standardize(rank_scaled),
+         focal_std = standardize(prop_focal),
+         prop_TY_std = standardize(prop_TY),
+         prop_IT_std = standardize(prop_IT)) -> female_presence_agg
+```
+
+データは以下の通り。  
+```{r}
+datatable(female_presence_agg %>% 
+            mutate(across(where(is.numeric), ~round(.x, 2))))
+```
+
+## モデリング  
+モデルは以下の通り。応答変数の分布としてはガンマ分布を用いる。ガンマ分布については、 @Dunn2018 に詳しい。  
+
+$i$はデータ番号、$j$はメスIDを表す。  
+
+- `mean_agg`: 調査期間ごとの平均被攻撃頻度(回/h)  
+- `prop_presence`: 確認日数割合  
+- `prop_rs`: 調査期間ごとの発情日数割合  
+- `rank_scaled`: 0~1に変換された順位  
+- `age`: 年齢  
+- `m20`: 2020年交尾期かを表すダミー変数  
+- `m21`: 2021年交尾期化を表すダミー変数  
+
+$$
+\begin{aligned}
+& mean_agg_i \sim Gamma(\mu_i, \phi) \\
+&log(\mu_i) = \beta_0 + \beta_1 \times prop\_presence_i + \beta_2 \times prop\_rs_i + \beta_3 \times rank\_scaled_i + \beta_4 \times age_i + \beta_5 \times m20 + \beta_6 \times m21 + r_j\\
+&r_j \sim Normal(0, \sigma)\\
+&\beta_{0,1,2,3,4} \sim student_t(4,0,10)\\
+&\sigma \sim student\_t(0,4,5)\\
+&\phi \sim student_t
+\end{aligned}
+$$
+
+### モデルの実行  
+Rでは以下のように実行する。  
+```{r}
+m_presence_agg <- brm(data = female_presence_agg,
+                      sum_agg ~ prop_std  + rs_std  +  age_std + rank_std + focal_std +
+                        study_period+ offset(log(N)) + (1|femaleID),
+                      family = Gamma(link = "log"),
+                      prior = c(prior(student_t(4,0,10),class = Intercept),
+                      prior(student_t(4,0,10), class = b),
+                      prior(student_t(4,0,5), class = sd),
+                      prior(gamma(0.01,0.01), class = shape)),
+                      iter = 11000, warmup = 1000, seed = 13,
+                      control=list(adapt_delta = 0.999, max_treedepth = 15),
+                      backend = "cmdstanr",
+                      file = "model/m_presence_agg")
+```
+
+### モデルチェック  
+DHARMaパッケージ[@Hartig2022]とDHARMa.helperパッケージ[@Francisco2023]でモデルの前提が満たされているかを確認する。特に問題はないよう。 
+```{r, fig.height = 4}
+## 全個体への攻撃  
+dh_check_brms(m_presence_agg)
+```
+<br/>  
+
+bayesplotパッケージ[@Gabry2022]の`pp_check`関数で、事後分布からの予測分布と実測値の分布を比較しても大きな乖離はない?     
+```{r, fig.height = 4.5}
+## 全個体への攻撃  
+pp_check(m_presence_agg, ndraws = 100)+
+  theme_bw()+
+  theme(aspect.ratio = 0.9)
+```  
+<br/>  
+
+多重共線性のチェックもお個あったが、VIFに問題はない。  
+```{r}
+check_collinearity(m_presence_agg)
+```
+<br/>  
+
+Rhatにも問題はなく、収束の問題はないよう。  
+```{r, fig.dim = c(8,4)}
+## 全個体への攻撃  
+data.frame(Rhat = brms::rhat(m_presence_agg)) %>% 
+  ggplot(aes(x = Rhat))+
+  geom_histogram(fill = "white",
+                 color = "black")+
+  theme_bw()+
+  theme(aspect.ratio = 1) -> p_rhat_female_out_an
+
+p_rhat_female_out_an
+```
+<br/>  
+
+### 結果の確認   
+結果は以下の通り。太字になっている変数は95%確信区間が0をまたいでおらず、有意な影響があるといえる。  
+```{r, echo = FALSE}
+model_parameters(m_presence_agg) %>% 
+  data.frame() %>% 
+  select(1,3,5,6,8,9) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
+  select(c(1,2,7), everything()) %>% 
+  select(-CI_low, -CI_high) %>% 
+  filter(Parameter != "shape") %>% 
+  mutate(Parameter = fct_relevel(Parameter,
+                                  "b_Intercept","b_prop_std",
+                                  "b_rs_std","b_age_std",
+                                  "b_rank_std", "b_focal_std", 
+                                  "b_study_periodm20",
+                                  "b_study_periodm21")) %>% 
+  arrange(Parameter) %>% 
+  mutate(Parameter = str_replace_all(Parameter, c("b_Intercept"="切片",
+                                     "b_study_periodm20" = "調査期間\n(m20 vs m19)",
+                                     "b_study_periodm21" = "調査期間\n(m21 vs m19)",
+                                     "b_prop_std" = "確認日数割合",
+                                     "b_rs_std" = "発情日数割合",
+                                     "b_focal_std" = "追跡時間割合",
+                                     "b_rank_std" = "順位",
+                                     "b_age_std" = "年齢"))) %>% 
+  rename("Explanatory variables"="Parameter") %>% 
+  flextable() %>% 
+  colformat_double(digits=2) %>% 
+  set_table_properties(layout="autofit",width = 0.9) %>% 
+  autofit() %>% 
+  font(part = "header", fontname = "Segoe UI") %>% 
+  font(part = "body", j=2:5, fontname = "Segoe UI") %>% 
+  font(part = "body", j=1, fontname = "Yu Gothic") %>% 
+  bold(j=c(1,2,3),i = c(2,3,5, 6,7),bold = TRUE) %>% 
+  theme_zebra() %>% 
+  align(j=2:5,part = "all",align = "center") -> table_presence_agg
+
+table_presence_agg
+
+# save_as_image(table_presence_agg, "tables/table_presence_agg.tiff",
+#               res = 600)
+```
+<br/>  
+
+### 結果の図示  
+```{r, fig.dim = c(10,4)}
+nd_presence_agg <- tidyr::crossing(age_std = mean(female_presence_agg$age_std),
+                                   rank_std = mean(female_presence_agg$rank_std),
+                                   rs_std = mean(female_presence_agg$rs_std),
+                                   study_period = c("m19","m20","m21"),
+                                   prop_presence = seq(0,1,length = 50),
+                                   focal_std = mean(female_presence_agg$focal_std),
+                                   N = 1) %>% 
+  mutate(prop_std = (prop_presence - mean(female_presence_agg$prop_presence))/sd(female_presence_agg$prop_presence))
+
+fitted(m_presence_agg,
+       newdata = nd_presence_agg,
+       re_formula = NA) %>% 
+  bind_cols(nd_presence_agg) %>% 
+  data.frame() %>% 
+  ggplot(aes(x = prop_presence))+
+  geom_point(data = female_presence_agg,
+             aes(y = mean_agg),
+             alpha = 0.5,
+             size = 3)+
+  facet_rep_wrap(~study_period,
+                 scales = "free")+
+  coord_cartesian(xlim = c(0.4,1))+
+  geom_line(aes(y = Estimate))+
+  geom_ribbon(aes(y = Estimate,
+                  ymin = Q2.5,
+                  ymax = Q97.5),
+              alpha = 0.2)+
+  labs(x = "Proportion of confirmed days",
+       y = "Mean frequency of \ndaily aggression")+
+  theme_bw(base_size = 15)+
+  theme(axis.title.y = element_text(family = "Yu Gothic"),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"),
+        aspect.ratio = 1,
+        strip.background = element_blank(),
+        strip.text = element_text(family = "Arial",
+                                  hjust = 0)) -> p_presence_agg
+
+p_presence_agg
+
+# ggsave("figures/p_presence_agg.png",p_presence_agg, dpi = 600, units = "mm",
+#        width = 240, height = 100)
+```
+

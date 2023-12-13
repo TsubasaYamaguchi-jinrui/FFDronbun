@@ -1,0 +1,67 @@
+# 0. パッケージの読み込み {.unnumbered}
+
+本稿はRの基本操作と`tidyverse`パッケージによるデータハンドリングができることを前提としている。`tidyverse`パッケージを用いたデータ処理については、以下の書籍などを参照。
+
+-   R for Data Science [@Wickham2016]\
+    [電子書籍](https://r4ds.had.co.nz/), [日本語](https://www.oreilly.co.jp/books/9784873118147/)
+
+-   R Graphics Coocbook 2nd Edition [@Chang2018]\
+    [電子書籍](https://r-graphics.org/), [日本語](https://www.oreilly.co.jp/books/9784873118925/)
+
+-   RユーザのためのRstudio[実践]入門\~tidyverseによるモダンな分析フローの世界 改訂2版 [@Matsumura2021] [出版社サイト](https://gihyo.jp/book/2021/978-4-297-12170-9)
+
+使用するパッケージは以下のとおりである。
+
+```{r}
+## データハンドリング
+library(tidyverse)
+library(readxl)
+library(knitr)
+library(easystats)
+library(DT)
+library(scales)
+## モデリング  
+library(brms)
+library(rethinking)
+library(rstan)
+library(rstanarm)
+library(cmdstanr)
+library(ggeffects)
+library(DHARMa)
+library(DHARMa.helpers)
+## ネットワーク分析  
+library(sna)
+library(ANTs)
+library(asnipe)
+library(aninet)
+library(vegan)
+library(igraph)
+library(tidygraph)
+library(ggraph)
+## グラフや表関連
+library(ggforce)
+library(ggbeeswarm)
+library(plotly)
+library(bayesplot)
+library(viridis)
+library(ggnewscale)
+library(GGally)
+library(flextable)
+library(ggrepel)
+library(patchwork)
+library(kableExtra)
+library(ggsci)
+library(lemon)
+library(ggsignif)
+library(ggh4x)
+library(ggrepel)
+# ## フォント関連
+library(extrafont)
+require(systemfonts)
+require(fontregisterer)
+# ベイズモデルの設定
+rstan_options(auto_write = TRUE) 
+options(mc.cores = parallel::detectCores()) 
+```
+
+

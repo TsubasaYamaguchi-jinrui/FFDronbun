@@ -1,0 +1,67 @@
+# 基本情報  
+以下では、基本的な情報をまとめる。  
+
+## 追跡時間と観察日数  
+<<<<<<< HEAD
+240分以上かつ50%のメス(>5)が観察された日のみを含む。  
+=======
+>>>>>>> a72d98704112aaa02e1d2d936ffc5d36eae01840
+```{r}
+no_female_over0.5 %>% 
+  group_by(study_period) %>% 
+  summarise(N = n(),
+            mean = mean(dur),
+            sd = sd(dur)) %>% 
+<<<<<<< HEAD
+  mutate(across(3:4,~round(.,2))) %>% 
+  rename("調査期間" = 1, "観察日数" = 2, "平均追跡時(分)" = 3, "SD" = 4) %>% 
+  flextable() %>% 
+  colformat_double(digits=2) %>% 
+  set_table_properties(layout="autofit",width = 0.9) %>% 
+  font(part = "header", fontname = "Segoe UI") %>% 
+  font(part = "body", j=2:4, fontname = "Segoe UI") %>% 
+  font(part = "body", j=1, fontname = "Segoe UI") %>% 
+  theme_zebra() %>% 
+  align(j=2:4,part = "all",align = "center") -> table_dur
+
+table_dur
+
+no_female_over0.5 %>% 
+  group_by(study_period) %>% 
+  summarise(N = n(),
+            mean = mean(dur),
+            sd = sd(dur)) %>% 
+  mutate(across(3:4,~round(.,2))) %>% 
+  separate(study_period, sep = -2, into = c("season", "year")) %>% 
+  pivot_wider(names_from = season, values_from = 3:5) %>% 
+  mutate(year = str_c("20",year)) %>% 
+  select(year, N_m, mean_m, sd_m, everything()) %>% 
+  rename("年" = 1,"観察日数" = 2, "平均追跡時(分)" = 3, "SD" = 4,
+         "観察日数 " = 5, "平均追跡時(分) " = 6, "SD " = 7) %>% 
+  flextable() %>% 
+  add_header_row(values = c("","交尾期", "非交尾期"),
+                 colwidth = c(1,3,3)) %>% 
+  colformat_double(digits=2) %>% 
+  set_table_properties(layout="autofit",width = 1) %>% 
+  autofit(add_w = 0.2) %>% 
+  font(part = "header", fontname = "Yu Gothic") %>% 
+  font(part = "body", j=2:7, fontname = "Segoe UI") %>% 
+  font(part = "body", j=1, fontname = "Segoe UI") %>% 
+  fontsize(j = 1:7,
+           size = 15) %>% 
+  theme_zebra() %>% 
+  align(j=2:7,part = "all",align = "center")-> table_dur_wide
+
+table_dur_wide
+
+# save_as_image(table_dur, "tables/table_dur.tiff",
+#               res = 600)
+
+save_as_image(table_dur_wide, "tables/table_dur_wide.tiff",
+              res = 600)
+=======
+  flextable() %>% 
+  theme_zebra()
+>>>>>>> a72d98704112aaa02e1d2d936ffc5d36eae01840
+```
+

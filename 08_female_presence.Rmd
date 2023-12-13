@@ -1,0 +1,448 @@
+# 調査期間ごとのメスの確認状況 {#c8}    
+以下では、メスの確認状況について分析を行う。  
+
+## 各観察日のメス確認割合  
+前章(\@ref(c7))で、6歳以上のメス(以下、メス)が50%以上確認でき、240分以上追跡できた日のデータを抽出していた(`no_female_over0.5`)。以下では、1日に確認できた6歳以上のメスの割合が調査期間ごとにどのように異なっていたかを分析する。    
+
+### データの確認  
+まず、調査期間ごとにデータを図示する。2019年交尾期から2021年交尾期までの期間に1日に確認されたメスの割合が低い日が多くなっていることが分かる(特に交尾期)。    
+```{r}
+n_days <- no_female_over0.5 %>% 
+  group_by(study_period) %>% 
+  summarise(N = n())
+
+no_female_over0.5 %>% 
+  mutate(season = ifelse(str_detect(study_period, "nm"), "nm","m")) %>% 
+  ggplot(aes(x = study_period, y = prop_female)) + 
+  geom_violin(aes(fill = as.factor(season)),
+              scale = "width",width = 0.9,
+              size = 0.3,bw = 0.03)+
+  geom_quasirandom(shape = 1,
+                alpha = 0.8,
+                size = 1.9,
+                stroke = 0.7,
+                dodge.width = 0.8)+
+  geom_text(data = n_days, 
+            aes(label = str_c("N = ",N), 
+                y = 1.025, 
+                family = "Arial"),
+            size = 4) +
+  scale_fill_manual(values = c("grey","white"),
+                    labels  = c("nonmating(m)","mating(nm)"))+
+  scale_color_manual(values = c("black","black"),
+                     labels  = c("nonmating(m)","mating(nm)"))+
+  labs(fill = "",
+       y = "Proportion of confirmed females",x="")+
+  theme_bw(base_size = 16)+
+  theme(axis.title.y = element_text(family = "Arial", size = 14.5),
+        axis.text.x = element_text(family="Arial",
+                                   face = "bold", size = 16,
+                                   angle = -45, vjust = -0.2),
+        axis.title = element_text(family = "Yu Gothic",
+                                  size = 20),
+        legend.text = element_text(family = "Yu Gothic"),
+        axis.text.y = element_text(family ="Arial"))+
+  scale_y_continuous(breaks = seq(0,1,0.1))
+```
+
+### 調査期間間の比較  
+#### モデリング   
+以下では、ベイズモデルによって調査期間間で確認したメスの割合を比較する。モデル式は以下の通り。`max_females`は各観察日の全メス数、`no_females`は各観察日の確認メス数を表す。    
+
+$$
+\begin{aligned}
+&no\_female_i \sim BetaBinomial(p_i, max\_female_i, \theta)\\
+&logit(p_i) = \beta_0 + \beta_1 \times study\_period_i + r_i\\
+&r_i \sim Normal(0, \sigma)\\
+&\beta_0 \sim student\_t(4,0,10)\\
+&\beta_1 \sim student\_t(4,0,10)\\
+&\sigma \sim student\_t(4,0,5)
+\end{aligned}
+$$
+
+```{r}
+m_female_prop <- brm(data = no_female_over0.5 %>% mutate(date=as.factor(date)),
+                     no_female|trials(max_female) ~ study_period + (1|date),
+                     family = "beta_binomial",
+                     prior = c(prior(student_t(4,0,10),class = Intercept),
+                     prior(student_t(4,0,10), class = b),
+                     prior(student_t(4,0,5), class = sd)),
+                     iter = 11000, warmup = 6000, seed = 13,
+                     control=list(adapt_delta = 0.9999, max_treedepth = 20),
+                     backend = "cmdstanr",
+                     file = "model/m_female_prop")
+```
+
+#### モデルチェック  
+続いて、モデルチェックを行う。まず、DHARMaパッケージ[@Hartig2022]とDHARMa.helperパッケージ[@Francisco2023]でモデルの前提が満たされているかを確認する。特に問題はないよう。    
+
+```{r}
+dh_female_prop <- dh_check_brms(m_female_prop)
+```
+<br/>  
+
+bayesplotパッケージ[@Gabry2022]の`pp_check`関数で、事後分布からの予測分布と実測値の分布を比較しても大きな乖離はない。   
+```{r}
+pp_check(m_female_prop, ndraws = 100)+
+  theme_bw()
+```
+
+ただし、残差には時系列相関があることがわかり、可能であれば考慮した方がよい。  
+```{r, fig.dim = c(8,4)}
+## 残差の算出
+resid_female_prop <- no_female_over0.5 %>% 
+  mutate(resid = dh_female_prop$scaledResiduals) %>% 
+  complete(date = seq.Date(min(date), max(date), by = "1 day"))
+
+
+## 自己相関の算出
+acf_female_prop <- acf(x = resid_female_prop$resid,
+                        lag.max = 20,
+                        na.action = na.pass,
+                        plot = F)
+
+pacf_female_prop <- pacf(x = resid_female_prop$resid,
+                       lag.max = 20,
+                       na.action = na.pass,
+                       plot = F)
+
+## 図示  
+data.frame(Lag = acf_female_prop$lag[,,1],
+           acf = acf_female_prop$acf[,,1]) %>% 
+  ggplot(aes(x = Lag, y = acf))+
+  geom_segment(aes(yend = 0, xend = Lag))+
+  theme_bw(base_size = 15)+
+  theme(aspect.ratio = 1) -> p_acf_female_prop
+
+data.frame(Lag = pacf_female_prop$lag[,,1],
+           acf = pacf_female_prop$acf[,,1]) %>% 
+  ggplot(aes(x = Lag, y = acf))+
+  geom_segment(aes(yend = 0, xend = Lag))+
+  theme_bw(base_size = 15)+
+  theme(aspect.ratio = 1) -> p_pacf_female_prop
+
+p_acf_female_prop_com <- p_acf_female_prop + p_pacf_female_prop
+
+p_acf_female_prop_com
+
+# ggsave("figures/p_acf_female_prop_com.png",
+#        p_acf_female_prop_com, width = 240, height = 100,
+#        dpi =600, units = "mm")
+```
+<br/>  
+
+`DHARMa`パッケージで調べても、時系列相関が検出された。  
+```{r, fig.height = 4}
+dh_female_prop <- dh_check_brms(m_female_prop, plot = FALSE)
+testTemporalAutocorrelation(dh_female_prop, time = no_female_over0.5$date)
+```
+
+
+#### 結果の確認  
+まず、モデルの結果は以下の通り。収束の問題は内容。有向サンプルサイズ(ESS)は1000を下回っているものがいくつかある。    
+```{r}
+model_parameters(m_female_prop) %>% 
+  data.frame() %>% 
+  select(1,3,5,6,7,8,9) %>% 
+  mutate(across(where(is.numeric),~round(.,2)))
+```
+
+続いて、多重比較を行う。  
+```{r}
+estimate_contrasts(m_female_prop, contrast = "study_period", ci = 0.95) %>% 
+  data.frame() -> cont_female_prop
+  
+cont_female_prop %>% 
+  mutate(across(where(is.numeric),~round(.,2)))
+```
+
+結果をまとめたのが下の表である。2019~2021年の交尾期は、その他の期間に比べて有意に確認メス割合が低いことが分かる。  
+```{r}
+cont_female_prop %>% 
+  mutate(p = ifelse(CI_low*CI_high >0, "***","n.s")) %>% 
+  select(Level1,Level2,p) %>% 
+  pivot_wider(names_from = Level2,
+              values_from = p) %>% 
+  column_to_rownames(var = "Level1")
+```
+
+#### 結果の図示  
+モデルの結果と実データを合わせてプロットすると以下のようになる。  
+```{r fig.dim = c(10,4.5)}
+mean_female_prop <- estimate_means(m_female_prop, at = "study_period") %>% 
+  data.frame()
+
+no_female_over0.5 %>% 
+  mutate(season = ifelse(str_detect(study_period, "nm"), "nm","m")) %>% 
+  mutate(season = fct_relevel(season, "nm","m")) %>% 
+  ggplot(aes(x = study_period, y = prop_female)) + 
+  geom_violin(aes(fill = as.factor(season)),
+              scale = "width",width = 0.9,
+              size = 0.3,bw = 0.03)+
+  geom_text(data = n_days, 
+            aes(label = str_c("N = ",N), 
+                y = 1.025, 
+                family = "Arial"),
+            size = 4) +
+  geom_boxplot(aes(fill = as.factor(season)),
+               width = 0.1,
+               outlier.shape = NA,
+               size = 0.3) +   
+  geom_pointrange(data = mean_female_prop %>% filter(!str_detect(study_period,"NM")),
+                aes(y = Probability, ymin = CI_low,ymax = CI_high),
+                  color = "white",size = 0.4)+
+  geom_errorbar(data = mean_female_prop%>% filter(!str_detect(study_period,"NM")),
+                aes(y = Probability, ymin = CI_low,ymax = CI_high),
+                  color = "white",width = 0.1,size=0.6)+
+  scale_fill_manual(values = c("palegreen4","orange"),
+                    label = c("nonmating(m)","mating(nm)"))+
+  scale_color_manual(values = c("palegreen4","orange3"),
+                    label = c("nonmating(m)","mating(nm)"))+
+  labs(fill = "",
+       y = "Proportion of confirmed females",x="")+
+  theme_bw(base_size = 16)+
+  theme(axis.title.y = element_text(family = "Arial", size = 14.5),
+        axis.text.x = element_text(family="Arial",
+                                   face = "bold", size = 16),
+        axis.title = element_text(family = "Arial",
+                                  size = 23),
+        legend.text = element_text(family = "Yu Gothic"),
+        axis.text.y = element_text(family ="Arial"))+
+  scale_y_continuous(breaks = seq(0,1,0.1)) -> p_female_prop
+
+p_female_prop
+
+# ggsave("figures/p_female_prop.png",p_female_prop, dpi = 600,
+#      width = 225, height = 110, units = "mm")
+```
+
+```{r fig.dim = c(10,4.5)}
+mean_female_prop_m <- estimate_means(m_female_prop, at = "study_period") %>% 
+  data.frame() %>% 
+  filter(!str_detect(study_period,"nm"))
+
+no_female_over0.5 %>% 
+  mutate(season = ifelse(str_detect(study_period, "nm"), "nm","m")) %>% 
+  mutate(season = fct_relevel(season, "nm","m")) %>% 
+  filter(season != "nm") %>% 
+  ggplot(aes(x = study_period, y = prop_female)) + 
+  geom_violin(fill = "orange",
+              scale = "width",width = 0.9,
+              size = 0.3,bw = 0.03)+
+  geom_text(data = n_days %>% filter(!str_detect(study_period,"nm")), 
+            aes(label = str_c("N = ",N), 
+                y = 1.025, 
+                family = "Arial"),
+            size = 6) +
+  geom_boxplot(width = 0.1,
+               outlier.shape = NA,
+               size = 0.3,
+               fill = "orange3") +   
+  geom_pointrange(data = mean_female_prop_m,
+                aes(y = Probability, ymin = CI_low,ymax = CI_high),
+                  color = "white",size = 0.4)+
+  geom_errorbar(data = mean_female_prop_m ,
+                aes(y = Probability, ymin = CI_low,ymax = CI_high),
+                  color = "white",width = 0.1,size=0.6)+
+  labs(fill = "",
+       y = "Proportion of confirmed females",x="")+
+  theme_bw(base_size = 18)+
+  theme(axis.title.y = element_text(family = "Arial", size = 14.5),
+        axis.text.x = element_text(family="Arial",
+                                   face = "bold", size = 19),
+        axis.title = element_text(family = "Arial",
+                                  size = 23),
+        legend.text = element_text(family = "Yu Gothic"),
+        axis.text.y = element_text(family ="Arial",
+                                   size = 20))+
+  scale_y_continuous(breaks = seq(0,1,0.1)) -> p_female_prop_m
+
+p_female_prop_m
+
+# ggsave("figures/p_female_prop_m.png",p_female_prop_m, dpi = 600,
+#      width = 180, height = 110, units = "mm")
+```
+
+## メスごとの確認日数割合  
+続いて、メスごとの確認に数割合を調査期間ごとに調べる。  
+
+### データの加工  
+メスごとに各調査期間ごとの確認に数割合を算出する。なお、2019年交尾期以降のKurと2021年非交尾期以降のTamは死亡したので除く。  
+```{r}
+no_female_over0.5 %>% 
+  select(groupID) %>% 
+  left_join(group_all %>% select(-c(TY,IT,KR,LK,KM,TG))) %>% 
+  ## 縦型にする  
+  pivot_longer(Kur:Yun,
+               names_to = "femaleID",
+               values_to = "presence") %>% 
+  left_join(att, by = c("femaleID", "study_period")) %>% 
+  ## 6歳以上のみ抽出  
+  filter(age >= 6) %>% 
+  drop_na(presence) %>% 
+  ## 算出
+  group_by(study_period, femaleID) %>% 
+  summarise(sum = n(),
+            n = sum(presence)) %>% 
+  ungroup() %>% 
+  mutate(prop_presence= n/sum) %>% 
+  ## 2019年交尾期のKurと2021年非交尾期のTamを除く  
+  filter(!((femaleID == "Kur" & study_period == "m19")|(femaleID == "Tam" & study_period == "nm21"))) %>% 
+  mutate(study_period = fct_relevel(study_period, "m18","nm19","m19","nm20", 
+                                    "m20","nm21","m21","nm22")) -> prop_female_presence
+```
+
+データは以下のようになる。  
+```{r}
+datatable(prop_female_presence %>% mutate(across(where(is.numeric),~round(.,3))),
+          options = list(scrollX = 60))
+```
+
+### データの確認  
+まず、データを確認する。2019年交尾期から2021年交尾期までは、確認に数割合が低いメスがかなりいることが分かる。  
+```{r, fig.dim = c(10,10)}
+prop_female_presence %>% 
+  ggplot(aes(x = femaleID, y = prop_presence)) +
+  geom_col() +
+  theme_bw(base_size = 11)+
+  labs(x="",
+       y = "Proportion of confirmed days")+
+  theme(axis.text.y = element_text(family= "Arial"),
+        axis.title.y = element_text(family = "Arial"),
+        axis.text.x = element_text(family = "Arial",
+                                    face = "italic"),
+        strip.background = element_blank(),
+        strip.text.x = element_text(hjust=0,
+                                    family = "Arial",
+                                    size = 11))+
+  coord_cartesian(ylim = c(0,1.2))+
+  scale_y_continuous(expand = c(0,0),
+                     breaks = seq(0,1,0.25))+
+  geom_text(aes(label = str_c(n,"/",sum),
+                y = prop_presence+0.1),
+            family = "Arial",
+            size = 2.5)+
+  facet_rep_wrap(~study_period, repeat.tick.labels = T,
+                 ncol = 2) 
+```
+
+### 調査期間間の比較  
+#### モデリング   
+以下では、ベイズモデルによって調査期間間でメスの確認日数割合に違いがあるかを調べる。モデル式は以下の通り。$i$はデータ番号を、$j$はメスIDを表す。また、`max_date`は各観察期間の観察日数、`no_present`はそのうちそのメスが確認されたかを数を表す。    
+
+$$
+\begin{aligned}
+&no\_present_{i} \sim BetaBinomial(p_{i}, max\_date_{i})\\
+&logit(p_{i}) = \beta_0 + \beta_1 \times study\_period_{i} + r_{i} + \gamma_j \\
+&r_{i} \sim Normal(0, \sigma_{r})\\
+&\gamma_j \sim Normal(0, \sigma_{\gamma})\\
+&\beta_0 \sim student\_t(4,0,10)\\
+&\beta_1 \sim student\_t(4,0,10)\\
+&\sigma \sim student\_t(4,0,5)
+\end{aligned}
+$$
+
+```{r}
+m_female_presence <- get_prip(data = prop_female_presence %>% mutate(N = 1:n()),
+                         n|trials(sum) ~ study_period + (1|femaleID),
+                         family = "beta_binomial",
+                         prior = c(prior(student_t(4,0,10),class = Intercept),
+                         prior(student_t(4,0,10), class = b),
+                         prior(student_t(4,0,5), class = sd)),
+                         iter = 11000, warmup = 6000, seed = 13,
+                         control=list(adapt_delta = 0.9999, max_treedepth = 20),
+                         backend = "cmdstanr",
+                         file = "model/m_female_presence")
+```
+
+#### モデルチェック  
+続いて、モデルチェックを行う。まず、DHARMaパッケージでモデルの前提が満たされているかを確認する。  
+
+```{r}
+dh_check_brms(m_female_presence)
+```
+<br/>  
+
+`pp_check`関数で、事後分布からの予測分布と実測値の分布を比較しても大きな乖離はない。   
+```{r}
+pp_check(m_female_presence, ndraws = 100)+
+  theme_bw()
+```
+
+#### 結果の確認  
+まず、モデルの結果は以下の通り。収束の問題はないよう。  
+```{r}
+model_parameters(m_female_presence) %>% 
+  data.frame() %>% 
+  select(1,3,5,6,7,8,9) %>% 
+  mutate(across(where(is.numeric),~round(.,2)))
+```
+
+続いて、多重比較を行う。  
+```{r}
+estimate_contrasts(m_female_presence, contrast = "study_period", ci = 0.95) %>% 
+  data.frame() -> cont_female_presence
+  
+cont_female_presence %>% 
+  mutate(across(where(is.numeric),~round(.,2)))
+```
+
+結果をまとめたのが下の表である。
+```{r}
+cont_female_presence %>% 
+  mutate(p = ifelse(CI_low*CI_high >0, "***","n.s")) %>% 
+  select(Level1,Level2,p) %>% 
+  pivot_wider(names_from = Level2,
+              values_from = p) %>% 
+  column_to_rownames(var = "Level1")
+```
+
+#### 結果の図示  
+モデルの結果と実データを合わせてプロットすると以下のようになる。  
+```{r, fig.dim = c(10,4.5)}
+mean_female_presence <- estimate_means(m_female_presence, at = "study_period") %>% 
+  data.frame()
+
+prop_female_presence %>% 
+  mutate(season = ifelse(str_detect(study_period, "nm"), "nm","m")) %>% 
+  mutate(season = fct_relevel(season, "nm","m")) %>% 
+  ggplot(aes(x = study_period))+
+  geom_violin(aes( y = prop_presence,fill = as.factor(season)),
+              scale = "width",width = 0.9,
+              size = 0.3)+
+  geom_boxplot(aes( y = prop_presence,fill = as.factor(season)), color = "black",
+               width = 0.2, position = position_dodge(0.9),
+          outlier.shape = NA,
+               size =0.3)+
+  geom_pointrange(data = mean_female_presence,
+                aes(y = Probability, ymin = CI_low,ymax = CI_high),
+                  color = "white",size = 0.25)+
+  geom_errorbar(data = mean_female_presence,
+                aes(y = Probability, ymin = CI_low,ymax = CI_high),
+                  color = "white",width = 0.1,size=0.6)+
+  #stat_summary(fun = "mean",geom = "point", shape = 23,
+   #            color = "black", position = position_dodge(0.9),
+    #           aes( y = rate, group = as.factor(season)), fill = "white")+
+  scale_fill_manual(values = c("palegreen4","orange"),
+                    label = c("nonmating(m)","mating(nm)"))+
+  scale_color_manual(values = c("palegreen4","orange3"),
+                    label = c("nonmating(m)","mating(nm)"))+
+  labs(fill = "season",
+       y = "Proportion of confirmed days",x="")+
+  theme_bw(base_size = 16)+
+  theme(axis.title.y = element_text(family = "Arial", size = 14.5),
+        axis.text.x = element_text(family="Arial",
+                                   face = "bold", size = 16),
+        axis.title = element_text(family = "Arial",
+                                  size = 23),
+        legend.text = element_text(family = "Yu Gothic"),
+        axis.text.y = element_text(family ="Arial"))+
+  scale_y_continuous(breaks = seq(0,1,0.1))  ->p_female_presence
+
+p_female_presence
+
+
+ # ggsave("figures/p_female_presence.png",p_female_presence, dpi = 600,
+ #      width = 225, height = 110, units = "mm")
+```
+

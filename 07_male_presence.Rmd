@@ -1,0 +1,482 @@
+# オスの確認状況の分析 {#c7}    
+本章では、オスの確認状況についてまとめる。ここでは、一度でもその集団で確認されれば確認されたとみなす。    
+
+## データの加工  
+まず、6歳以上のメスが50%以上確認できた集団(群れ本体)が240分以上追跡できた日のデータのみを抽出する。1日に2集団を観察し、移動などがあっていずれも50%以上のメスが確認された場合は、より大きい方の集団のデータを用いる。  
+
+まず条件を満たす集団の`groupID`を計算する。  
+```{r}
+group_all %>% 
+  ## オスの列を除外
+  select(-c(TY,IT,KR,LK,KM,TG)) %>% 
+  ## 縦型にする  
+  pivot_longer(Kur:Yun,
+               names_to = "femaleID",
+               values_to = "presence") %>% 
+  ## メスの属性データの結合
+  left_join(att, by = c("femaleID", "study_period")) %>% 
+  ## 6歳以上のみ抽出  
+  filter(age >= 6) %>% 
+  ## 日ごとの観察時間と確認個体数を算出
+  mutate(dur = ifelse(is.na(suspend), as.numeric(fin - start)/60,
+                      as.numeric((fin - start) - (restart - suspend))/60)) %>% 
+  group_by(date, groupID, study_period) %>% 
+  summarise(no_female = sum(presence, na.rm = TRUE),
+            dur = unique(dur)) %>% 
+  ungroup() %>% 
+  drop_na(dur) %>% 
+  ## 最大メス数のデータを結合  
+  left_join(max_female) %>% 
+  ## 確認メス割合が0.5以上を抽出
+  mutate(prop_female = no_female/max_female) %>% 
+  filter(prop_female >= 0.5) %>% 
+  ## 2021年2月28日は"nm21_23"は用いない
+  filter(groupID != "nm21_23") %>% 
+  ## 追跡時間240分以上  
+  filter(dur >= 240) %>% 
+  mutate(study_period = fct_relevel(study_period, "m18","nm19","m19","nm20", 
+                                    "m20","nm21","m21","nm22"))-> no_female_over0.5
+```
+
+続いて、先ほどのデータにオスの確認状況のデータを結合し、調査期間ごとに確認日数割合を算出する。    
+```{r}
+no_female_over0.5 %>% 
+  left_join(group_all %>% select(groupID, TY, IT, KR, LK, KM, TG),
+            by = "groupID") %>% 
+  ## 縦長にする
+  pivot_longer(TY:TG,
+               names_to = "maleID",
+               values_to = "presence") %>% 
+  ## 算出する
+  group_by(study_period, maleID) %>%
+  summarise(sum = n(),
+            n = sum(presence, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  ## いなかった期間などを除外  
+  mutate(sp_maleID = str_c(study_period,"_",maleID)) %>% 
+  filter(!(sp_maleID %in% c("m21_IT","m18_KM","m19_KM","m18_TG","m19_TG","nm22_IT",
+                            "m20_LK","m21_LK","nm19_KM","nm19_TG", "nm20_KM","nm20_TG",
+                            "nm20_LK", "nm21_LK", "nm22_LK"))) %>% 
+  select(-sp_maleID) %>% 
+  mutate(maleID = fct_relevel(maleID, "TY", "IT", "LK", "KR", "KM", "TG")) -> male_presence_sum
+```
+
+## 確認日数割合の図示  
+### 表  
+まずは表で図示する。*TY*と*IT*については、2019年交尾期～2021年交尾期の5つの調査期間にわたって出席率が顕著に低くなっており、特に交尾期にその傾向が強い。     
+
+```{r}
+male_presence_sum %>% 
+  mutate(prop = n/sum) %>% 
+  mutate(p = str_c(sprintf("%.2f",prop),"(",n,"/",sum,")")) %>% 
+  select(maleID, study_period,p) %>% 
+  arrange(maleID, study_period) %>% 
+  pivot_wider(names_from = "study_period",
+              values_from = "p") %>% 
+  arrange(maleID) %>%  
+  ## KMとTGを含めるか
+  filter(!(maleID %in% c("KM", "TG"))) %>% 
+  flextable() %>% 
+  theme_zebra() %>% 
+  italic(j=1,part = "body") %>% 
+  font(j=2:9,part = "all",fontname = "Arial") %>% 
+  font(j=1, part = "body",fontname = "Arial") %>% 
+  colformat_double(digits = 2) %>% 
+  autofit(add_w = 0) %>% 
+  align(j=2:9, part = "all", align = "center") -> table_male_presence
+
+table_male_presence
+
+#save_as_image(table_male_presence, "tables/table_male_presence.png", res = 600)
+```
+
+### グラフ  
+続いて、確認日数割合のグラフを作成する。  
+```{r, fig.dim = c(10,6)}
+male_presence_sum %>% 
+  mutate(prop = n/sum) %>% 
+  mutate(p = str_c(sprintf("%.2f",prop),"(",n,"/",sum,")")) %>% 
+  mutate(season = ifelse(str_detect(study_period, "nm"), "nm","m")) %>% 
+  ## KMとTGを含めるか
+  filter(!(maleID %in% c("KM", "TG"))) %>% 
+  ggplot(aes(x = study_period, y = prop))+
+  geom_col(aes(color = season,fill= season))+
+  scale_fill_manual(values = c("orange", "palegreen4"),
+                    label = c("mating(m)","nonmating(nm)"))+
+  scale_color_manual(values = c("orange", "palegreen4"),
+                    label = c("mating(m)","nonmating(nm)"))+
+  labs(y = "Proportion of confirmed days",x="")+
+  theme_bw(base_size = 16)+
+  theme(axis.text = element_text(family = "Arial"),
+        aspect.ratio = 0.6,
+        axis.title.y = element_text(family = "Arial"),
+        strip.background = element_blank(),
+        strip.text.x = element_text(face = "bold.italic",
+                                  hjust=0,
+                                  family = "Arial"),
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_text(family = "Arial",
+                                    size = 12,
+                                   angle = -45,
+                                   vjust = -0.5),
+        legend.text = element_text(family = "Yu Gothic"))+
+  geom_text(aes(label = str_c(n,"/",sum), y = prop + 0.07, family = "Arial"),
+            size = 3)+
+  labs(fill = "",color = "")+
+  scale_y_continuous(expand = c(0,0), breaks = seq(0,1,0.25))+
+  coord_cartesian(ylim = c(0,1.13))+
+  facet_rep_wrap(~maleID,
+                 repeat.tick.labels = "TRUE",
+                 ncol = 2) -> p_male_presence
+
+p_male_presence
+
+# ggsave("figures/p_male_presence.png", dpi = 600, width = 240, height = 145, units = "mm")
+```
+
+TYとITのみについてグラフを書くと以下のようになる。  
+```{r, fig.dim = c(10,4)}
+male_presence_sum %>% 
+  mutate(prop = n/sum) %>% 
+  mutate(p = str_c(sprintf("%.2f",prop),"(",n,"/",sum,")")) %>% 
+  mutate(season = ifelse(str_detect(study_period, "nm"), "nm","m")) %>% 
+  ## TYとITのみ含める
+  filter(maleID %in% c("TY", "IT")) %>% 
+  ggplot(aes(x = study_period, y = prop))+
+  geom_col(aes(color = season,fill= season))+
+  scale_fill_manual(values = c("orange", "palegreen4"),
+                    label = c("mating(m)","nonmating(nm)"))+
+  scale_color_manual(values = c("orange", "palegreen4"),
+                    label = c("mating(m)","nonmating(nm)"))+
+  labs(y = "Proportion of confirmed days",x="")+
+  theme_bw(base_size = 16)+
+  theme(axis.text = element_text(family = "Arial"),
+        aspect.ratio = 0.8,
+        axis.title.y = element_text(family = "Arial",
+                                    size = 12.5),
+        strip.background = element_blank(),
+        strip.text.x = element_text(face = "bold.italic",
+                                  hjust=0,
+                                  family = "Arial"),
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_text(family = "Arial",
+                                    size = 12,
+                                   angle = -45,
+                                   vjust = -0.5),
+        legend.text = element_text(family = "Yu Gothic"))+
+  geom_text(aes(label = str_c(n,"/",sum), y = prop + 0.07, family = "Arial"),
+            size = 3)+
+  labs(fill = "",color = "")+
+  scale_y_continuous(expand = c(0,0), breaks = seq(0,1,0.25))+
+  coord_cartesian(ylim = c(0,1.13))+
+  facet_rep_wrap(~maleID,
+                 repeat.tick.labels = "TRUE",
+                 ncol = 2) -> p_male_presence_TYIT
+
+p_male_presence_TYIT
+
+# ggsave("figures/p_male_presence_TYIT.png", p_male_presence_TYIT,
+#        dpi = 600, width = 240, height = 100, units = "mm")
+```
+
+交尾期のみについて書くと以下のようになる。   
+```{r, fig.dim = c(10,4)}
+male_presence_sum %>% 
+  mutate(prop = n/sum) %>% 
+  mutate(p = str_c(sprintf("%.2f",prop),"(",n,"/",sum,")")) %>% 
+  mutate(season = ifelse(str_detect(study_period, "nm"), "nm","m")) %>% 
+  filter(season != "nm") %>% 
+  ## TYとITのみ含める
+  filter(maleID %in% c("TY", "IT")) %>% 
+  ggplot(aes(x = study_period, y = prop))+
+  geom_col(color = "orange", fill = "orange")+
+  labs(y = "Proportion of confirmed days",x="")+
+  theme_bw(base_size = 18)+
+  theme(axis.text = element_text(family = "Arial"),
+        aspect.ratio = 0.8,
+        axis.title.y = element_text(family = "Arial",
+                                    size = 16),
+        strip.background = element_blank(),
+        strip.text.x = element_text(face = "bold.italic",
+                                  hjust=0,
+                                  family = "Arial"),
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_text(family = "Arial"),
+        legend.text = element_text(family = "Yu Gothic"))+
+  geom_text(aes(label = str_c(n,"/",sum), y = prop + 0.07, family = "Arial"),
+            size = 5)+
+  labs(fill = "",color = "")+
+  scale_y_continuous(expand = c(0,0), breaks = seq(0,1,0.25))+
+  coord_cartesian(ylim = c(0,1.13))+
+  facet_rep_wrap(~maleID,
+                 repeat.tick.labels = "TRUE",
+                 ncol = 2) -> p_male_presence_TYIT_m
+
+p_male_presence_TYIT_m
+
+# ggsave("figures/p_male_presence_TYIT_m.png", p_male_presence_TYIT_m,
+#        dpi = 600, width = 200, height = 100, units = "mm")
+```
+
+KRとLKのみについてグラフを書くと以下のようになる。  
+```{r, fig.dim = c(10,4)}
+male_presence_sum %>% 
+  mutate(prop = n/sum) %>% 
+  mutate(p = str_c(sprintf("%.2f",prop),"(",n,"/",sum,")")) %>% 
+  mutate(season = ifelse(str_detect(study_period, "nm"), "nm","m")) %>% 
+  ## TYとITのみ含める
+  filter(maleID %in% c("LK", "KR")) %>% 
+  ggplot(aes(x = study_period, y = prop))+
+  geom_col(aes(color = season,fill= season))+
+  scale_fill_manual(values = c("orange", "palegreen4"),
+                    label = c("mating(m)","nonmating(nm)"))+
+  scale_color_manual(values = c("orange", "palegreen4"),
+                    label = c("mating(m)","nonmating(nm)"))+
+  labs(y = "Proportion of confirmed days",x="")+
+  theme_bw(base_size = 16)+
+  theme(axis.text = element_text(family = "Arial"),
+        aspect.ratio = 0.8,
+        axis.title.y = element_text(family = "Arial",
+                                    size = 12.5),
+        strip.background = element_blank(),
+        strip.text.x = element_text(face = "bold.italic",
+                                  hjust=0,
+                                  family = "Arial"),
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_text(family = "Arial",
+                                    size = 12,
+                                   angle = -45,
+                                   vjust = -0.5),
+        legend.text = element_text(family = "Yu Gothic"))+
+  geom_text(aes(label = str_c(n,"/",sum), y = prop + 0.07, family = "Arial"),
+            size = 3)+
+  labs(fill = "",color = "")+
+  scale_y_continuous(expand = c(0,0), breaks = seq(0,1,0.25))+
+  coord_cartesian(ylim = c(0,1.13))+
+  facet_rep_wrap(~maleID,
+                 repeat.tick.labels = "TRUE",
+                 ncol = 2) -> p_male_presence_LKKR
+
+p_male_presence_LKKR
+
+# ggsave("figures/p_male_presence_LKKR.png",p_male_presence_LKKR,
+#        dpi = 600, width = 240, height = 100, units = "mm")
+```
+
+交尾期のみについて書くと以下のようになる。   
+```{r, fig.dim = c(10,4)}
+male_presence_sum %>% 
+  mutate(prop = n/sum) %>% 
+  mutate(p = str_c(sprintf("%.2f",prop),"(",n,"/",sum,")")) %>% 
+  mutate(season = ifelse(str_detect(study_period, "nm"), "nm","m")) %>% 
+  filter(season != "nm") %>% 
+  ## TYとITのみ含める
+  filter(maleID %in% c("LK", "KR")) %>% 
+  ggplot(aes(x = study_period, y = prop))+
+  geom_col(color = "orange", fill = "orange")+
+  labs(y = "Proportion of confirmed days",x="")+
+  theme_bw(base_size = 18)+
+  theme(axis.text = element_text(family = "Arial"),
+        aspect.ratio = 0.8,
+        axis.title.y = element_text(family = "Arial",
+                                    size = 16),
+        strip.background = element_blank(),
+        strip.text.x = element_text(face = "bold.italic",
+                                  hjust=0,
+                                  family = "Arial"),
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_text(family = "Arial"),
+        legend.text = element_text(family = "Yu Gothic"))+
+  geom_text(aes(label = str_c(n,"/",sum), y = prop + 0.07, family = "Arial"),
+            size = 5)+
+  labs(fill = "",color = "")+
+  scale_y_continuous(expand = c(0,0), breaks = seq(0,1,0.25))+
+  coord_cartesian(ylim = c(0,1.13))+
+  facet_rep_wrap(~maleID,
+                 repeat.tick.labels = "TRUE",
+                 ncol = 2) -> p_male_presence_LKKR_m
+
+p_male_presence_LKKR_m
+
+# ggsave("figures/p_male_presence_LKKR_m.png", p_male_presence_LKKR_m,
+#        dpi = 600, width = 200, height = 100, units = "mm")
+```
+<br/>  
+
+KMとTGは以下の通り。  
+TYとITのみについてグラフを書くと以下のようになる。  
+```{r, fig.dim = c(10,4)}
+male_presence_sum %>% 
+  mutate(prop = n/sum) %>% 
+  mutate(p = str_c(sprintf("%.2f",prop),"(",n,"/",sum,")")) %>% 
+  mutate(season = ifelse(str_detect(study_period, "nm"), "nm","m")) %>% 
+  ## KMとTGのみ含める
+  filter(maleID %in% c("KM", "TG")) %>% 
+  ggplot(aes(x = study_period, y = prop))+
+  geom_col(aes(color = season,fill= season))+
+  scale_fill_manual(values = c("orange", "palegreen4"),
+                    label = c("mating(m)","nonmating(nm)"))+
+  scale_color_manual(values = c("orange", "palegreen4"),
+                    label = c("mating(m)","nonmating(nm)"))+
+  labs(y = "Proportion of confirmed days",x="")+
+  theme_bw(base_size = 16)+
+  theme(axis.text = element_text(family = "Arial"),
+        aspect.ratio = 0.8,
+        axis.title.y = element_text(family = "Arial",
+                                    size = 12.5),
+        strip.background = element_blank(),
+        strip.text.x = element_text(face = "bold.italic",
+                                  hjust=0,
+                                  family = "Arial"),
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_text(family = "Arial",
+                                    size = 12,
+                                   angle = -45,
+                                   vjust = -0.5),
+        legend.text = element_text(family = "Yu Gothic"))+
+  geom_text(aes(label = str_c(n,"/",sum), y = prop + 0.07, family = "Arial"),
+            size = 3)+
+  labs(fill = "",color = "")+
+  scale_y_continuous(expand = c(0,0), breaks = seq(0,1,0.25))+
+  coord_cartesian(ylim = c(0,1.13))+
+  facet_rep_wrap(~maleID,
+                 repeat.tick.labels = "TRUE",
+                 ncol = 2) -> p_male_presence_KMTG
+
+p_male_presence_KMTG
+
+# ggsave("figures/p_male_presence_KMTG.png", p_male_presence_KMTG,
+#        dpi = 600, width = 240, height = 100, units = "mm")
+```
+
+交尾期のみについて描くと以下の通り。  
+```{r, fig.dim = c(10,4)}
+male_presence_sum %>% 
+  mutate(prop = n/sum) %>% 
+  mutate(p = str_c(sprintf("%.2f",prop),"(",n,"/",sum,")")) %>% 
+  mutate(season = ifelse(str_detect(study_period, "nm"), "nm","m")) %>% 
+  filter(season != "nm") %>% 
+  ## TYとITのみ含める
+  filter(maleID %in% c("KM", "TG")) %>% 
+  ggplot(aes(x = study_period, y = prop))+
+  geom_col(color = "orange", fill = "orange")+
+  labs(y = "Proportion of confirmed days",x="")+
+  theme_bw(base_size = 18)+
+  theme(axis.text = element_text(family = "Arial"),
+        aspect.ratio = 0.8,
+        axis.title.y = element_text(family = "Arial",
+                                    size = 16),
+        strip.background = element_blank(),
+        strip.text.x = element_text(face = "bold.italic",
+                                  hjust=0,
+                                  family = "Arial"),
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_text(family = "Arial"),
+        legend.text = element_text(family = "Yu Gothic"))+
+  geom_text(aes(label = str_c(n,"/",sum), y = prop + 0.07, family = "Arial"),
+            size = 5)+
+  labs(fill = "",color = "")+
+  scale_y_continuous(expand = c(0,0), breaks = seq(0,1,0.25))+
+  coord_cartesian(ylim = c(0,1.13))+
+  facet_rep_wrap(~maleID,
+                 repeat.tick.labels = "TRUE",
+                 ncol = 2) -> p_male_presence_KMTG_m
+
+p_male_presence_KMTG_m
+
+# ggsave("figures/p_male_presence_KMTG_m.png", p_male_presence_KMTG_m,
+#        dpi = 600, width = 200, height = 100, units = "mm")
+```
+
+## 群れを離れた頻度の算出  
+ひとまず、ここでは6時間以上群れ本体で確認できないときに「群れを離れて行動していた」とみなし、TYとITが群れを離れた頻度を算出する。  
+
+### データの読み込み  
+まずは、データを読み込む。  
+```{r}
+maleout_19m <- read_excel("../Data/data/2019mating/2019mating_raw.xlsx",
+                          sheet =　"male_presence_out") %>% 
+  mutate(study_period = "m19")
+
+maleout_20m <- read_excel("../Data/data/2020mating/2020mating_raw.xlsx",
+                          sheet =　"male_presence_out") %>% 
+  mutate(study_period = "m20")
+
+maleout_21m <- read_excel("../Data/data/2021mating/2021mating_raw.xlsx",
+                          sheet =　"male_presence_out") %>% 
+  mutate(study_period = "m21")
+
+maleout_20nm <-  read_excel("../Data/data/2020nonmating/2020nonmating_raw.xlsx",
+                             sheet =　"male_presence_out") %>% 
+  mutate(study_period = "nm20")
+
+maleout_21nm <-  read_excel("../Data/data/2021nonmating/2021nonmating_raw.xlsx",
+                            sheet =　"male_presence_out") %>% 
+  mutate(study_period = "nm21")
+```
+
+これらを結合し、縦長データにする。  
+```{r}
+male_out <- bind_rows(maleout_19m,
+                      maleout_20m,
+                      maleout_21m,
+                      maleout_20nm,
+                      maleout_21nm) %>% 
+  left_join(no_female_over0.5) %>% 
+  drop_na(prop_female) %>% 
+  select(date, study_period, TY,IT) %>% 
+  pivot_longer(3:4,
+               names_to = "maleID",
+               values_to = "out") %>%
+  drop_na(out)
+```
+
+### 頻度の算出  
+10日に何回のペースで出入りするのかを算出する。    
+2020年交尾期に*TY*と*IT*ともに最も頻繁に出入りしていた。   
+```{r}
+male_out %>% 
+  group_by(maleID,study_period) %>% 
+  summarise(sum = n(),
+            n = sum(out),
+            rate = mean(out)*10) %>% 
+  ungroup() -> male_out_sum
+
+male_out_sum
+```
+
+**表**
+```{r, echo = FALSE}
+## 表  
+male_out_sum %>%  
+  mutate(maleID = fct_relevel(maleID, "TY")) %>%
+  arrange(maleID) %>% 
+  rename("study period" = "study_period",
+         "frequency" = "rate" ) %>% 
+  mutate(n = as.character(n)) %>% 
+  flextable() %>% 
+  theme_zebra() %>% 
+  colformat_double(digits = 2) %>% 
+  autofit(part = "all",add_w = 0.1) %>% 
+  align(j = 2:5, align = "center", part = "all") %>% 
+  font(part = "header", fontname = "Yu Gothic") %>% 
+  font(j=1:3, part = "body", fontname = "Arial") %>% 
+  fontsize(size = 12) -> table_male_out
+
+table_male_out
+
+# save_as_image(table_male_out,"output/table_male_out.png")
+```
+
+特に交尾期に群れの出入りが多かったよう。  
+```{r}
+male_out %>% 
+  mutate(season = ifelse(str_detect(study_period,"nm"),"nonmating","mating")) %>% 
+  group_by(maleID, season) %>% 
+  summarise(rate = mean(out)*10) %>% 
+  ungroup() %>% 
+  arrange(desc(maleID)) %>% 
+  flextable() %>% 
+  theme_zebra() %>% 
+  colformat_double(digits=3)
+```

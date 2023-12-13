@@ -1,0 +1,1960 @@
+# TY、ITの有無とオスからの被攻撃頻度  
+第\@ref(c10)章の結果から、メスたちは*TY*や*IT*が群れにいない日や、TYが群れから離れたのと同じ日に群れを離れやすい傾向があることが分かった。 @Yamaguchi2022 が正しければ、これは*TY*や*IT*がメスにとって他のオスからの「用心棒」となっているため、オスの攻撃を回避するために彼らの動きに応じてメスたちが動いた結果だと考えられる。  
+
+本章では、実際に彼らが群れにいなかった日にはメスが受ける攻撃は増加したのかを検討する。  
+
+## データの加工  
+### 各観察日の被攻撃頻度  
+まず各観察日におけるそれぞれのメスの被攻撃頻度とそれぞれのメスの発情の有無を算出する。なお、分析には群れ本体を観察し、240分以上観察できた日のみを用いる。  
+
+```{r}
+## 日ごとの被攻撃頻度の算出  
+agg_daily_each <- no_female_over0.5 %>% 
+  select(groupID, prop_female, dur) %>% 
+  left_join(group_all %>% select(-c(TY,IT,KR,LK,KM,TG))) %>% 
+  select(-(start:fin)) %>% 
+  ## 縦型にする  
+  pivot_longer(Kur:Yun,
+               names_to = "femaleID",
+               values_to = "presence") %>% 
+  left_join(att,
+            by = c("study_period", "femaleID")) %>% 
+  filter(age >= 6) %>% 
+  filter(presence == 1) %>%
+  filter(study_period != "m18" & !str_detect(study_period, "nm")) %>% 
+  ## 攻撃頻度を結合
+  left_join(agg_rate_each %>% select(groupID, femaleID, rate_agg, no_agg),
+            by = c("groupID", "femaleID")) %>% 
+  left_join(female_all %>% select(date, femaleID, rs2),
+            by = c("date","femaleID")) %>% 
+  ## 発情の記録がない2019/9/27は除外
+  filter(!is.na(rs2)) %>% 
+  ## 攻撃が一度もない日の値を補完
+  replace_na(list(rate_agg = 0, no_agg = 0))
+```
+
+### TYとITの確認状況  
+続いて、これらにTYとITの確認状況や発情メス数、確認した合計オス数のデータを結合する。*TY*や*IT*が群れにいるか否かの効果を見たいため、彼らが少なくとも3時間以上確認できた日と、一度も確認できなかった日を比較する。    
+
+まず、*TY*と*IT*が3時間以上確認できたか否かについて算出する。  
+```{r}
+male_time_19m_3h <- read_excel("../Data/data/2019mating/2019mating_raw.xlsx",
+                             sheet =　"male_presence_long") %>% 
+  mutate(study_period = "m19") %>% 
+  mutate(groupID = str_c(study_period,"_", groupID)) %>% 
+  ## 確認時間の算出
+  mutate(dur = ifelse(is.na(first), 0,
+                      difftime(last, first, units = "mins"))) %>% 
+  ## 180以上は1, 1~179分は2, 0分は0とした。  
+  mutate(presence_3h = ifelse(dur >= 180,1,
+                              ifelse(0 < dur & dur < 180, 2, 0))) %>% 
+  select(maleID, date, groupID, presence_3h) %>% 
+  pivot_wider(names_from = maleID,
+              values_from = presence_3h)
+
+male_time_20m_3h <- read_excel("../Data/data/2020mating/2020mating_raw.xlsx",
+                            sheet =　"male_presence_long") %>% 
+  mutate(study_period = "m20") %>% 
+  mutate(groupID = str_c(study_period,"_", groupID)) %>% 
+  ## 確認時間の算出
+  mutate(dur = ifelse(is.na(first), 0,
+                      difftime(last, first, units = "mins"))) %>% 
+  mutate(presence_3h = ifelse(dur >= 180,1,
+                              ifelse(0 < dur & dur < 180, 2, 0))) %>% 
+  select(maleID, date, groupID, presence_3h) %>% 
+  pivot_wider(names_from = maleID,
+              values_from = presence_3h)
+
+male_time_21m_3h <- read_excel("../Data/data/2021mating/2021mating_raw.xlsx",
+                            sheet =　"male_presence_long") %>% 
+  mutate(study_period = "m21") %>% 
+  mutate(groupID = str_c(study_period,"_", groupID)) %>% 
+  ## 確認時間の算出
+  mutate(dur = ifelse(is.na(first), 0,
+                      difftime(last, first, units = "mins"))) %>% 
+  mutate(presence_3h = ifelse(dur >= 180,1,
+                              ifelse(0 < dur & dur < 180, 2, 0))) %>% 
+  select(maleID, date, groupID, presence_3h) %>% 
+  pivot_wider(names_from = maleID,
+              values_from = presence_3h)
+
+male_time_3h <- bind_rows(male_time_19m_3h,
+                          male_time_20m_3h,
+                          male_time_21m_3h) %>% 
+  replace_na(list(IT = 0))
+```
+
+### 確認オス数と発情メス数  
+まず、各観察日の確認オス数を算出する。  
+```{r}
+no_ntm_m19 <- male_19m %>% 
+  filter(!(maleID %in% c("TY", "IT", "KR", "LK"))) %>% 
+  group_by(date) %>% 
+  summarise(no_ntm = sum(presence, na.rm = TRUE))
+
+no_ntm_m20 <- male_20m %>% 
+  filter(!(maleID %in% c("TY", "IT", "KR", "LK", "KM", "TG"))) %>% 
+  group_by(date) %>% 
+  summarise(no_ntm = sum(presence, na.rm = TRUE))
+
+no_ntm_m21 <- male_21m %>% 
+  filter(!(maleID %in% c("TY", "IT", "KR", "LK", "KM", "TG"))) %>% 
+  group_by(date) %>% 
+  summarise(no_ntm = sum(presence, na.rm = TRUE))
+
+no_ntm <- bind_rows(no_ntm_m19, no_ntm_m20, no_ntm_m21)
+
+no_male <- no_female_over0.5 %>% 
+  filter(study_period != "m18" & !str_detect(study_period, "nm")) %>% 
+  select(groupID, prop_female, dur) %>% 
+  left_join(group_all %>% 
+              select(-c(Kur:Kun,Mif:Har,Cur:Yun))) %>% 
+  select(-(start:fin)) %>% 
+  rowwise() %>% 
+  mutate(no_tm = sum(TY,IT,LK,KR,KM,TG, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  left_join(no_ntm, by = "date") %>% 
+  mutate(no_male = no_ntm + no_tm) %>% 
+  select(date, groupID, no_male)
+```
+
+続いて、各観察日の発情メス数を算出する。  
+```{r}
+no_est <- agg_daily_each %>% 
+  group_by(date, groupID) %>% 
+  summarise(no_est = sum(rs2))
+```
+
+### 個体追跡状況  
+各メスが各観察日に個体追跡された時間と、一日の追跡時間に占める割合を算出する。  
+
+```{r}
+focal_combined %>% 
+  group_by(no_focal, date, subject) %>% 
+  summarise(dur_focal = max(time)) %>% 
+  mutate(date = as_date(date)) %>% 
+  rename(femaleID = subject) %>% 
+  ungroup() %>% 
+  group_by(date, femaleID) %>% 
+  summarise(dur_focal = sum(dur_focal)) %>% 
+  ungroup()  ->  focal_summary
+``` 
+
+
+### データの結合  
+最後に、上記のデータを全て結合する。  
+```{r}
+agg_daily_all <- agg_daily_each %>% 
+  left_join(male_time_3h,
+            by = c("date", "groupID")) %>% 
+  left_join(no_male,
+            by = c("date", "groupID")) %>% 
+  left_join(no_est,
+            by = c("date", "groupID")) %>% 
+  left_join(CSI_TY %>% 
+              rename(femaleID = subject) %>% 
+              select(femaleID, CSI_TY),
+            by = "femaleID") %>% 
+  left_join(CSI_IT %>% 
+              rename(femaleID = subject) %>% 
+              select(femaleID, CSI_IT),
+            by = "femaleID") %>% 
+  left_join(focal_summary, 
+            by = c("femaleID", "date")) %>% 
+  replace_na(list(dur_focal = 0)) %>% 
+  mutate(prop_focal = dur_focal/dur) %>% 
+  group_by(study_period) %>% 
+  mutate(rank_scaled = rank/max(rank)) %>% 
+  ungroup()
+```
+
+## 分析    
+### 発情と非発情を分けない  
+#### 全期間 + TY/ITの有無  
+まず、全期間のデータを用いて分析を行う。  
+
+##### データの加工  
+TYとITが3時間以上確認されたか、一度も確認されていない日だけを抽出する。  
+```{r}
+agg_daily_all_b <- agg_daily_all %>% 
+  filter(TY != 2) %>% 
+  mutate(logdur = log(dur/60)) %>% 
+  mutate(date = as.factor(date)) %>% 
+  drop_na(CSI_TY) %>% 
+  mutate(CSI_TY_std = standardize(CSI_TY),
+         est_std = standardize(no_est),
+         male_std = standardize(no_male),
+         rank_std = standardize(rank_scaled),
+         age_std = standardize(age),
+         prop_std = standardize(prop_female),
+         focal_std = standardize(prop_focal)) 
+
+agg_daily_all_b2 <- agg_daily_all %>% 
+  filter(TY != 2 & IT != 2) %>% 
+  mutate(logdur = log(dur/60)) %>% 
+  mutate(date = as.factor(date)) %>% 
+  drop_na(CSI_TY) %>% 
+  mutate(CSI_TY_std = standardize(CSI_TY),
+         CSI_IT_std = standardize(CSI_IT),
+         est_std = standardize(no_est),
+         male_std = standardize(no_male),
+         rank_std = standardize(rank_scaled),
+         age_std = standardize(age),
+         prop_std = standardize(prop_female),
+         focal_std = standardize(prop_focal)) 
+```
+
+##### モデリング      
+モデルの概要は以下の通り。データは各観察日におけるそれぞれのメスのデータである。    
+
+- 応答変数: オスからの被攻撃回数  
+- 説明変数: 発情の有無、TYの有無、TYとのCSI、発情の有無×TYの有無、TYとのCSI×TYの有無、発情メス数、確認オス数、確認メス割合、調査期間、年齢、順位  
+- オフセット項: 群れの追跡時間  
+- 分布: 負の二項分布  
+- リンク関数: log関数  
+- 事前分布: 弱情報分布  
+
+```{r}
+## TYの有無だけを含むモデル
+m_agg_TYIT <- brm(no_agg ~ TY*rs2 + TY*CSI_TY_std + est_std + male_std + 
+                    rank_std + age_std + prop_std + focal_std + 
+                     study_period + offset(logdur) + (1|femaleID) + (1|date),
+                     family = negbinomial,
+                     iter = 11000, warmup = 1000, seed = 134,
+                     prior = c(prior(student_t(4,0,5), class = "b"),
+                               prior(student_t(4,0,10), class = "Intercept"),
+                               prior(student_t(4,0,10), class = "sd"),
+                               prior(gamma(0.01,0.01), class = "shape")),
+                     control=list(adapt_delta = 0.99, max_treedepth = 20),
+                     backend = "cmdstanr",
+                     data = agg_daily_all_b,
+                     file = "model/m_agg_TYIT.rds")
+
+## ITの有無も含める  
+m_agg_TYIT2 <- brm(no_agg ~ TY*rs2 + TY*CSI_TY_std + IT*rs2 + IT*CSI_IT_std +
+                         est_std + male_std + rank_std + prop_std + focal_std + 
+                         age_std + study_period + offset(logdur) +
+                          (1|femaleID) + (1|date),
+                     family = negbinomial,
+                     iter = 11000, warmup = 1000, seed = 134,
+                     prior = c(prior(student_t(4,0,5), class = "b"),
+                               prior(student_t(4,0,10), class = "Intercept"),
+                               prior(student_t(4,0,10), class = "sd"),
+                               prior(gamma(0.01,0.01), class = "shape")),
+                     control=list(adapt_delta = 0.99, max_treedepth = 20),
+                     backend = "cmdstanr",
+                     data = agg_daily_all_b2,
+                     file = "model/m_agg_TYIT2.rds")
+```
+
+###### モデルのチェック  
+DHARMaパッケージ[@Hartig2022]とDHARMa.helperパッケージ[@Francisco2023]でモデルの前提が満たされているかを確認する。特に問題はないよう。 
+```{r, fig.height = 4}
+## 全個体への攻撃  
+dh_check_brms(m_agg_TYIT2, quantreg = TRUE)
+```
+<br/>  
+
+bayesplotパッケージ[@Gabry2022]の`pp_check`関数で、事後分布からの予測分布と実測値の分布を比較しても大きな乖離はない。   
+```{r, fig.height = 4.5}
+## 全個体への攻撃  
+pp_check(m_agg_TYIT2, ndraws = 100)+
+  theme_bw()+
+  theme(aspect.ratio = 0.9)
+```  
+<br/>  
+
+多重共線性のチェックも行ったが、VIFに問題はない。  
+```{r}
+check_collinearity(m_agg_TYIT2)
+```
+<br/>  
+
+Rhatにも問題はなく、収束の問題はないよう。  
+```{r, fig.dim = c(8,4)}
+## 全個体への攻撃  
+data.frame(Rhat = brms::rhat(m_agg_TYIT2)) %>% 
+  ggplot(aes(x = Rhat))+
+  geom_histogram(fill = "white",
+                 color = "black")+
+  theme_bw()+
+  theme(aspect.ratio = 1) -> p_rhat_agg_TYIT
+
+p_rhat_agg_TYIT  
+```
+<br/>  
+
+###### 結果の確認  
+結果は以下の通り。太字になっている変数は95%確信区間が0をまたいでおらず、有意な影響があるといえる。  
+```{r, echo = FALSE}
+model_parameters(m_agg_TYIT2) %>% 
+  data.frame() %>% 
+  select(1,3,5,6,8,9) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
+  select(c(1,2,7,5,6), everything()) %>% 
+  select(-CI_low, -CI_high) %>% 
+  filter(Parameter != "shape") %>% 
+  mutate(Parameter = fct_relevel(Parameter,
+                                  "b_Intercept","b_TY","b_IT",
+                                  "b_CSI_TY_std","b_CSI_IT_std",
+                                  "b_rs2",
+                                  "b_TY:CSI_TY_std",
+                                  "b_TY:rs2",
+                                  "b_IT:CSI_IT_std",
+                                  "b_rs2:IT",
+                                  "b_male_std","b_est_std", 
+                                  "b_prop_std",
+                                  "b_focal_std", 
+                                  "b_rank_std", "b_age_std", 
+                                  "b_study_periodm20")) %>% 
+  arrange(Parameter) %>% 
+  mutate(Parameter = str_replace_all(Parameter, c("b_Intercept"="切片",
+                                     "b_study_periodm20" = "調査期間\n(m20 vs m19)",
+                                     "b_study_periodm21" = "調査期間\n(m21 vs m19)",
+                                     "^b_TY$" = "TYの在否 \n (在 vs 否)",
+                                     "^b_IT$" = "ITの在否 \n (在 vs 否)",
+                                     "^b_rs2$" = "メスの発情 \n(有 vs 無)",
+                                     "b_rank_std" = "順位",
+                                     "b_age_std" = "年齢",
+                                     "b_male_std" = "確認オス数",
+                                     "b_est_std" = "発情メス数",
+                                     "b_prop_std" = "確認メス割合",
+                                     "b_focal_std" = "個体追跡時間割合", 
+                                     "b_CSI_TY_std" = "TYとの親密度(CSI)",
+                                     "b_TY:rs2" = "TYの在否\n ×メスの発情の有無",
+                                     "b_TY:CSI_TY_std" = "TYの在否\n ×TYとの親密度(CSI)",
+                                     "b_CSI_IT_std" = "ITとの親密度(CSI)",
+                                     "b_rs2:IT" = "ITの在否\n ×メスの発情の有無",
+                                     "b_IT:CSI_IT_std" = "ITの在否\n ×ITとの親密度(CSI)"))) %>%
+  rename("Explanatory variables"="Parameter") %>% 
+  flextable() %>% 
+  colformat_double(digits=2) %>% 
+  set_table_properties(layout="autofit",width = 0.9) %>% 
+  autofit(add_w = 0.3) %>% 
+  font(part = "header", fontname = "Segoe UI") %>% 
+  font(part = "body", j=2:5, fontname = "Segoe UI") %>% 
+  font(part = "body", j=1, fontname = "Yu Gothic") %>% 
+  bold(j=c(1,2,3),i = c(2,3,6,10:15, 17,18),bold = TRUE) %>% 
+  theme_zebra() %>% 
+  align(j=2:5,part = "all",align = "center") -> table_agg_TYIT
+
+table_agg_TYIT
+
+# save_as_image(table_agg_TYIT, "tables/table_agg_TYIT.tiff",
+#               res = 600)
+```
+<br/>  
+
+続いて、交互作用がある変数について検討する。  
+
+TYとのCSIと発情状態によってTYの有無による被攻撃頻度の違いがどのように変わるかを示したのが以下である。Differenceはoffsetが$log(1) = 0$のとき、すなわち1時間当たりの被攻撃頻度の比($\frac{\mu_{TY = 0}}{\mu_{TY=1}}$)を表している[^foot2]。    
+
+[^foot2]: 2つの群の平均の比、$log(\mu_1) - log(\mu_2) = log(\frac{\mu_1}{\mu_2})$を推定したのちにlogを外す変換を行うためこうなるようだ。詳しくは、[emmeansパッケージのviganettes](https://cran.r-project.org/web/packages/emmeans/vignettes/comparisons.html#logs)を参照。`type = "none"`とすると、線形予測子の状態での差が出力されるので、$log(\mu_1) - log(\mu_2) = log(\frac{\mu_1}{\mu_2})$の結果が出力される。    
+
+いずれの場合でもDifferenceは1より大きく、95%確信区間も全ての期間において1をまたがないので、CSIや発情状態に関わらずTYがいない日はTYがいる日よりも攻撃を受ける頻度が低くなる。    
+
+```{r}
+estimate_contrasts(m_agg_TYIT2,
+                   contrast = "TY = c(0,1)",
+                   at = c("CSI_TY_std = seq(-1,1.5, 0.2)",
+                          "rs2 = c(0,1)"),
+                   transform = "none",
+                   offset = log(1)) %>% 
+  data.frame() %>% 
+  select(-.offset.) %>% 
+  rename(CSI_TY = CSI_TY_std) %>% 
+  mutate(CSI_TY = sd(agg_daily_all_b2$CSI_TY)*CSI_TY + mean(agg_daily_all_b2$CSI_TY)) %>% 
+  select(1:7) %>% 
+  mutate(across(where(is.numeric), ~round(.,2)))
+```
+<br/>  
+
+ITについては、非発情メスではそのような傾向。  
+```{r}
+estimate_contrasts(m_agg_TYIT2,
+                   contrast = "IT = c(0,1)",
+                   at = c("CSI_IT_std = seq(-0.67,3.5, 0.2)",
+                          "rs2 = c(0,1)"),
+                   transform = "none",
+                   offset = log(1)) %>% 
+  data.frame() %>% 
+  select(-.offset.) %>% 
+  rename(CSI_IT = CSI_IT_std) %>% 
+  mutate(CSI_IT = sd(agg_daily_all_b2$CSI_IT)*CSI_IT + mean(agg_daily_all_b2$CSI_IT)) %>% 
+  select(1:7) %>% 
+  mutate(across(where(is.numeric), ~round(.,2)))
+```
+<br/>  
+
+###### 結果の図示  
+交互作用項の結果について図示する。  
+
+まずはTYについて図示する。結果は以下の通り。発情メス、非発情メスいずれについても*TY*がいない日には<u>CSIに関わらず</u>オスからの攻撃頻度が有意に多くなった。    
+```{r}
+# cont_agg_TY <- estimate_contrasts(m_agg_TYIT2,
+#                    contrast = "TY = c(0,1)",
+#                    at = c("CSI_TY_std",
+#                           "rs2 = c(0,1)"),
+#                    transform = "response",
+#                    offset = log(1),
+#                    length = 50)
+# 
+# saveRDS(cont_agg_TY, "model/cont_agg_TY.rds")  
+cont_agg_TY <- readRDS("model/cont_agg_TY.rds")  
+
+cont_agg_TY %>% 
+  data.frame() %>% 
+  rename(CSI_TY = CSI_TY_std) %>% 
+    mutate(CSI_TY = sd(agg_daily_all_b2$CSI_TY)*CSI_TY + mean(agg_daily_all_b2$CSI_TY)) %>% 
+  ggplot(aes(x = CSI_TY, y = Difference))+
+  geom_line()+
+  geom_ribbon(aes(ymin = CI_low, ymax = CI_high),
+              alpha = 0.1)+
+  geom_hline(aes(yintercept = 1),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 1)+
+  theme_bw(base_size = 18)+
+  theme(aspect.ratio = 1) +
+  labs(y = expression(frac(mu[TY不在],mu[TY在])), x = expression(paste("CSI with ",italic("TY")))) +
+  scale_x_continuous(breaks = seq(0,3.5,1))+
+  scale_y_continuous(breaks = seq(1,7,1))+
+  theme(axis.title.y = element_text(family = "Yu Gothic",
+                                    angle = 0,
+                                    vjust = 0.5,
+                                    hjust = -0.5),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"),
+        aspect.ratio = 1,
+        strip.background = element_blank(),
+        strip.text = element_text(family = "Arial",
+                                  hjust = 0))+
+  facet_rep_wrap(~rs2, repeat.tick.labels = TRUE,
+                 labeller = as_labeller(c(`1` = "発情メス", `0` = "非発情メス"))) -> p_cont_agg_TY
+
+p_cont_agg_TY
+
+# ggsave("figures/p_cont_agg_TY.png",p_cont_agg_TY, dpi = 600, units = "mm",
+#          width = 200, height = 100)
+```
+<br/>  
+
+実データとmarginal meanを共に図示する。なお、3日以上観察できた個体のデータのみを用いて図示した。    
+```{r}
+emm_agg_TY <- estimate_means(m_agg_TYIT2,
+                               at = c("TY = c(0,1)",
+                                      "rs2 = c(0,1)"),
+                               offset = 0) %>% 
+  data.frame() %>% 
+  mutate(TY = as.factor(TY))
+
+df_signif <- tidyr::crossing(rs2 = c(0,1)) %>% 
+                      mutate(start = "0",
+                             end = "1",
+                             y = c(0.082, 0.85),
+                             label = "***")
+
+agg_daily_all_b2 %>% 
+  group_by(femaleID, TY, rs2) %>% 
+  summarise(mean = mean(rate_agg),
+            n = n()) %>% 
+  ungroup() %>% 
+  filter(n >= 5) %>% 
+  mutate(TY = as.factor(TY)) %>% 
+  ggplot(aes(x = TY, y = mean))+
+  geom_line(aes(group = femaleID),
+            alpha = 0.7)+
+  geom_point(alpha = 0.7)+
+  coord_cartesian(xlim = c(1.3,1.7))+
+  # geom_errorbar(data = emm_agg_TY,
+  #                 aes(y = Mean,
+  #                     ymin = CI_low,
+  #                     ymax = CI_high),
+  #               width = 0.15,
+  #               color = "red3",
+  #               alpha = 0.3)+
+  # geom_pointrange(data = emm_agg_TY,
+  #                 aes(y = Mean,
+  #                     ymin = CI_low,
+  #                     ymax = CI_high),
+  #                 color = "red3",
+  #                 size = 0.7,
+  #                 linewidth = 1,
+  #                 alpha = 0.3)+
+  theme_bw(base_size = 16)+
+  scale_x_discrete(labels = c(expression(paste(italic("TY"), "absent")),
+                              expression(paste(italic("TY"), "present"))))+
+  labs(x = "", y = "Rate of aggression (times/h)")+
+  theme(axis.title.y = element_text(family = "Arial"),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"),
+        strip.background = element_blank(),
+        strip.text = element_text(hjust = 0,
+                                  family = "Yu Gothic"),
+        aspect.ratio = 1)+
+  facet_rep_wrap(~rs2,
+                 scales = "free",
+                 labeller = as_labeller(c(`0` = "非発情メス",
+                                          `1` = "発情メス"))) -> p_agg_TY_raw
+
+p_agg_TY_raw
+
+# ggsave("figures/p_agg_TY_raw.png",p_agg_TY_raw, dpi = 600, units = "mm",
+#         width = 200, height = 100)
+```
+<br/>  
+
+続いて、ITについて図示する。結果は以下の通り。非発情メスのみついては、*IT*がいない日には<u>CSIに関わらず</u>オスからの攻撃頻度が有意に多くなった。       
+```{r}
+# cont_agg_IT <- estimate_contrasts(m_agg_TYIT2,
+#                    contrast = "IT = c(0,1)",
+#                    at = c("CSI_IT_std",
+#                           "rs2 = c(0,1)"),
+#                    transform = "response",
+#                    offset = log(1),
+#                    length = 50)
+# 
+# saveRDS(cont_agg_IT, "model/cont_agg_IT.rds")  
+cont_agg_IT <- readRDS("model/cont_agg_IT.rds") 
+
+cont_agg_IT %>% 
+  data.frame() %>% 
+  rename(CSI_IT = CSI_IT_std) %>% 
+    mutate(CSI_IT = sd(agg_daily_all_b2$CSI_IT)*CSI_IT + mean(agg_daily_all_b2$CSI_IT)) %>% 
+  ggplot(aes(x = CSI_IT, y = Difference))+
+  geom_line()+
+  geom_ribbon(aes(ymin = CI_low, ymax = CI_high),
+              alpha = 0.1)+
+  geom_hline(aes(yintercept = 1),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 1)+
+  theme_bw(base_size = 18)+
+  theme(aspect.ratio = 1) +
+  labs(y = expression(frac(mu[IT不在],mu[IT在])), x = expression(paste("CSI with ",italic("IT")))) +
+  scale_x_continuous(breaks = seq(0,7,1))+
+  scale_y_continuous(breaks = seq(1,7,1))+
+  theme(axis.title.y = element_text(family = "Yu Gothic",
+                                    angle = 0,
+                                    vjust = 0.5,
+                                    hjust = -0.5),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"),
+        aspect.ratio = 1,
+        strip.background = element_blank(),
+        strip.text = element_text(family = "Arial",
+                                  hjust = 0))+
+  facet_rep_wrap(~rs2, repeat.tick.labels = TRUE,
+                 labeller = as_labeller(c(`1` = "発情メス", `0` = "非発情メス"))) -> p_cont_agg_IT
+
+p_cont_agg_IT
+
+# ggsave("figures/p_cont_agg_IT.png",p_cont_agg_IT, dpi = 600, units = "mm",
+#          width = 200, height = 100)
+```
+<br/>  
+
+実データとmarginal meanを共に図示する。ただし、観察が3日以上あるもののみを図示した。    
+```{r}
+emm_agg_IT <- estimate_means(m_agg_TYIT2,
+                               at = c("IT = c(0,1)",
+                                      "rs2 = c(0,1)"),
+                               offset = 0) %>% 
+  data.frame() %>% 
+  mutate(IT = as.factor(IT))
+
+df_signif <- tidyr::crossing(rs2 = c(0,1)) %>% 
+                      mutate(start = "0",
+                             end = "1",
+                             y = c(0.082, 0.85),
+                             label = "***")
+
+agg_daily_all_b2 %>% 
+  group_by(femaleID, IT, rs2) %>% 
+  summarise(mean = mean(rate_agg),
+            n = n()) %>% 
+  ungroup() %>% 
+  filter(n >= 3) %>% 
+  mutate(IT = as.factor(IT)) %>% 
+  ggplot(aes(x = IT, y = mean))+
+  geom_line(aes(group = femaleID),
+            alpha = 0.7)+
+  geom_point(alpha = 0.7)+
+  coord_cartesian(xlim = c(1.3,1.7))+
+  # geom_errorbar(data = emm_agg_IT,
+  #                 aes(y = Mean,
+  #                     ymin = CI_low,
+  #                     ymax = CI_high),
+  #               width = 0.15,
+  #               color = "red3",
+  #               alpha = 0.3)+
+  # geom_pointrange(data = emm_agg_IT,
+  #                 aes(y = Mean,
+  #                     ymin = CI_low,
+  #                     ymax = CI_high),
+  #                 color = "red3",
+  #                 size = 0.7,
+  #                 linewidth = 1,
+  #                 alpha = 0.3)+
+  theme_bw(base_size = 16)+
+  scale_x_discrete(labels = c(expression(paste(italic("IT"), "absent")),
+                              expression(paste(italic("IT"), "present"))))+
+  labs(x = "", y = "Rate of aggression (times/h)")+
+  theme(axis.title.y = element_text(family = "Arial"),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"),
+        strip.background = element_blank(),
+        strip.text = element_text(hjust = 0,
+                                  family = "Yu Gothic"),
+        aspect.ratio = 1)+
+  facet_rep_wrap(~rs2,
+                 scales = "free",
+                 labeller = as_labeller(c(`0` = "非発情メス",
+                                          `1` = "発情メス"))) -> p_agg_IT_raw
+
+p_agg_IT_raw
+
+# ggsave("figures/p_agg_IT_raw.png",p_agg_IT_raw, dpi = 600, units = "mm",
+#         width = 200, height = 100)
+```
+
+#### 2019~2020交尾期 + TYの有無 + ITの有無    
+続いて2019~2020交尾期のデータを用い、TYとITの有無両方を考慮したモデルを考える。  
+
+##### データの加工  
+TYとITが3時間以上確認されたか、一度も確認されていない日だけを抽出する。  
+```{r}
+agg_daily_all_c <- agg_daily_all %>% 
+  filter(study_period != "m21") %>% 
+  filter(TY != 2 & IT != 2) %>% 
+  mutate(CSI_TY_std = standardize(CSI_TY),
+         CSI_IT_std = standardize(CSI_IT),
+         est_std = standardize(no_est),
+         male_std = standardize(no_male),
+         rank_std = standardize(rank_scaled),
+         age_std = standardize(age),
+         prop_std = standardize(prop_female),
+         focal_std = standardize(prop_focal)) %>% 
+  mutate(logdur = log(dur/60)) %>% 
+  mutate(date = as.factor(date)) %>% 
+  drop_na(CSI_TY, CSI_IT)
+```
+
+##### モデリング  
+モデルの概要は以下の通り。データは各観察日におけるそれぞれのメスのデータである。    
+
+- 応答変数: オスからの被攻撃回数  
+- 説明変数: メスの発情の有無、TYの有無、それらの交互作用、発情メス数、確認オス数、調査期間、TYとのCSI、年齢、順位  
+- オフセット項: 群れの追跡時間  
+- 分布: 負の二項分布  
+- リンク関数: log関数  
+- 事前分布: 関数にある通り弱情報分布  
+
+```{r}
+m_agg_TYIT_bf21 <- brm(no_agg ~ TY*rs2 + TY*CSI_TY_std + IT*rs2 + IT*CSI_IT_std +
+                         est_std + male_std + rank_std + prop_std + focal_std + 
+                         age_std + study_period + offset(logdur) +
+                          (1|femaleID) + (1|date),
+                       family = negbinomial,
+                       iter = 11000, warmup = 1000, seed = 13,
+                       prior = c(prior(student_t(4,0,5), class = "b"),
+                                 prior(student_t(4,0,10), class = "Intercept"),
+                                 prior(student_t(4,0,10), class = "sd"),
+                                 prior(gamma(0.01,0.01), class = "shape")),
+                       control=list(adapt_delta = 0.99, max_treedepth = 20),
+                       backend = "cmdstanr",
+                       data = agg_daily_all_c,
+                       file = "model/m_agg_TYIT_bf21.rds")
+```
+
+###### モデルのチェック  
+DHARMaパッケージ[@Hartig2022]とDHARMa.helperパッケージ[@Francisco2023]でモデルの前提が満たされているかを確認する。特に問題はないよう。 
+```{r, fig.height = 4}
+## 全個体への攻撃  
+dh_check_brms(m_agg_TYIT_bf21, quantreg = TRUE)
+```
+<br/>  
+
+bayesplotパッケージ[@Gabry2022]の`pp_check`関数で、事後分布からの予測分布と実測値の分布を比較しても大きな乖離はない。   
+```{r, fig.height = 4.5}
+## 全個体への攻撃  
+pp_check(m_agg_TYIT_bf21, ndraws = 100)+
+  theme_bw()+
+  theme(aspect.ratio = 0.9)
+```  
+<br/>  
+
+多重共線性のチェックもお個あったが、VIFに問題はない。  
+```{r}
+check_collinearity(m_agg_TYIT_bf21)
+```
+<br/>  
+
+Rhatにも問題はなく、収束の問題はないよう。  
+```{r, fig.dim = c(8,4)}
+## 全個体への攻撃  
+data.frame(Rhat = brms::rhat(m_agg_TYIT_bf21)) %>% 
+  ggplot(aes(x = Rhat))+
+  geom_histogram(fill = "white",
+                 color = "black")+
+  theme_bw()+
+  theme(aspect.ratio = 1) -> p_rhat_agg_TYIT_bf21
+
+p_rhat_agg_TYIT_bf21  
+```
+<br/>  
+
+###### 結果の確認  
+結果は以下の通り。太字になっている変数は95%確信区間が0をまたいでおらず、有意な影響があるといえる。  
+```{r, echo = FALSE}
+model_parameters(m_agg_TYIT_bf21) %>% 
+  data.frame() %>% 
+  select(1,3,5,6,8,9) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
+  select(c(1,2,7), everything()) %>% 
+  select(-CI_low, -CI_high) %>% 
+  filter(Parameter != "shape") %>% 
+  mutate(Parameter = fct_relevel(Parameter,
+                                  "b_Intercept","b_TY","b_IT",
+                                  "b_CSI_TY_std","b_CSI_IT_std",
+                                  "b_rs2",
+                                  "b_TY:CSI_TY_std",
+                                  "b_TY:rs2",
+                                  "b_IT:CSI_IT_std",
+                                  "b_rs2:IT",
+                                  "b_male_std","b_est_std", 
+                                  "b_prop_std","b_focal_std",
+                                  "b_rank_std", "b_age_std", 
+                                  "b_study_periodm20")) %>% 
+  arrange(Parameter) %>% 
+  mutate(Parameter = str_replace_all(Parameter, c("b_Intercept"="切片",
+                                     "b_study_periodm20" = "調査期間\n(m20 vs m19)",
+                                     "b_study_periodm21" = "調査期間\n(m21 vs m19)",
+                                     "^b_TY$" = "TYの在否 \n (在 vs 否)",
+                                     "^b_IT$" = "ITの在否 \n (在 vs 否)",
+                                     "^b_rs2$" = "メスの発情 \n(有 vs 無)",
+                                    "b_rank_std" = "順位",
+                                     "b_age_std" = "年齢",
+                                     "b_male_std" = "確認オス数",
+                                     "b_est_std" = "発情メス数",
+                                     "b_prop_std" = "確認メス割合",
+                                     "b_focal_std" = "個体追跡時間割合", 
+                                     "b_CSI_TY_std" = "TYとの親密度(CSI)",
+                                     "b_TY:rs2" = "TYの在否\n ×メスの発情の有無",
+                                     "b_TY:CSI_TY_std" = "TYの在否\n ×TYとの親密度(CSI)",
+                                     "b_CSI_IT_std" = "ITとの親密度(CSI)",
+                                     "b_rs2:IT" = "ITの在否\n ×メスの発情の有無",
+                                     "b_IT:CSI_IT_std" = "ITの在否\n ×ITとの親密度(CSI)"))) %>% 
+  rename("Explanatory variables"="Parameter") %>% 
+  flextable() %>% 
+  colformat_double(digits=2) %>% 
+  set_table_properties(layout="autofit",width = 0.9) %>% 
+  autofit() %>% 
+  font(part = "header", fontname = "Segoe UI") %>% 
+  font(part = "body", j=2:5, fontname = "Segoe UI") %>% 
+  font(part = "body", j=1, fontname = "Yu Gothic") %>% 
+  bold(j=c(1,2,3),i = c(2,3,6,10,11,13,14,17),bold = TRUE) %>% 
+  theme_zebra() %>% 
+  align(j=2:5,part = "all",align = "center") -> table_agg_TYIT_bf21
+
+table_agg_TYIT_bf21
+
+# save_as_image(table_agg_TYIT_bf21, "tables/table_agg_TYIT_bf21.tiff",
+#               res = 600)
+```
+<br/>  
+
+続いて、交互作用がある変数について検討する。  
+
+TY/ITとのCSIと発情状態によってTY/ITの有無による被攻撃頻度の違いがどのように変わるかを示したのが以下である。Differenceはoffsetが$log(1) = 0$のとき、すなわち1時間当たりの被攻撃頻度の比($\frac{\mu_{TY = 0}}{\mu_{TY=1}}$)を表している。    
+
+まずはTYについてみていく。非発情メスについては、ほとんどのCSIで差が有意であった。一方で、発情メスについてはいずれのCSIでも差が有意でない。  
+
+```{r}
+estimate_contrasts(m_agg_TYIT_bf21,
+                   contrast = "TY = c(0,1)",
+                   at = c("CSI_TY_std = seq(-1,1.5, 0.2)",
+                          "rs2 = c(0,1)"),
+                   transform = "none",
+                   offset = log(1)) %>% 
+  data.frame() %>% 
+  select(-.offset.) %>% 
+  rename(CSI_TY = CSI_TY_std) %>% 
+  mutate(CSI_TY = sd(agg_daily_all_b$CSI_TY)*CSI_TY + mean(agg_daily_all_b$CSI_TY)) %>% 
+  select(1:7) %>% 
+  mutate(across(where(is.numeric), ~round(.,2)))
+```
+<br/>  
+
+ITについても、発情メスのみで有意な差が見られるようだ。  
+```{r}
+estimate_contrasts(m_agg_TYIT_bf21,
+                   contrast = "IT = c(0,1)",
+                   at = c("CSI_IT_std = seq(-0.7,3.5, 0.2)",
+                          "rs2 = c(0,1)"),
+                   transform = "none",
+                   offset = log(1)) %>% 
+  data.frame() %>% 
+  select(-.offset.) %>% 
+  rename(CSI_IT = CSI_IT_std) %>% 
+  mutate(CSI_IT = sd(agg_daily_all_b$CSI_IT)*CSI_IT + mean(agg_daily_all_b$CSI_IT)) %>% 
+  select(1:7) %>% 
+  mutate(across(where(is.numeric), ~round(.,2)))
+```
+<br/>  
+
+###### 結果の図示  
+交互作用項の結果について図示する。  
+
+まずは、TYについて図示する。非発情メスについては、ほとんどのCSIで差が有意であった。一方で、発情メスについてはいずれのCSIでも差が有意でない。     
+```{r}
+# cont_agg_TY_bf21 <- estimate_contrasts(m_agg_TYIT_bf21,
+#                                        contrast = "TY = c(0,1)",
+#                                        at = c("CSI_TY_std",
+#                                                    "rs2 = c(0,1)"),
+#                                        transform = "response",
+#                                        offset = log(1),
+#                                        length = 50)
+# 
+# saveRDS(cont_agg_TY_bf21, "model/cont_agg_TY_bf21.rds")  
+cont_agg_TY_bf21 <- readRDS("model/cont_agg_TY_bf21.rds")  
+
+cont_agg_TY_bf21 %>% 
+  data.frame() %>% 
+  rename(CSI_TY = CSI_TY_std) %>% 
+  mutate(CSI_TY = sd(agg_daily_all_c$CSI_TY)*CSI_TY + mean(agg_daily_all_c$CSI_TY)) %>% 
+  ggplot(aes(x = CSI_TY, y = Difference))+
+  geom_line()+
+  geom_ribbon(aes(ymin = CI_low, ymax = CI_high),
+              alpha = 0.1)+
+  geom_hline(aes(yintercept = 1),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 1)+
+  theme_bw(base_size = 18)+
+  theme(aspect.ratio = 1) +
+  labs(y = expression(frac(mu[TY不在],mu[TY在])), x = expression(paste("CSI with ",italic("TY")))) +
+  scale_x_continuous(breaks = seq(0,3.5,1))+
+  scale_y_continuous(breaks = seq(1,7,1))+
+  theme(axis.title.y = element_text(family = "Yu Gothic",
+                                    angle = 0,
+                                    vjust = 0.5,
+                                    hjust = -0.5),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"),
+        aspect.ratio = 1,
+        strip.background = element_blank(),
+        strip.text = element_text(family = "Arial",
+                                  hjust = 0))+
+  facet_rep_wrap(~rs2, repeat.tick.labels = TRUE,
+                 labeller = as_labeller(c(`1` = "発情メス", `0` = "非発情メス"))) -> p_cont_agg_TY_bf21
+
+p_cont_agg_TY_bf21
+
+# ggsave("figures/p_cont_agg_TY_bf21.png",p_cont_agg_TY_bf21, dpi = 600, units = "mm",
+#         width = 200, height = 100)
+```
+<br/>  
+
+次に、ITについて図示する。こちらは2021年を除かない場合と同じ傾向を示した。    
+```{r}
+# cont_agg_IT_bf21 <- estimate_contrasts(m_agg_TYIT_bf21,
+#                                             contrast = "IT = c(0,1)",
+#                                             at = c("CSI_IT_std",
+#                                                    "rs2 = c(0,1)"),
+#                                             transform = "response",
+#                                             offset = log(1),
+#                                             length = 50)
+# 
+# saveRDS(cont_agg_IT_bf21, "model/cont_agg_IT_bf21.rds")  
+cont_agg_IT_bf21 <- readRDS("model/cont_agg_IT_bf21.rds")  
+
+cont_agg_IT_bf21 %>% 
+  data.frame() %>% 
+  rename(CSI_IT = CSI_IT_std) %>% 
+  mutate(CSI_IT = sd(agg_daily_all_b$CSI_IT)*CSI_IT + mean(agg_daily_all_b$CSI_IT)) %>% 
+  ggplot(aes(x = CSI_IT, y = Difference))+
+  geom_line()+
+  geom_ribbon(aes(ymin = CI_low, ymax = CI_high),
+              alpha = 0.1)+
+  geom_hline(aes(yintercept = 1),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 1)+
+  theme_bw(base_size = 18)+
+  theme(aspect.ratio = 1) +
+  labs(y = expression(frac(mu[IT不在],mu[IT在])), x = expression(paste("CSI with ",italic("IT")))) +
+  scale_x_continuous(breaks = seq(0,6,1))+
+  scale_y_continuous(breaks = seq(1,10,2))+
+  theme(axis.title.y = element_text(family = "Yu Gothic",
+                                    angle = 0,
+                                    vjust = 0.5,
+                                    hjust = -0.5),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"),
+        aspect.ratio = 1,
+        strip.background = element_blank(),
+        strip.text = element_text(family = "Arial",
+                                  hjust = 0))+
+  facet_rep_wrap(~rs2, repeat.tick.labels = TRUE,
+                 labeller = as_labeller(c(`1` = "発情メス", `0` = "非発情メス"))) -> p_cont_agg_IT_bf21
+
+p_cont_agg_IT_bf21
+
+# ggsave("figures/p_cont_agg_IT_bf21.png",p_cont_agg_IT_bf21, dpi = 600, units = "mm",
+#         width = 200, height = 100)
+```
+<br/>  
+
+実データとmarginal meanを共に図示する。ただし、$n \ge 3$の個体のみを図示に用いた。    
+```{r}
+emm_agg_TYIT_bf21_IT <- estimate_means(m_agg_TYIT_bf21,
+                                       at = c("IT = c(0,1)",
+                                              "rs2 = c(0,1)"),
+                                       offset = 0) %>% 
+  data.frame() %>% 
+  mutate(IT = as.factor(IT))
+
+agg_daily_all_c %>% 
+  group_by(femaleID, IT, rs2) %>% 
+  summarise(mean = mean(rate_agg),
+            n = n()) %>% 
+  ungroup() %>% 
+  filter(n >= 3) %>% 
+  mutate(IT = as.factor(IT)) %>% 
+  ggplot(aes(x = IT, y = mean))+
+  geom_line(aes(group = femaleID),
+            alpha = 0.7)+
+  geom_point(alpha = 0.7)+
+  coord_cartesian(xlim = c(1.3,1.7))+
+  # geom_errorbar(data = emm_agg_TYIT_bf21_IT,
+  #                 aes(y = Mean, 
+  #                     ymin = CI_low,
+  #                     ymax = CI_high),
+  #               width = 0.15,
+  #               color = "red3")+
+  # geom_pointrange(data = emm_agg_TYIT_bf21_IT,
+  #                 aes(y = Mean, 
+  #                     ymin = CI_low,
+  #                     ymax = CI_high),
+  #                 color = "red3",
+  #                 size = 0.7,
+  #                 linewidth = 1)+
+  theme_bw(base_size = 16)+
+  scale_x_discrete(labels = c(expression(paste(italic("IT"), "absent")),
+                              expression(paste(italic("IT"), "present"))))+
+  labs(x = "", y = "Rate of aggression (times/h)")+
+  theme(axis.title.y = element_text(family = "Arial"),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"),
+        strip.background = element_blank(),
+        strip.text = element_text(hjust = 0,
+                                  family = "Yu Gothic"),
+        aspect.ratio = 1)+
+  facet_rep_wrap(~rs2,
+                 scales = "free_y",
+                 labeller = as_labeller(c(`0` = "非発情メス",
+                                          `1` = "発情メス"))) -> p_agg_TYIT_bf21_IT_raw
+
+p_agg_TYIT_bf21_IT_raw
+
+# ggsave("figures/p_agg_TYIT_bf21_IT_raw.png",
+#          p_agg_TYIT_bf21_IT_raw, dpi = 600, units = "mm",
+#          width = 200, height = 100)
+```
+
+### 発情と非発情を分ける    
+#### 全期間 + TY/ITの有無  
+まず、全期間のデータを用いて分析を行う。ITは2021年には移出していなかったので、TYの有無のみを考慮する。  
+
+##### データの加工  
+TYが3時間以上確認されたか、一度も確認されていない日だけを抽出する。  
+```{r}
+agg_daily_all_es <- agg_daily_all %>% 
+  filter(TY != 2 & IT != 2) %>% 
+  filter(rs2 == "1") %>% 
+  mutate(logdur = log(dur/60)) %>% 
+  mutate(date = as.factor(date)) %>% 
+  drop_na(CSI_TY) %>% 
+  mutate(CSI_TY_std = standardize(CSI_TY),
+         CSI_IT_std = standardize(CSI_IT),
+         est_std = standardize(no_est),
+         male_std = standardize(no_male),
+         rank_std = standardize(rank_scaled),
+         age_std = standardize(age),
+         prop_std = standardize(prop_female),
+         focal_std = standardize(prop_focal)) 
+
+agg_daily_all_an <- agg_daily_all %>% 
+  filter(TY != 2 & IT != 2) %>% 
+  filter(rs2 == "0") %>% 
+  mutate(logdur = log(dur/60)) %>% 
+  mutate(date = as.factor(date)) %>% 
+  drop_na(CSI_TY) %>% 
+  mutate(CSI_TY_std = standardize(CSI_TY),
+         CSI_IT_std = standardize(CSI_IT),
+         est_std = standardize(no_est),
+         male_std = standardize(no_male),
+         rank_std = standardize(rank_scaled),
+         age_std = standardize(age),
+         prop_std = standardize(prop_female),
+         focal_std = standardize(prop_focal)) 
+```
+
+##### モデリング      
+モデルの概要は以下の通り。データは各観察日におけるそれぞれのメスのデータである。    
+
+- 応答変数: オスからの被攻撃回数  
+- 説明変数: 発情の有無、TYの有無、TYとのCSI、発情の有無×TYの有無、TYとのCSI×TYの有無、発情メス数、確認オス数、調査期間、年齢、順位  
+- オフセット項: 群れの追跡時間  
+- 分布: 負の二項分布  
+- リンク関数: log関数  
+- 事前分布: 関数にある通り弱情報分布  
+
+```{r}
+m_agg_TYIT_es <- brm(no_agg ~ TY*CSI_TY_std +  IT*CSI_IT_std +
+                         est_std + male_std + rank_std + prop_std + focal_std + 
+                         age_std + study_period + offset(logdur) +
+                          (1|femaleID) + (1|date),
+                     family = negbinomial,
+                     iter = 11000, warmup = 1000, seed = 13,
+                     prior = c(prior(student_t(4,0,5), class = "b"),
+                               prior(student_t(4,0,10), class = "Intercept"),
+                               prior(student_t(4,0,10), class = "sd"),
+                               prior(gamma(0.01,0.01), class = "shape")),
+                     control=list(adapt_delta = 0.99, max_treedepth = 20),
+                     backend = "cmdstanr",
+                     data = agg_daily_all_es,
+                     file = "model/m_agg_TYIT_es.rds")
+
+m_agg_TYIT_an <- brm(no_agg ~ TY*CSI_TY_std + IT*CSI_IT_std +
+                         est_std + male_std + rank_std + prop_std + focal_std + 
+                         age_std + study_period + offset(logdur) +
+                          (1|femaleID) + (1|date),
+                     family = "negbinomial",
+                     iter = 11000, warmup = 1000, seed = 13,
+                     prior = c(prior(student_t(4,0,5), class = "b"),
+                               prior(student_t(4,0,10), class = "Intercept"),
+                               prior(student_t(4,0,10), class = "sd"),
+                               prior(gamma(0.01,0.01), class = "shape")),
+                     control=list(adapt_delta = 0.99, max_treedepth = 20),
+                     backend = "cmdstanr",
+                     data = agg_daily_all_an,
+                     file = "model/m_agg_TYIT_an.rds")
+```
+
+###### モデルのチェック  
+DHARMaパッケージ[@Hartig2022]とDHARMa.helperパッケージ[@Francisco2023]でモデルの前提が満たされているかを確認する。どちらのモデルも特に問題はないよう。 
+```{r, fig.height = 4}
+dh_check_brms(m_agg_TYIT_es, quantreg = TRUE)
+dh_check_brms(m_agg_TYIT_an, quantreg = TRUE)
+```
+<br/>  
+
+bayesplotパッケージ[@Gabry2022]の`pp_check`関数で、事後分布からの予測分布と実測値の分布を比較しても大きな乖離はない。   
+```{r, fig.height = 4.5}
+## 全個体への攻撃  
+pp_check(m_agg_TYIT_es, ndraws = 100)+
+  theme_bw()+
+  theme(aspect.ratio = 0.9)
+
+pp_check(m_agg_TYIT_an, ndraws = 100)+
+  theme_bw()+
+  theme(aspect.ratio = 0.9)
+```  
+<br/>  
+
+多重共線性のチェックも行ったが、VIFに問題はない。  
+```{r}
+check_collinearity(m_agg_TYIT_es)
+check_collinearity(m_agg_TYIT_an)
+```
+<br/>  
+
+###### 結果の確認  
+結果は以下の通り。太字になっている変数は95%確信区間が0をまたいでおらず、有意な影響があるといえる。まずは発情メスについては、発情メス数のみが有意な影響を持っていた。      
+```{r, echo = FALSE}
+model_parameters(m_agg_TYIT_es) %>% 
+  data.frame() %>% 
+  select(1,3,5,6,8,9) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
+  select(c(1,2,7,5,6), everything()) %>% 
+  select(-CI_low, -CI_high) %>% 
+  filter(Parameter != "shape") %>% 
+  mutate(Parameter = fct_relevel(Parameter,
+                                  "b_Intercept","b_TY","b_IT",
+                                  "b_CSI_TY_std","b_CSI_IT_std",
+                                  "b_TY:CSI_TY_std",
+                                  "b_IT:CSI_IT_std",
+                                  "b_male_std","b_est_std", 
+                                  "b_prop_std", "b_focal_std",
+                                  "b_rank_std", "b_age_std", 
+                                  "b_study_periodm20")) %>% 
+  arrange(Parameter) %>% 
+  mutate(Parameter = str_replace_all(Parameter, c("b_Intercept"="切片",
+                                     "b_study_periodm20" = "調査期間\n(m20 vs m19)",
+                                     "b_study_periodm21" = "調査期間\n(m21 vs m19)",
+                                     "^b_TY$" = "TYの在否 \n (在 vs 否)",
+                                     "^b_IT$" = "ITの在否 \n (在 vs 否)",
+                                     "^b_rs2$" = "メスの発情 \n(有 vs 無)",
+                                     "b_rank_std" = "順位",
+                                     "b_age_std" = "年齢",
+                                     "b_male_std" = "確認オス数",
+                                     "b_est_std" = "発情メス数",
+                                     "b_prop_std" = "確認メス割合",
+                                     "b_focal_std" = "個体追跡時間割合", 
+                                     "b_CSI_TY_std" = "TYとの親密度(CSI)",
+                                     "b_TY:rs2" = "TYの在否\n ×メスの発情の有無",
+                                     "b_TY:CSI_TY_std" = "TYの在否\n ×TYとの親密度(CSI)",
+                                     "b_CSI_IT_std" = "ITとの親密度(CSI)",
+                                     "b_rs2:IT" = "ITの在否\n ×メスの発情の有無",
+                                     "b_IT:CSI_IT_std" = "ITの在否\n ×ITとの親密度(CSI)")))%>% 
+  rename("Explanatory variables"="Parameter") %>% 
+  flextable() %>% 
+  colformat_double(digits=2) %>% 
+  set_table_properties(layout="autofit",width = 0.9) %>% 
+  autofit(add_w = 0.3) %>% 
+  font(part = "header", fontname = "Segoe UI") %>% 
+  font(part = "body", j=2:5, fontname = "Segoe UI") %>% 
+  font(part = "body", j=1, fontname = "Yu Gothic") %>% 
+  bold(j=c(1,2,3),i = c(3, 9, 11, 14, 15),bold = TRUE) %>% 
+  theme_zebra() %>% 
+  align(j=2:5,part = "all",align = "center") -> table_agg_TYIT_es
+
+table_agg_TYIT_es
+
+# save_as_image(table_agg_TYIT_es, "tables/table_agg_TYIT_es.tiff",
+#               res = 600)
+```
+<br/>  
+
+続いて、非発情メスについては以下のとおりである。  
+```{r, echo = FALSE}
+model_parameters(m_agg_TYIT_an) %>% 
+  data.frame() %>% 
+  select(1,3,5,6,8,9) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
+  select(c(1,2,7,5,6), everything()) %>% 
+  select(-CI_low, -CI_high) %>% 
+  filter(Parameter != "shape") %>% 
+  mutate(Parameter = fct_relevel(Parameter,
+                                  "b_Intercept","b_TY","b_IT",
+                                  "b_CSI_TY_std","b_CSI_IT_std",
+                                  "b_TY:CSI_TY_std",
+                                  "b_IT:CSI_IT_std",
+                                  "b_male_std","b_est_std", 
+                                  "b_prop_std", "b_focal_std",
+                                  "b_rank_std", "b_age_std", 
+                                  "b_study_periodm20")) %>% 
+  arrange(Parameter) %>% 
+  mutate(Parameter = str_replace_all(Parameter, c("b_Intercept"="切片",
+                                     "b_study_periodm20" = "調査期間\n(m20 vs m19)",
+                                     "b_study_periodm21" = "調査期間\n(m21 vs m19)",
+                                     "^b_TY$" = "TYの在否 \n (在 vs 否)",
+                                     "^b_IT$" = "ITの在否 \n (在 vs 否)",
+                                     "^b_rs2$" = "メスの発情 \n(有 vs 無)",
+                                     "b_focal_std" = "個体追跡時間割合", 
+                                     "b_rank_std" = "順位",
+                                     "b_age_std" = "年齢",
+                                     "b_male_std" = "確認オス数",
+                                     "b_est_std" = "発情メス数",
+                                     "b_prop_std" = "確認メス割合",
+                                     "b_CSI_TY_std" = "TYとの親密度(CSI)",
+                                     "b_TY:rs2" = "TYの在否\n ×メスの発情の有無",
+                                     "b_TY:CSI_TY_std" = "TYの在否\n ×TYとの親密度(CSI)",
+                                     "b_CSI_IT_std" = "ITとの親密度(CSI)",
+                                     "b_rs2:IT" = "ITの在否\n ×メスの発情の有無",
+                                     "b_IT:CSI_IT_std" = "ITの在否\n ×ITとの親密度(CSI)")))%>% 
+  rename("Explanatory variables"="Parameter") %>% 
+  flextable() %>% 
+  colformat_double(digits=2) %>% 
+  set_table_properties(layout="autofit",width = 0.9) %>% 
+  autofit(add_w = 0.3) %>% 
+  font(part = "header", fontname = "Segoe UI") %>% 
+  font(part = "body", j=2:5, fontname = "Segoe UI") %>% 
+  font(part = "body", j=1, fontname = "Yu Gothic") %>% 
+  bold(j=c(1,2,3),i = c(2,3,8,9,10,11, 12, 14, 15),bold = TRUE) %>% 
+  theme_zebra() %>% 
+  align(j=2:5,part = "all",align = "center") -> table_agg_TYIT_an
+
+table_agg_TYIT_an
+
+# save_as_image(table_agg_TYIT_an, "tables/table_agg_TYIT_an.tiff",
+#               res = 600)
+```
+<br/>  
+
+
+続いて、交互作用がある変数について検討する。  
+
+TYとのCSIと発情状態によってTYの有無による被攻撃頻度の違いがどのように変わるかを示したのが以下である。まず発情メスについては、CSIに関わらず*TY*の有無は有意に影響していない。  
+
+```{r}
+estimate_contrasts(m_agg_TYIT_es,
+                   contrast = "TY = c(0,1)",
+                   at = c("CSI_TY_std = seq(-1,1.5, 0.2)"),
+                   transform = "none",
+                   offset = log(1)) %>% 
+  data.frame() %>% 
+  select(-.offset.) %>% 
+  rename(CSI_TY = CSI_TY_std) %>% 
+  mutate(CSI_TY = sd(agg_daily_all_es$CSI_TY)*CSI_TY + mean(agg_daily_all_es$CSI_TY)) %>% 
+  select(1:7) %>% 
+  mutate(across(where(is.numeric), ~round(.,2)))
+```
+<br/>  
+
+続いて非発情メスについては、CSIの関わらずTYがいると攻撃を受ける頻度が低下することが分かる。  
+```{r}
+estimate_contrasts(m_agg_TYIT_an,
+                   contrast = "TY = c(0,1)",
+                   at = c("CSI_TY_std = seq(-1,1.5, 0.2)"),
+                   transform = "none",
+                   offset = log(1)) %>% 
+  data.frame() %>% 
+  select(-.offset.) %>% 
+  rename(CSI_TY = CSI_TY_std) %>% 
+  mutate(CSI_TY = sd(agg_daily_all_an$CSI_TY)*CSI_TY + mean(agg_daily_all_an$CSI_TY)) %>% 
+  select(1:7) %>% 
+  mutate(across(where(is.numeric), ~round(.,2)))
+```
+<br/>  
+
+同様の分析をITについても行う。まず、発情メスについてはCSIに関わらずITがいない日の方が攻撃を受けやすい。    
+```{r}
+estimate_contrasts(m_agg_TYIT_es,
+                   contrast = "IT = c(0,1)",
+                   at = c("CSI_IT_std = seq(-1,1.5, 0.2)"),
+                   transform = "none",
+                   offset = log(1)) %>% 
+  data.frame() %>% 
+  select(-.offset.) %>% 
+  rename(CSI_IT = CSI_IT_std) %>% 
+  mutate(CSI_IT = sd(agg_daily_all_es$CSI_IT)*CSI_IT + mean(agg_daily_all_es$CSI_IT)) %>% 
+  select(1:7) %>% 
+  mutate(across(where(is.numeric), ~round(.,2)))
+```
+<br/>  
+
+非発情メスについても同様の傾向があるようだ。  
+```{r}
+estimate_contrasts(m_agg_TYIT_an,
+                   contrast = "IT = c(0,1)",
+                   at = c("CSI_IT_std = seq(-1,1.5, 0.2)"),
+                   transform = "none",
+                   offset = log(1)) %>% 
+  data.frame() %>% 
+  select(-.offset.) %>% 
+  rename(CSI_IT = CSI_IT_std) %>% 
+  mutate(CSI_IT = sd(agg_daily_all_es$CSI_IT)*CSI_IT + mean(agg_daily_all_es$CSI_IT)) %>% 
+  select(1:7) %>% 
+  mutate(across(where(is.numeric), ~round(.,2)))
+```
+<br/>  
+
+###### 結果の図示  
+交互作用項の結果について図示する。先ほど見たように、  
+```{r}
+# cont_agg_TY_es <- estimate_contrasts(m_agg_TYIT_es,
+#                    contrast = "TY = c(0,1)",
+#                    at = c("CSI_TY_std"),
+#                    transform = "response",
+#                    offset = log(1),
+#                    length = 100)
+
+# saveRDS(cont_agg_TY_es, "model/cont_agg_TY_es.rds")
+
+cont_agg_TY_es <- readRDS("model/cont_agg_TY_es.rds")
+
+# cont_agg_TY_an <- estimate_contrasts(m_agg_TYIT_an,
+#                    contrast = "TY = c(0,1)",
+#                    at = c("CSI_TY_std"),
+#                    transform = "response",
+#                    offset = log(1),
+#                    length = 100)
+
+# saveRDS(cont_agg_TY_an, "model/cont_agg_TY_an.rds")
+
+cont_agg_TY_an <- readRDS("model/cont_agg_TY_an.rds")
+
+
+cont_agg_TY_es %>% 
+  data.frame() %>% 
+  rename(CSI_TY = CSI_TY_std) %>% 
+    mutate(CSI_TY = sd(agg_daily_all_es$CSI_TY)*CSI_TY + mean(agg_daily_all_es$CSI_TY)) %>% 
+  ggplot(aes(x = CSI_TY, y = Difference))+
+  geom_line()+
+  geom_ribbon(aes(ymin = CI_low, ymax = CI_high),
+              alpha = 0.1)+
+  geom_hline(aes(yintercept = 1),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 1)+
+  theme_bw(base_size = 18)+
+  theme(aspect.ratio = 1) +
+  labs(y = expression(frac(mu[TY不在],mu[TY在])), x = expression(paste("CSI with ",italic("TY")))) +
+  scale_x_continuous(breaks = seq(0,3.5,1))+
+  scale_y_continuous(breaks = seq(1,9,2))+
+  theme(axis.title.y = element_text(family = "Yu Gothic",
+                                    angle = 0,
+                                    vjust = 0.5,
+                                    hjust = -0.5),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"),
+        aspect.ratio = 1,
+        strip.background = element_blank(),
+        strip.text = element_text(family = "Arial",
+                                  hjust = 0),
+        title = element_text(family = "Yu Gothic",
+                             size = 12))+
+        labs(title = "発情メス") -> p_cont_agg_TY_es
+
+cont_agg_TY_an %>% 
+  data.frame() %>% 
+  rename(CSI_TY = CSI_TY_std) %>% 
+    mutate(CSI_TY = sd(agg_daily_all_an$CSI_TY)*CSI_TY + mean(agg_daily_all_an$CSI_TY)) %>% 
+  ggplot(aes(x = CSI_TY, y = Difference))+
+  geom_line()+
+  geom_ribbon(aes(ymin = CI_low, ymax = CI_high),
+              alpha = 0.1)+
+  geom_hline(aes(yintercept = 1),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 1)+
+  theme_bw(base_size = 18)+
+  theme(aspect.ratio = 1) +
+  labs(y = expression(frac(mu[TY不在],mu[TY在])), x = expression(paste("CSI with ",italic("TY")))) +
+  scale_x_continuous(breaks = seq(0,3.5,1))+
+  scale_y_continuous(breaks = seq(1,9,1))+
+  theme(axis.title.y = element_text(family = "Yu Gothic",
+                                    angle = 0,
+                                    vjust = 0.5,
+                                    hjust = -0.5),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"),
+        aspect.ratio = 1,
+        strip.background = element_blank(),
+        strip.text = element_text(family = "Arial",
+                                  hjust = 0),
+        title = element_text(family = "Yu Gothic",
+                             size = 12))+
+   labs(title = "非発情メス") -> p_cont_agg_TY_an
+
+p_cont_agg_TY_esan <-  p_cont_agg_TY_an + p_cont_agg_TY_es
+
+p_cont_agg_TY_esan
+
+# ggsave("figures/p_cont_agg_TY_esan.png",p_cont_agg_TY_esan, dpi = 600, units = "mm",
+#         width = 200, height = 100)
+```
+<br/>  
+
+```{r}
+# cont_agg_IT_es <- estimate_contrasts(m_agg_TYIT_es,
+#                    contrast = "IT = c(0,1)",
+#                    at = c("CSI_IT_std"),
+#                    transform = "response",
+#                    offset = log(1),
+#                    length = 100)
+# 
+# saveRDS(cont_agg_IT_es, "model/cont_agg_IT_es.rds")
+
+cont_agg_IT_es <- readRDS("model/cont_agg_IT_es.rds")
+
+# cont_agg_IT_an <- estimate_contrasts(m_agg_TYIT_an,
+#                    contrast = "IT = c(0,1)",
+#                    at = c("CSI_IT_std"),
+#                    transform = "response",
+#                    offset = log(1),
+#                    length = 100)
+# 
+# saveRDS(cont_agg_IT_an, "model/cont_agg_IT_an.rds")
+
+cont_agg_IT_an <- readRDS("model/cont_agg_IT_an.rds")
+
+cont_agg_IT_es %>% 
+  data.frame() %>% 
+  rename(CSI_IT = CSI_IT_std) %>% 
+    mutate(CSI_IT = sd(agg_daily_all_es$CSI_IT)*CSI_IT + mean(agg_daily_all_es$CSI_IT)) %>% 
+  ggplot(aes(x = CSI_IT, y = Difference))+
+  geom_line()+
+  geom_ribbon(aes(ymin = CI_low, ymax = CI_high),
+              alpha = 0.1)+
+  geom_hline(aes(yintercept = 1),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 1)+
+  theme_bw(base_size = 18)+
+  theme(aspect.ratio = 1) +
+  labs(y = expression(frac(mu[IT不在],mu[IT在])), x = expression(paste("CSI with ",italic("IT")))) +
+  scale_x_continuous(breaks = seq(0,7,1))+
+  scale_y_continuous(breaks = seq(1,12,2))+
+  theme(axis.title.y = element_text(family = "Yu Gothic",
+                                    angle = 0,
+                                    vjust = 0.5,
+                                    hjust = -0.5),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"),
+        aspect.ratio = 1,
+        strip.background = element_blank(),
+        strip.text = element_text(family = "Arial",
+                                  hjust = 0),
+        title = element_text(family = "Yu Gothic",
+                             size = 12))+
+  labs(title = "発情メス")-> p_cont_agg_IT_es
+
+cont_agg_IT_an %>% 
+  data.frame() %>% 
+  rename(CSI_IT = CSI_IT_std) %>% 
+    mutate(CSI_IT = sd(agg_daily_all_an$CSI_IT)*CSI_IT + mean(agg_daily_all_an$CSI_IT)) %>% 
+  ggplot(aes(x = CSI_IT, y = Difference))+
+  geom_line()+
+  geom_ribbon(aes(ymin = CI_low, ymax = CI_high),
+              alpha = 0.1)+
+  geom_hline(aes(yintercept = 1),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 1)+
+  theme_bw(base_size = 18)+
+  theme(aspect.ratio = 1) +
+  labs(y = expression(frac(mu[IT不在],mu[IT在])), x = expression(paste("CSI with ",italic("IT")))) +
+  scale_x_continuous(breaks = seq(0,7,1))+
+  scale_y_continuous(breaks = seq(1,12,2))+
+  theme(axis.title.y = element_text(family = "Yu Gothic",
+                                    angle = 0,
+                                    vjust = 0.5,
+                                    hjust = -0.5),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"),
+        aspect.ratio = 1,
+        strip.background = element_blank(),
+        strip.text = element_text(family = "Arial",
+                                  hjust = 0),
+        title = element_text(family = "Yu Gothic",
+                             size = 12)) +
+  labs(title = "非発情メス") -> p_cont_agg_IT_an
+
+p_cont_agg_IT_esan <-  p_cont_agg_IT_an + p_cont_agg_IT_es
+
+p_cont_agg_IT_esan
+
+# ggsave("figures/p_cont_agg_IT_esan.png",p_cont_agg_IT_esan, dpi = 600, units = "mm",
+#         width = 200, height = 100)
+```
+<br/>  
+
+#### 2019~2020交尾期 + TYの有無 + ITの有無    
+続いて2019~2020交尾期のデータを用い、TYとITの有無両方を考慮したモデルを考える。  
+
+##### データの加工  
+TYとITが3時間以上確認されたか、一度も確認されていない日だけを抽出する。  
+```{r}
+agg_daily_all_bf21_es <- agg_daily_all %>% 
+  filter(TY != 2 & IT != 2) %>% 
+  filter(study_period != "m21") %>% 
+  filter(rs2 == "1") %>% 
+  mutate(logdur = log(dur/60)) %>% 
+  mutate(date = as.factor(date)) %>% 
+  drop_na(CSI_TY) %>% 
+  mutate(CSI_TY_std = standardize(CSI_TY),
+         CSI_IT_std = standardize(CSI_IT),
+         est_std = standardize(no_est),
+         male_std = standardize(no_male),
+         rank_std = standardize(rank_scaled),
+         age_std = standardize(age),
+         prop_std = standardize(prop_female),
+         focal_std = standardize(prop_focal)) 
+
+agg_daily_all_bf21_an <- agg_daily_all %>% 
+  filter(TY != 2 & IT != 2) %>% 
+  filter(study_period != "m21") %>% 
+  filter(rs2 == "0") %>% 
+  mutate(logdur = log(dur/60)) %>% 
+  mutate(date = as.factor(date)) %>% 
+  drop_na(CSI_TY) %>% 
+  mutate(CSI_TY_std = standardize(CSI_TY),
+         CSI_IT_std = standardize(CSI_IT),
+         est_std = standardize(no_est),
+         male_std = standardize(no_male),
+         rank_std = standardize(rank_scaled),
+         age_std = standardize(age),
+         prop_std = standardize(prop_female),
+         focal_std = standardize(prop_focal)) 
+```
+
+##### モデリング      
+モデルの概要は以下の通り。データは各観察日におけるそれぞれのメスのデータである。    
+
+- 応答変数: オスからの被攻撃回数  
+- 説明変数: 発情の有無、TYの有無、TYとのCSI、発情の有無×TYの有無、TYとのCSI×TYの有無、発情メス数、確認オス数、調査期間、年齢、順位  
+- オフセット項: 群れの追跡時間  
+- 分布: 負の二項分布  
+- リンク関数: log関数  
+- 事前分布: 関数にある通り弱情報分布  
+
+```{r}
+m_agg_TYIT_bf21_es <- brm(no_agg ~ TY*CSI_TY_std +  IT*CSI_IT_std +
+                         est_std + male_std + rank_std + prop_std + focal_std + 
+                         age_std + study_period + offset(logdur) +
+                          (1|femaleID) + (1|date),
+                     family = negbinomial,
+                     iter = 11000, warmup = 1000, seed = 133,
+                     prior = c(prior(student_t(4,0,5), class = "b"),
+                               prior(student_t(4,0,10), class = "Intercept"),
+                               prior(student_t(4,0,10), class = "sd"),
+                               prior(gamma(0.01,0.01), class = "shape")),
+                     control=list(adapt_delta = 0.999, max_treedepth = 20),
+                     backend = "cmdstanr",
+                     data = agg_daily_all_bf21_es,
+                     file = "model/m_agg_TYIT_bf21_es.rds")
+
+m_agg_TYIT_bf21_an <- brm(no_agg ~ TY*CSI_TY_std + IT*CSI_IT_std +
+                         est_std + male_std + rank_std + prop_std + focal_std + 
+                         age_std + study_period + offset(logdur) +
+                          (1|femaleID) + (1|date),
+                     family = "negbinomial",
+                     iter = 11000, warmup = 1000, seed = 13,
+                     prior = c(prior(student_t(4,0,5), class = "b"),
+                               prior(student_t(4,0,10), class = "Intercept"),
+                               prior(student_t(4,0,10), class = "sd"),
+                               prior(gamma(0.01,0.01), class = "shape")),
+                     control=list(adapt_delta = 0.99, max_treedepth = 20),
+                     backend = "cmdstanr",
+                     data = agg_daily_all_bf21_an,
+                     file = "model/m_agg_TYIT_bf21_an.rds")
+```
+
+###### モデルのチェック  
+DHARMaパッケージ[@Hartig2022]とDHARMa.helperパッケージ[@Francisco2023]でモデルの前提が満たされているかを確認する。どちらのモデルも特に問題はないよう。 
+```{r, fig.height = 4}
+dh_check_brms(m_agg_TYIT_bf21_es, quantreg = TRUE)
+dh_check_brms(m_agg_TYIT_bf21_an, quantreg = TRUE)
+```
+<br/>  
+
+bayesplotパッケージ[@Gabry2022]の`pp_check`関数で、事後分布からの予測分布と実測値の分布を比較しても大きな乖離はない。   
+```{r, fig.height = 4.5}
+## 全個体への攻撃  
+pp_check(m_agg_TYIT_bf21_es, ndraws = 100)+
+  theme_bw()+
+  theme(aspect.ratio = 0.9)
+
+pp_check(m_agg_TYIT_bf21_an, ndraws = 100)+
+  theme_bw()+
+  theme(aspect.ratio = 0.9)
+```  
+<br/>  
+
+多重共線性のチェックも行ったが、VIFに問題はない。  
+```{r}
+check_collinearity(m_agg_TYIT_bf21_es)
+check_collinearity(m_agg_TYIT_bf21_an)
+```
+<br/>  
+
+###### 結果の確認  
+結果は以下の通り。太字になっている変数は95%確信区間が0をまたいでおらず、有意な影響があるといえる。まずは発情メスについては、*IT*の在否のみが有意な影響を持っていた。      
+```{r, echo = FALSE}
+model_parameters(m_agg_TYIT_bf21_es) %>% 
+  data.frame() %>% 
+  select(1,3,5,6,8,9) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
+  select(c(1,2,7,5,6), everything()) %>% 
+  select(-CI_low, -CI_high) %>% 
+  filter(Parameter != "shape") %>% 
+  mutate(Parameter = fct_relevel(Parameter,
+                                  "b_Intercept","b_TY","b_IT",
+                                  "b_CSI_TY_std","b_CSI_IT_std",
+                                  "b_TY:CSI_TY_std",
+                                  "b_IT:CSI_IT_std",
+                                  "b_male_std","b_est_std", 
+                                  "b_prop_std","b_focal_std",
+                                  "b_rank_std", "b_age_std", 
+                                  "b_study_periodm20")) %>% 
+  arrange(Parameter) %>% 
+  mutate(Parameter = str_replace_all(Parameter, c("b_Intercept"="切片",
+                                     "b_study_periodm20" = "調査期間\n(m20 vs m19)",
+                                     "b_study_periodm21" = "調査期間\n(m21 vs m19)",
+                                     "^b_TY$" = "TYの在否 \n (在 vs 否)",
+                                     "^b_IT$" = "ITの在否 \n (在 vs 否)",
+                                     "^b_rs2$" = "メスの発情 \n(有 vs 無)",
+                                    "b_rank_std" = "順位",
+                                     "b_age_std" = "年齢",
+                                     "b_male_std" = "確認オス数",
+                                     "b_est_std" = "発情メス数",
+                                     "b_prop_std" = "確認メス割合",
+                                     "b_focal_std" = "個体追跡時間割合", 
+                                     "b_CSI_TY_std" = "TYとの親密度(CSI)",
+                                     "b_TY:rs2" = "TYの在否\n ×メスの発情の有無",
+                                     "b_TY:CSI_TY_std" = "TYの在否\n ×TYとの親密度(CSI)",
+                                     "b_CSI_IT_std" = "ITとの親密度(CSI)",
+                                     "b_rs2:IT" = "ITの在否\n ×メスの発情の有無",
+                                     "b_IT:CSI_IT_std" = "ITの在否\n ×ITとの親密度(CSI)")))%>% 
+  rename("Explanatory variables"="Parameter") %>% 
+  flextable() %>% 
+  colformat_double(digits=2) %>% 
+  set_table_properties(layout="autofit",width = 0.9) %>% 
+  autofit(add_w = 0.3) %>% 
+  font(part = "header", fontname = "Segoe UI") %>% 
+  font(part = "body", j=2:5, fontname = "Segoe UI") %>% 
+  font(part = "body", j=1, fontname = "Yu Gothic") %>% 
+  bold(j=c(1,2,3),i = c(3),bold = TRUE) %>% 
+  theme_zebra() %>% 
+  align(j=2:5,part = "all",align = "center") -> table_agg_TYIT_bf21_es
+
+table_agg_TYIT_bf21_es
+
+# save_as_image(table_agg_TYIT_bf21_es, "tables/table_agg_TYIT_bf21_es.tiff",
+#               res = 600)
+```
+<br/>  
+
+続いて、非発情メスについては以下のとおりである。  
+```{r, echo = FALSE}
+model_parameters(m_agg_TYIT_bf21_an) %>% 
+  data.frame() %>% 
+  select(1,3,5,6,8,9) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
+  select(c(1,2,7,5,6), everything()) %>% 
+  select(-CI_low, -CI_high) %>% 
+  filter(Parameter != "shape") %>% 
+  mutate(Parameter = fct_relevel(Parameter,
+                                  "b_Intercept","b_TY","b_IT",
+                                  "b_CSI_TY_std","b_CSI_IT_std",
+                                  "b_TY:CSI_TY_std",
+                                  "b_IT:CSI_IT_std",
+                                  "b_male_std","b_est_std", 
+                                  "b_prop_std","b_focal_std",
+                                  "b_rank_std", "b_age_std", 
+                                  "b_study_periodm20")) %>% 
+  arrange(Parameter) %>% 
+  mutate(Parameter = str_replace_all(Parameter, c("b_Intercept"="切片",
+                                     "b_study_periodm20" = "調査期間\n(m20 vs m19)",
+                                     "b_study_periodm21" = "調査期間\n(m21 vs m19)",
+                                     "^b_TY$" = "TYの在否 \n (在 vs 否)",
+                                     "^b_IT$" = "ITの在否 \n (在 vs 否)",
+                                     "^b_rs2$" = "メスの発情 \n(有 vs 無)",
+                                     "b_rank_std" = "順位",
+                                     "b_age_std" = "年齢",
+                                     "b_male_std" = "確認オス数",
+                                     "b_est_std" = "発情メス数",
+                                     "b_prop_std" = "確認メス割合",
+                                     "b_focal_std" = "個体追跡時間割合", 
+                                     "b_CSI_TY_std" = "TYとの親密度(CSI)",
+                                     "b_TY:rs2" = "TYの在否\n ×メスの発情の有無",
+                                     "b_TY:CSI_TY_std" = "TYの在否\n ×TYとの親密度(CSI)",
+                                     "b_CSI_IT_std" = "ITとの親密度(CSI)",
+                                     "b_rs2:IT" = "ITの在否\n ×メスの発情の有無",
+                                     "b_IT:CSI_IT_std" = "ITの在否\n ×ITとの親密度(CSI)")))%>% 
+  rename("Explanatory variables"="Parameter") %>% 
+  flextable() %>% 
+  colformat_double(digits=2) %>% 
+  set_table_properties(layout="autofit",width = 0.9) %>% 
+  autofit(add_w = 0.3) %>% 
+  font(part = "header", fontname = "Segoe UI") %>% 
+  font(part = "body", j=2:5, fontname = "Segoe UI") %>% 
+  font(part = "body", j=1, fontname = "Yu Gothic") %>% 
+  bold(j=c(1,2,3),i = c(3,8, 10,11, 14),bold = TRUE) %>% 
+  theme_zebra() %>% 
+  align(j=2:5,part = "all",align = "center") -> table_agg_TYIT_bf21_an
+
+table_agg_TYIT_bf21_an
+
+# save_as_image(table_agg_TYIT_bf21_an, "tables/table_agg_TYIT_bf21_an.tiff",
+#               res = 600)
+```
+<br/>  
+
+
+続いて、交互作用がある変数について検討する。  
+
+TYとのCSIと発情状態によってTYの有無による被攻撃頻度の違いがどのように変わるかを示したのが以下である。まず発情メスについては、いずれのCSIでも有意な差はないことが分かる。  
+
+```{r}
+estimate_contrasts(m_agg_TYIT_bf21_es,
+                   contrast = "TY = c(0,1)",
+                   at = c("CSI_TY_std = seq(-1,1.5, 0.2)"),
+                   transform = "none",
+                   offset = log(1)) %>% 
+  data.frame() %>% 
+  select(-.offset.) %>% 
+  rename(CSI_TY = CSI_TY_std) %>% 
+  mutate(CSI_TY = sd(agg_daily_all_es$CSI_TY)*CSI_TY + mean(agg_daily_all_es$CSI_TY)) %>% 
+  select(1:7) %>% 
+  mutate(across(where(is.numeric), ~round(.,2)))
+```
+<br/>  
+
+非発情メスについても同様である。   
+```{r}
+estimate_contrasts(m_agg_TYIT_bf21_an,
+                   contrast = "TY = c(0,1)",
+                   at = c("CSI_TY_std = seq(-1,1.5, 0.2)"),
+                   transform = "none",
+                   offset = log(1)) %>% 
+  data.frame() %>% 
+  select(-.offset.) %>% 
+  rename(CSI_TY = CSI_TY_std) %>% 
+  mutate(CSI_TY = sd(agg_daily_all_an$CSI_TY)*CSI_TY + mean(agg_daily_all_an$CSI_TY)) %>% 
+  select(1:7) %>% 
+  mutate(across(where(is.numeric), ~round(.,2)))
+```
+<br/>  
+
+同様の分析をITについても行う。まず、発情メスについてはCSIが3.5くらいまではITがいない日の方が攻撃を受けやすい。    
+```{r}
+estimate_contrasts(m_agg_TYIT_bf21_es,
+                   contrast = "IT = c(0,1)",
+                   at = c("CSI_IT_std = seq(-1,3, 0.2)"),
+                   transform = "none",
+                   offset = log(1)) %>% 
+  data.frame() %>% 
+  select(-.offset.) %>% 
+  rename(CSI_IT = CSI_IT_std) %>% 
+  mutate(CSI_IT = sd(agg_daily_all_es$CSI_IT)*CSI_IT + mean(agg_daily_all_es$CSI_IT)) %>% 
+  select(1:7) %>% 
+  mutate(across(where(is.numeric), ~round(.,2)))
+```
+<br/>  
+
+非発情メスについてはCSIに関わらず同様の傾向があるようだ。  
+```{r}
+estimate_contrasts(m_agg_TYIT_bf21_an,
+                   contrast = "IT = c(0,1)",
+                   at = c("CSI_IT_std = seq(-1,1.5, 0.2)"),
+                   transform = "none",
+                   offset = log(1)) %>% 
+  data.frame() %>% 
+  select(-.offset.) %>% 
+  rename(CSI_IT = CSI_IT_std) %>% 
+  mutate(CSI_IT = sd(agg_daily_all_es$CSI_IT)*CSI_IT + mean(agg_daily_all_es$CSI_IT)) %>% 
+  select(1:7) %>% 
+  mutate(across(where(is.numeric), ~round(.,2)))
+```
+<br/>  
+
+###### 結果の図示  
+交互作用項の結果について図示する。  
+```{r}
+# cont_agg_TY_bf21_es <- estimate_contrasts(m_agg_TYIT_bf21_es,
+#                    contrast = "TY = c(0,1)",
+#                    at = c("CSI_TY_std"),
+#                    transform = "none",
+#                    offset = log(1),
+#                    length = 100)
+
+# saveRDS(cont_agg_TY_bf21_es, "model/cont_agg_TY_bf21_es.rds")
+
+cont_agg_TY_bf21_es <- readRDS("model/cont_agg_TY_bf21_es.rds")
+
+# cont_agg_TY_bf21_an <- estimate_contrasts(m_agg_TYIT_bf21_an,
+#                    contrast = "TY = c(0,1)",
+#                    at = c("CSI_TY_std"),
+#                    transform = "none",
+#                    offset = log(1),
+#                    length = 100)
+# 
+# saveRDS(cont_agg_TY_bf21_an, "model/cont_agg_TY_bf21_an.rds")
+
+cont_agg_TY_bf21_an <- readRDS("model/cont_agg_TY_bf21_an.rds")
+
+cont_agg_TY_bf21_es %>% 
+  data.frame() %>% 
+  rename(CSI_TY = CSI_TY_std) %>% 
+    mutate(CSI_TY = sd(agg_daily_all_bf21_es$CSI_TY)*CSI_TY +
+             mean(agg_daily_all_bf21_es$CSI_TY)) %>% 
+  ggplot(aes(x = CSI_TY, y = Difference))+
+  geom_line()+
+  geom_ribbon(aes(ymin = CI_low, ymax = CI_high),
+              alpha = 0.1)+
+  geom_hline(aes(yintercept = 0),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 1)+
+  theme_bw(base_size = 18)+
+  theme(aspect.ratio = 1) +
+  labs(y = expression(frac(mu[TY不在],mu[TY在])), x = expression(paste("CSI with ",italic("TY")))) +
+  scale_x_continuous(breaks = seq(0,3.5,1))+
+  scale_y_continuous(breaks = seq(-10,50,2))+
+  theme(axis.title.y = element_text(family = "Yu Gothic",
+                                    angle = 0,
+                                    vjust = 0.5,
+                                    hjust = -0.5),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"),
+        aspect.ratio = 1,
+        strip.background = element_blank(),
+        strip.text = element_text(family = "Arial",
+                                  hjust = 0),
+        title = element_text(family = "Yu Gothic",
+                             size = 12))+
+        labs(title = "発情メス") -> p_cont_agg_TY_bf21_es
+
+cont_agg_TY_bf21_an %>% 
+  data.frame() %>% 
+  rename(CSI_TY = CSI_TY_std) %>% 
+    mutate(CSI_TY = sd(agg_daily_all_bf21_an$CSI_TY)*CSI_TY +
+             mean(agg_daily_all_bf21_an$CSI_TY)) %>% 
+  ggplot(aes(x = CSI_TY, y = Difference))+
+  geom_line()+
+  geom_ribbon(aes(ymin = CI_low, ymax = CI_high),
+              alpha = 0.1)+
+  geom_hline(aes(yintercept = 0),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 1)+
+  theme_bw(base_size = 18)+
+  theme(aspect.ratio = 1) +
+  labs(y = expression(frac(mu[TY不在],mu[TY在])), x = expression(paste("CSI with ",italic("TY")))) +
+  scale_x_continuous(breaks = seq(0,3.5,1))+
+  scale_y_continuous(breaks = seq(-0,9,1))+
+  theme(axis.title.y = element_text(family = "Yu Gothic",
+                                    angle = 0,
+                                    vjust = 0.5,
+                                    hjust = -0.5),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"),
+        aspect.ratio = 1,
+        strip.background = element_blank(),
+        strip.text = element_text(family = "Arial",
+                                  hjust = 0),
+        title = element_text(family = "Yu Gothic",
+                             size = 12))+
+   labs(title = "非発情メス") -> p_cont_agg_TY_bf21_an
+
+p_cont_agg_TY_bf21_esan <-  p_cont_agg_TY_bf21_an + p_cont_agg_TY_bf21_es
+
+p_cont_agg_TY_bf21_esan
+
+# ggsave("figures/p_cont_agg_TY_bf21_esan.png",p_cont_agg_TY_bf21_esan,
+#        dpi = 600, units = "mm",
+#         width = 200, height = 100)
+```
+<br/>  
+
+ITについても同様に図示する。  
+```{r}
+# cont_agg_IT_bf21_es <- estimate_contrasts(m_agg_TYIT_bf21_es,
+#                    contrast = "IT = c(0,1)",
+#                    at = c("CSI_IT_std"),
+#                    transform = "response",
+#                    offset = log(1),
+#                    length = 100)
+# 
+# saveRDS(cont_agg_IT_bf21_es, "model/cont_agg_IT_bf21_es.rds")
+
+cont_agg_IT_bf21_es <- readRDS("model/cont_agg_IT_bf21_es.rds")
+
+# cont_agg_IT_bf21_an <- estimate_contrasts(m_agg_TYIT_bf21_an,
+#                    contrast = "IT = c(0,1)",
+#                    at = c("CSI_IT_std"),
+#                    transform = "response",
+#                    offset = log(1),
+#                    length = 100)
+# 
+# saveRDS(cont_agg_IT_bf21_an, "model/cont_agg_IT_bf21_an.rds")
+
+cont_agg_IT_bf21_an <- readRDS("model/cont_agg_IT_bf21_an.rds")
+
+cont_agg_IT_bf21_es %>% 
+  data.frame() %>% 
+  rename(CSI_IT = CSI_IT_std) %>% 
+    mutate(CSI_IT = sd(agg_daily_all_bf21_es$CSI_IT)*CSI_IT +
+             mean(agg_daily_all_bf21_es$CSI_IT)) %>% 
+  ggplot(aes(x = CSI_IT, y = Difference))+
+  geom_line()+
+  geom_ribbon(aes(ymin = CI_low, ymax = CI_high),
+              alpha = 0.1)+
+  geom_hline(aes(yintercept = 1),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 1)+
+  theme_bw(base_size = 18)+
+  theme(aspect.ratio = 1) +
+  labs(y = expression(frac(mu[IT不在],mu[IT在])), x = expression(paste("CSI with ",italic("IT")))) +
+  scale_x_continuous(breaks = seq(0,7,1))+
+  scale_y_continuous(breaks = seq(1,12,2))+
+  theme(axis.title.y = element_text(family = "Yu Gothic",
+                                    angle = 0,
+                                    vjust = 0.5,
+                                    hjust = -0.5),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"),
+        aspect.ratio = 1,
+        strip.background = element_blank(),
+        strip.text = element_text(family = "Arial",
+                                  hjust = 0),
+        title = element_text(family = "Yu Gothic",
+                             size = 12))+
+  labs(title = "発情メス")-> p_cont_agg_IT_bf21_es
+
+cont_agg_IT_bf21_an %>% 
+  data.frame() %>% 
+  rename(CSI_IT = CSI_IT_std) %>% 
+    mutate(CSI_IT = sd(agg_daily_all_an$CSI_IT)*CSI_IT + mean(agg_daily_all_an$CSI_IT)) %>% 
+  ggplot(aes(x = CSI_IT, y = Difference))+
+  geom_line()+
+  geom_ribbon(aes(ymin = CI_low, ymax = CI_high),
+              alpha = 0.1)+
+  geom_hline(aes(yintercept = 1),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 1)+
+  theme_bw(base_size = 18)+
+  theme(aspect.ratio = 1) +
+  labs(y = expression(frac(mu[IT不在],mu[IT在])), x = expression(paste("CSI with ",italic("IT")))) +
+  scale_x_continuous(breaks = seq(0,7,1))+
+  scale_y_continuous(breaks = seq(1,12,2))+
+  theme(axis.title.y = element_text(family = "Yu Gothic",
+                                    angle = 0,
+                                    vjust = 0.5,
+                                    hjust = -0.5),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"),
+        aspect.ratio = 1,
+        strip.background = element_blank(),
+        strip.text = element_text(family = "Arial",
+                                  hjust = 0),
+        title = element_text(family = "Yu Gothic",
+                             size = 12)) +
+  labs(title = "非発情メス") -> p_cont_agg_IT_bf21_an
+
+p_cont_agg_IT_bf21_esan <-  p_cont_agg_IT_bf21_an + p_cont_agg_IT_bf21_es
+
+p_cont_agg_IT_bf21_esan
+
+# ggsave("figures/p_cont_agg_IT_bf21_esan.png",p_cont_agg_IT_bf21_esan,
+#         dpi = 600, units = "mm",
+#         width = 200, height = 100)
+```
+<br/>  

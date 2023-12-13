@@ -1,0 +1,463 @@
+# メスが群れに戻るときのメカニズム  
+本章では、メスが群れに戻るのはどのようなときなのかに関する分析を行う。以下では、メスの毎日の確認状況のデータからメスが群れに戻る要因を探る(図\@ref(fig:female-in))。
+
+```{r female-in, out.width = "40%", fig.align = "center", echo = FALSE, fig.cap = "メスの確認状況に影響する要因"}
+knitr::include_graphics("image/female_in_analysis.png")
+```
+<br/>    
+
+## データの加工  
+### オスの出入り情報  
+まず、オスの出入り情報について算出する。第\@ref(s10-2-1-3)でやったように4通りの場合を考える。  
+```{r}
+TYIT_presence_pre %>% 
+  mutate(TY_state4 = ifelse(TY_pre == 1 & TY == 1, "TY_stay",
+                           ifelse(TY_pre == 1 & TY == 0, "TY_out",
+                                  ifelse(TY_pre == 0 & TY == 1, "TY_return",
+                                         ifelse(TY_pre == 0 & TY == 0, "TY_absent", NA))))) %>% 
+  mutate(TY_state4 = fct_relevel(TY_state4, "TY_stay", "TY_absent","TY_return")) %>%
+  mutate(IT_state4 = ifelse(IT_pre == 1 & IT == 1, "IT_stay",
+                           ifelse(IT_pre == 1 & IT == 0, "IT_out",
+                                  ifelse(IT_pre == 0 & IT == 0, "IT_absent",
+                                         ifelse(IT_pre == 0 & IT == 1, "IT_return", NA))))) %>% 
+  mutate(IT_state4 = fct_relevel(IT_state4, "IT_stay", "IT_absent","IT_return")) %>% 
+  mutate(TY_state = ifelse(TY_pre == 0 & TY == 1, "TY_return",
+                           ifelse(TY_pre == 0 & TY == 0, "TY_absent",
+                                  ifelse(TY_pre == 1, "TY_present", NA)))) %>% 
+  mutate(TY_state = fct_relevel(TY_state, "TY_present", "TY_absent","TY_return")) %>%
+  mutate(IT_state = ifelse(IT_pre == 0 & IT == 1, "IT_return",
+                           ifelse(IT_pre == 0 & IT == 0, "IT_absent",
+                                  ifelse(IT_pre == 1, "IT_present", NA)))) %>% 
+  mutate(IT_state = fct_relevel(IT_state, "IT_present", "IT_absent","IT_return")) %>% 
+  mutate(TY_return = ifelse(TY_state4 == "TY_return", 1, 0),
+         IT_return = ifelse(IT_state4 == "IT_return", 1, 0)) %>% 
+  replace_na(list(IT_state4 = "IT_absent",
+                  IT_state = "IT_absent",
+                  IT_return = 0)) -> male_state
+```
+
+### メスが群れに戻った日の同定   
+続いて、各メスが群れに戻ったか否かを記したデータフレームを作成する。  
+```{r}
+## 発情状態とアカンボウの有無を結合  
+female_pre_long %>% 
+  mutate(date_pre = date - 1) %>% 
+  left_join(female_pre_long %>% 
+              select(date, femaleID, presence) %>% 
+              rename(presence_pre = presence),
+            by = c("date_pre" = "date", "femaleID")) %>% 
+  mutate(female_in = ifelse(is.na(presence_pre), NA,
+                         ifelse(presence_pre == 0 & presence == 1,1,0))) %>% 
+  ## 前日にメスがいない日のみを抽出
+  filter(presence_pre == 0) %>% 
+  ## オスの出入りがある期間のみを抽出  
+  filter(study_period %in% c("m19", "m20", "m21", "nm20", "nm21")) %>% 
+  left_join(female_all %>% 
+              select(date,femaleID, rs2), by = c("date","femaleID")) -> female_in
+```
+
+### 血縁個体が群れに戻ったか否か   
+続いて、各観察日に血縁個体が群れに戻ったか否かを算出する。  
+
+```{r}
+kin <- read_csv("../Data/data/others/kin.csv")
+
+female_in %>% 
+  select(groupID, date, study_period, femaleID, female_in, presence_pre) %>% 
+  ## 他のメスのデータを結合  
+  left_join(att %>% 
+              filter(age >= 6) %>% 
+              select(study_period, femaleID) %>% 
+              rename(femaleID2 = femaleID),
+            by = "study_period") %>% 
+  filter(femaleID != femaleID2) %>% 
+  ## 他のメスが群れを離れたか否かの列を作成
+  left_join(female_in %>% 
+              select(groupID, date, femaleID, female_in) %>% 
+              rename(female_in2 = female_in,
+                     femaleID2 = femaleID),
+            by = c("groupID","date", "femaleID2")) %>% 
+  replace_na(list(female_in2 = 0)) %>%
+  ## 相手のメスとの血縁度を結合  
+  left_join(kin, by = c("femaleID", "femaleID2")) %>% 
+  filter(female_in2 == 1) %>% 
+  ## それぞれの日で離れたメスの最大の血縁度を算出
+  group_by(groupID, date, femaleID) %>% 
+  summarise(max_kin = max(kin),
+            ## 血縁カテゴリーも作成する  
+            kin_cat = as.character(max(kin))) %>% 
+  mutate(kin_01 = ifelse(max_kin > 0, 1,0)) -> kin_female_in
+```
+
+### 全データの結合   
+最後に、全データを結合する。  
+```{r}
+female_in %>% 
+  left_join(no_female_over0.5 %>% 
+              select(date, prop_female)  %>% 
+              rename(date_pre = date),
+            by = c("date_pre")) %>% 
+  left_join(male_state %>% select(date, groupID, TY_state4, IT_state4, TY_state, IT_state, TY_return, IT_return),
+            by = c("date", "groupID")) %>% 
+  left_join(CSI_TY %>% 
+              rename(femaleID = subject) %>% 
+              select(femaleID, CSI_TY),
+            by = "femaleID") %>% 
+  left_join(CSI_IT %>% 
+              rename(femaleID = subject) %>% 
+              select(femaleID, CSI_IT),
+            by = "femaleID") %>% 
+  left_join(no_female_over0.5_b %>% 
+              select(date, TY, IT) %>% 
+              mutate(date = date + 1) %>% 
+              rename(TY_pre = TY,
+                     IT_pre = IT)) %>% 
+  left_join(kin_female_in,
+            by = c("groupID","date", "femaleID")) %>% 
+  left_join(sum_ntm, by = c("date_pre" = "date")) %>% 
+  left_join(agg_rate_all %>% 
+              select(date, rate_agg_all) %>% 
+              mutate(date = date + 1) %>% 
+              rename(rate_agg_all_pre = rate_agg_all), by = c("date")) %>% 
+  replace_na(list(max_kin = 0,
+                  kin_cat = "no")) %>% 
+  mutate(kin_01 = ifelse(max_kin > 0, 1,0)) %>% 
+  mutate(kin_cat = as.factor(kin_cat)) %>% 
+  group_by(study_period) %>% 
+  ## 相対順位を算出  
+  mutate(max_rank = max(rank)) %>% 
+  ungroup() %>% 
+  mutate(rank_scaled = rank/max_rank)  -> female_in_final
+```
+
+## 分析(モデリング)  
+以下では、交尾期と非交尾期に分けて分析を行う。分析に含まれるのは、6歳以上でかつTY、ITとのCSIが算出できる個体(= 2019年時点で6歳以上の個体)である。
+
+### 交尾期  
+#### データの加工  
+まず、データの加工を行う。データ数が少ないのと、区別が難しいので発情/非発情は分けない。    
+```{r}
+female_in_m <- female_in_final %>% 
+  filter(!str_detect(study_period, "nm")) %>% 
+  drop_na(CSI_TY)  %>% 
+  mutate(CSI_TY_std = standardize(CSI_TY),
+         CSI_IT_std = standardize(CSI_IT),
+         ntm_std = standardize(no_ntm),
+         prop_std = standardize(prop_female),
+         rank_std = standardize(rank_scaled),
+         age_std = standardize(age),
+         rate_agg_all_std = standardize(rate_agg_all_pre)) %>% 
+  mutate(N = 1:n())
+```
+
+#### モデリング1        
+まず、*TY*と*IT*が群れに戻ったか否かという2水準の変数を用いてモデリングを行う。モデルの詳細は以下のとおりである。なお、連続変数はすべて標準化している。    
+
+- 応答変数: メスが群れに戻ったか否か($female_in$)  
+- 説明変数: TYが群れに戻ったか($TY_return$)、TYとの親密度($CSI_TY$)、これらの交互作用、ITが群れに戻ったか($IT_return$)、ITとの親密度($CSI_IT$)、これらの交互作用、年齢($age_std$)、順位$rank_std$、前日の確認メス割合$prop_std$、前日の群れ外オス数$ntm_std$、前日のオスの攻撃頻度($rate_agg_std$)   
+- ランダム切片: メスID($femaleID$)、日付($date$)  
+
+モデルは以下のように実行する。  
+```{r}
+### ITとCSIの交互作用はVIFが高いので除く      
+m_female_in_m <-  brm(data = female_in_m %>% 
+                               mutate(date = as.factor(date)),
+                        female_in ~ TY_return*CSI_TY_std + IT_return*CSI_IT_std + kin_01 +
+                        rank_std + age_std + ntm_std + prop_std + rate_agg_all_std +
+                         study_period + (1|femaleID) + (1|date) + (1|N),
+                family = "bernoulli",
+                prior = c(prior(student_t(4,0,10),class = Intercept),
+                prior(student_t(4,0,10), class = b),
+                prior(student_t(4,0,5), class = sd)),
+  iter = 11000, warmup = 1000, seed = 112,
+  control=list(adapt_delta = 0.999, max_treedepth = 15),
+  backend = "cmdstanr",
+  file = "model/m_female_in_m")
+
+## 2021年を除く  
+female_in_m_bf21 <- female_in_m %>% 
+  filter(study_period != "m21") %>% 
+   mutate(CSI_TY_std = standardize(CSI_TY),
+         CSI_IT_std = standardize(CSI_IT),
+         ntm_std = standardize(no_ntm),
+         prop_std = standardize(prop_female),
+         rank_std = standardize(rank_scaled),
+         age_std = standardize(age),
+         rate_agg_all_std = standardize(rate_agg_all_pre))
+
+## TYの動向とCSIの交互作用はVIFが高いので除外  
+m_female_in_m_bf21 <-  brm(data = female_in_m_bf21 %>% 
+                               mutate(date = as.factor(date)),
+                        female_in ~ TY_return*CSI_TY_std + IT_return*CSI_IT_std + kin_01 +
+                        rank_std + age_std + ntm_std + prop_std + rate_agg_all_std +
+                         study_period + (1|femaleID) + (1|date) + (1|N),
+                family = "bernoulli",
+                prior = c(prior(student_t(4,0,10),class = Intercept),
+                prior(student_t(4,0,10), class = b),
+                prior(student_t(4,0,5), class = sd)),
+  iter = 11000, warmup = 1000, seed = 124,
+  control=list(adapt_delta = 0.999, max_treedepth = 15),
+  backend = "cmdstanr",
+  file = "model/m_female_in_m_bf21")
+```
+
+##### モデルチェック  
+まず、DHARMaパッケージ[@Hartig2022]とDHARMa.helperパッケージ[@Francisco2023]でモデルの前提が満たされているかを確認する。特に問題はないよう。   
+```{r, fig.height = 4}
+## 全個体への攻撃  
+dh_female_in_m <- dh_check_brms(m_female_in_m, quantreg = TRUE)
+```
+<br/>  
+
+bayesplotパッケージ[@Gabry2022]の`pp_check`関数で、事後分布からの予測分布と実測値の分布を比較しても大きな乖離はない。   
+```{r, fig.height = 4.5}
+## 全個体への攻撃  
+pp_check(m_female_in_m, ndraws = 100)+
+  theme_bw()+
+  theme(aspect.ratio = 0.9)
+```  
+<br/>  
+
+多重共線性のチェックもお個あったが、VIFに問題はない。  
+```{r}
+check_collinearity(m_female_in_m)
+```
+<br/>  
+
+最後に残差の時系列相関のチェックを行う。残差の自己相関をプロットすると、明確なパターンは見られなかった。また、Ljung-Box検定で3時点前までの残差との自己相関を検定したところ、有意な自己相関を示したのはNreだけだった。     
+```{r, fig.dim = c(10,10)}
+res_female_in_m <- female_in_m %>% 
+  mutate(resid = dh_female_in_m$scaledResiduals) %>% 
+  mutate(date = as_date(date)) %>% 
+  group_by(femaleID) %>% 
+  complete(date = seq.Date(min(date), max(date), by = "1 day")) %>% 
+  ungroup()
+
+females <- unique(female_in_m$femaleID)
+acf_female_in_m <- NULL
+
+for(i in seq_along(females)){
+  data <- res_female_in_m %>% 
+    filter(femaleID == females[i])
+  
+  out.acf <- acf(data$resid,
+                 lag.max = 5,
+                 na.action = na.pass,
+                 plot = F)
+  
+  box_test <- Box.test(data$resid, type = "Ljung-Box", lag = 3)
+  
+  out.df <- data.frame(Timelag = out.acf$lag,
+                       Acf = out.acf$acf,
+                       femaleID = females[i],
+                       p = box_test$p.value)
+  
+  acf_female_in_m <- bind_rows(acf_female_in_m, out.df)
+}
+
+acf_female_in_m %>% 
+  mutate(p = str_c("p = ",round(p,2))) %>% 
+  ggplot(aes(x = Timelag,
+             y = 0))+
+  geom_segment(aes(xend = Timelag,
+                   yend = Acf))+
+  geom_text(aes(x = 4, y = 0.8,
+                label = p),
+            size = 3.5,
+            family = "Arial")+
+  theme_bw()+
+  theme(aspect.ratio = 1)+
+  facet_rep_wrap(~femaleID,
+                 repeat.tick.labels = TRUE)
+```
+<br/>  
+
+##### 結果の確認   
+結果は以下の通り。
+```{r, echo = FALSE}
+model_parameters(m_female_in_m) %>% 
+  data.frame() %>% 
+  select(1,2,4,5,7,8) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>%
+  select(c(1,2,7), everything()) %>% 
+  select(-CI_low, -CI_high) %>% 
+  mutate(Parameter = fct_relevel(Parameter, "b_Intercept","b_TY_return","b_CSI_TY_std",
+                                  "b_TY_return:CSI_TY_std",
+                                  "b_IT_return","b_CSI_IT_std",
+                                  "b_IT_return:CSI_IT_std",
+                                  "b_rate_agg_all_std", "b_ntm_std",
+                                  "b_kin_01", 
+                                  "b_rank_std", "b_age_std",
+                                  "b_prop_std",
+                                  "b_study_periodm20","b_study_periodm21")) %>% 
+  arrange(Parameter) %>% 
+  mutate(Parameter = str_replace_all(Parameter, c("b_Intercept"="切片",
+                                     "b_study_periodm20" = "調査期間(m20 vs m19)",
+                                     "b_study_periodm21" = "調査期間(m21 vs m19)",
+                                      "^b_TY_stateTY_return$"="TY(return vs present)",
+                                     "^b_TY_return$"="TYが戻ったか(vs  否)",
+                                     "^b_IT_return$"="ITが戻ったか(vs  否)",
+                                     "b_rank_std" = "順位",
+                                     "b_age_std" = "年齢",
+                                     "b_prop_std" = "前日確認したメスの割合",
+                                     "b_ntm_std" = "前日の群れ外オス数",
+                                     "b_kin_01" = "血縁のメスが群れに戻ったか\n(vs 否)",   
+                                     "^b_rate_agg_all_std$" = "前日のオスからの攻撃頻度",
+                                     "b_CSI_TY_std" = "TYとの親密度(CSI)",
+                                     "b_CSI_IT_std" = "ITとの親密度(CSI)",
+                                     "b_TY_return:CSI_TY_std" =
+                                       "TYが戻ったか(vs 否) \n ×TYとの親密度",
+                                     "b_IT_return:CSI_IT_std" =
+                                       "ITが戻ったか(vs 否) \n ×ITとの親密度"))) %>% 
+  rename("Explanatory variables"="Parameter") %>% 
+  flextable() %>% 
+  colformat_double(digits=2) %>% 
+  set_table_properties(layout="autofit",width = 1) %>% 
+  autofit(add_w = 0.2) %>% 
+  font(part = "header", fontname = "Segoe UI") %>% 
+  font(part = "body", j=2:5, fontname = "Segoe UI") %>% 
+  font(part = "body", j=1, fontname = "Yu Gothic") %>% 
+  bold(j=c(1,2,3),i = c(4, 10:13),bold = TRUE) %>% 
+  theme_zebra() %>% 
+  align(j=2:5,part = "all",align = "center") -> table_female_in_m
+
+table_female_in_m
+
+# save_as_image(table_female_in_m,
+#               "tables/table_female_in_m.tiff",
+#               res = 600)
+```
+<br/>  
+
+##### 結果の図示  
+###### TYの動向・ CSIとメスに戻る確率の関連  
+まずは、`estimate_contrasts`関数を用いて、*TY*とのCSIに応じてオッズ比の対数をとったものがどのように変わるかを図示する。*TY*と親密度が高いメスは同じ日に群れに戻る確率が高いことが分かる。    
+
+```{r, fig.dim = c(12,5)}
+cont_female_in_m <- estimate_contrasts(m_female_in_m,
+                                       contrast = "TY_return = c(0,1)",
+                                       at = "CSI_TY_std",
+                                       length = 50)
+
+cont_female_in_m %>% 
+  rename(Level1 = Level2, Level2 = Level1) %>% 
+  mutate(Difference = -Difference) %>% 
+  data.frame() %>% 
+  rename(CSI_TY = CSI_TY_std) %>% 
+  mutate(CSI_TY = sd(female_in_m$CSI_TY)*CSI_TY + mean(female_in_m$CSI_TY)) %>% 
+  ggplot(aes(x = CSI_TY, y = Difference)) +
+  geom_hline(aes(yintercept = 0),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 1)+
+  geom_line()+
+  geom_ribbon(aes(ymin = -CI_low, ymax = -CI_high),
+              alpha = 0.2)+
+  theme_bw(base_size = 18)+
+  theme(aspect.ratio = 1) +
+  labs(y = "Log odds ratio", x = expression(paste("CSI with ",italic("TY")))) +
+  scale_x_continuous(breaks = seq(0,3.5,0.5))+
+  theme(axis.title.y = element_text(family = "Arial"),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial",
+                                   size = 12),
+        axis.text.y = element_text(family = "Arial"),
+        aspect.ratio = 1,
+        strip.background = element_blank(),
+        strip.text = element_text(hjust = 0))+
+  scale_y_continuous(breaks = seq(-40,100,10)) -> p_female_in_m_TYcsi
+
+p_female_in_m_TYcsi
+
+# ggsave("figures/p_female_in_m_TYcsi.png",
+#        p_female_in_m_TYcsi, dpi = 900, units = "mm",
+#          width = 100, height = 100)
+```
+<br/>  
+
+###### ITの動向・ CSIとメスに戻る確率の関連  
+続いて、2021年までのデータを用いたモデルをもとに、*IT*とのCSIに応じてオッズ比の対数をとったものがどのように変わるかを図示する。*TY*と親密度が高いメスは同じ日に群れに戻る確率が高いことが分かる。    
+
+```{r, fig.dim = c(12,5)}
+cont_female_in_m_IT <- estimate_contrasts(m_female_in_m_bf21,
+                                          contrast = "IT_return = c(0,1)",
+                                          at = "CSI_IT_std",
+                                          length = 50)
+
+cont_female_in_m_IT %>% 
+  rename(Level1 = Level2, Level2 = Level1) %>% 
+  mutate(Difference = -Difference) %>% 
+  data.frame() %>% 
+  rename(CSI_IT = CSI_IT_std) %>% 
+  mutate(CSI_IT = sd(female_in_m_bf21$CSI_IT)*CSI_IT + mean(female_in_m_bf21$CSI_IT)) %>% 
+  ggplot(aes(x = CSI_IT, y = Difference)) +
+  geom_hline(aes(yintercept = 0),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 1)+
+  geom_line()+
+  geom_ribbon(aes(ymin = -CI_low, ymax = -CI_high),
+              alpha = 0.2)+
+  theme_bw(base_size = 18)+
+  theme(aspect.ratio = 1) +
+  labs(y = "Log odds ratio", x = expression(paste("CSI with ",italic("IT")))) +
+  scale_x_continuous(breaks = seq(0,3.5,0.5))+
+  theme(axis.title.y = element_text(family = "Arial"),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial",
+                                   size = 12),
+        axis.text.y = element_text(family = "Arial"),
+        aspect.ratio = 1,
+        strip.background = element_blank(),
+        strip.text = element_text(hjust = 0))+
+  scale_y_continuous(breaks = seq(-40,100,10)) -> p_female_in_m_ITcsi
+
+p_female_in_m_ITcsi
+
+# ggsave("figures/p_female_in_m_ITcsi.png",
+#        p_female_in_m_ITcsi, dpi = 900, units = "mm",
+#          width = 100, height = 100)
+```
+<br/>  
+
+###### メス同士の血縁度との関連  
+```{r}
+female_in_m %>% 
+  mutate(kin_01 = as.factor(kin_01)) %>% 
+  group_by(kin_01, femaleID) %>% 
+  summarise(prop = mean(female_in),
+            n =  n()) %>% 
+  ungroup() %>% 
+  filter(n >= 3) %>% 
+  ggplot(aes(x = kin_01, y = prop))+
+  geom_count(alpha = 0.5)+
+  geom_line(aes(group = femaleID))+
+  scale_size(range = c(2,8))+
+  theme_bw(base_size = 13)+
+  labs(x = "If kin females returned the group",
+       y = "Probability of female returning main group",
+       color = "Study period",
+       fill = "Study period")+
+  coord_cartesian(xlim = c(1.2,1.7),
+                  ylim = c(0,1.15))+
+  scale_x_discrete(labels = c("No", "Yes")) +
+  theme(axis.title.y = element_text(family = "YArial",
+                                    size = 12),
+        axis.title.x = element_text(family = "Arial", size =12),
+        axis.text = element_text(family = "Arial",
+                                 size = 12),
+        legend.title = element_text(family = "Arial"),
+        legend.text = element_text(family = "Arial"),
+        aspect.ratio = 0.9) +
+  geom_signif(xmin = 1, xmax = 2,
+              y_position = 1.1, annotation = "***",
+              vjust = 0.01,
+              textsize = 5) -> p_female_in_kin
+
+p_female_in_kin
+
+# ggsave("figures/p_female_in_kin.png",p_female_in_kin, dpi = 600, units = "mm",
+#          width = 120, height = 100)
+```

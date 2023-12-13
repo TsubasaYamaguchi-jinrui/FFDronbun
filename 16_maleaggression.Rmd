@@ -1,0 +1,87 @@
+# オスの攻撃の概要  
+```{r}
+male_time_3h %>% 
+  mutate(date = as_date(date)) %>% 
+  pivot_longer(TY:IT,
+               names_to = "aggressor2",
+               values_to = "presence") -> male_time_3h_long
+
+aggression_all %>% 
+  left_join(att, by = c("femaleID", "study_period")) %>% 
+  drop_na(age) %>% 
+  mutate(aggressor = str_replace_all(aggressor, "\\?", "")) %>% 
+  filter(aggressor != "UK" & aggressor != "KMTG") %>% 
+  mutate(aggressor2 = ifelse(aggressor %in% c("TY","IT","LK","KR","KM","TG"),
+                             aggressor, "other")) %>% 
+  left_join(female_all %>% select(date,femaleID,rs2),
+            by = c("date", "femaleID")) %>% 
+  group_by(date, aggressor2, rs2) %>% 
+  summarise(no_agg = n()) %>% 
+  ungroup() %>% 
+  mutate(study_period = str_c("m", str_sub(year(date), 3,4))) %>% 
+  right_join(no_female_over0.5,
+             by = c("date", "study_period")) %>% 
+  filter(!str_detect(study_period, "nm")) %>% 
+  complete(nesting(date,study_period, groupID, dur), aggressor2, rs2) %>% 
+  filter(date >= "2018-10-08") %>% 
+  filter(!is.na(aggressor2) & !is.na(rs2)) %>% 
+  filter(date != "2019-09-27") %>% 
+  replace_na(list(no_agg = 0)) %>% 
+  filter(!((aggressor2 == "LK" & study_period %in% c("m20","m21")) |
+             (aggressor2 %in% c("KM","TG") & study_period == "m18"))) %>% 
+  left_join(male_time_3h_long,
+            by = c("date","groupID","aggressor2")) %>% 
+  replace_na(list(presence = 1)) %>% 
+  left_join(male_all %>% 
+              select(date, maleID, presence) %>% 
+              rename(presence2 = presence) %>% 
+              filter(maleID != "TY" & maleID != "IT"),
+            by = c("date", "aggressor2" = "maleID")) %>% 
+  replace_na(list(presence2 = 1)) %>% 
+  filter(presence == 1 & presence2 == 1)  %>% 
+  mutate(rate_agg = no_agg*60/dur) %>% 
+  mutate(aggressor2 = fct_relevel(aggressor2,
+                                  "TY","IT","LK","KR","KM","TG"))-> male_agg_daily
+```
+
+```{r}
+sp <- c("m18","m19","m20","m21")
+p <- list()
+
+for(i in seq_along(study_period)){
+  
+  male_agg_daily %>% 
+  filter(study_period == sp[i]) %>% 
+  ggplot(aes(x = aggressor2, y = rate_agg))+
+  geom_boxplot(outlier.alpha = 0.2)+
+  stat_summary(geom = "point",
+               shape = 23,
+               size = 3,
+               color = "black",
+               fill = "white",
+               fun = "mean")+
+  facet_rep_wrap(~rs2,
+                 repeat.tick.labels = TRUE,
+                 labeller = as_labeller(c(`0` = "非発情メス",`1` = "発情メス",
+                                          "m18" = "m18", "m19" = "m19",
+                                          "m20" = "m20", "m21" = "m21")),
+                 scales = "free")+
+  theme_bw(base_size = 16)+
+  labs(x = "",
+       y = "Aggression frequency (N/h)") +
+  theme(strip.background = element_blank(),
+        strip.text = element_text(hjust = 0,
+                                  family = "Yu Gothic"),
+        axis.title = element_text(family = "Arial"),
+        axis.text = element_text(family = "Arial"),
+        aspect.ratio = 1) -> p
+  
+  p[[i]] <- p
+  
+  ggsave(paste("figures/p_maleagg_", study_period[i],".png"), p[[i]], width =200, height = 100, dpi = 600,
+         units = "mm")
+  
+  assign(paste("p_male_agg_", sp[i]), p)
+}
+```
+

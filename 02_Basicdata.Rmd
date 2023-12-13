@@ -1,0 +1,23 @@
+# データの読み込み    
+以下、基本的なデータの読み込みを行う。なお、本論文で使用するのはた8つの期間（2018交尾期、2019非交尾期、2019交尾期、2020非交尾期、2020交尾期、2021非交尾期、2021交尾期、2022非交尾期）のデータである。  
+
+## Daily data の読み込み  
+```{r child = "../Basicdata/daily_data.Rmd", include = FALSE}
+
+```
+
+## 個体追跡データの読み込み  
+
+```{r child = "../Basicdata/focal_cleaning.Rmd", include = FALSE}
+
+```
+
+## 群れの詳細な出欠データを読み込む   
+```{r child = "../Basicdata/group_composition.Rmd", include = FALSE}
+
+```
+
+## オスの攻撃データを読み込む   
+```{r child = "../Basicdata/male_aggression.Rmd", include = FALSE}
+
+```

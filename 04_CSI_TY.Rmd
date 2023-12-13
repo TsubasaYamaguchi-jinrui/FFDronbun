@@ -1,0 +1,3 @@
+```{r child = "C:/Users/Tsubasa Yamaguchi/Desktop/Basicdata/CSI_TYIT.Rmd"}
+
+```
