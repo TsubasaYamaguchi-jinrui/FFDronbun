@@ -1,0 +1,67 @@
+h1 {
+  font-size: 21px;
+  font-family: "Meiryo";
+  margin-bottom: -20px;
+}
+
+h2 {
+  font-size: 19px;
+  font-family: "Meiryo";
+  margin-bottom: -20px;
+}
+
+h3 {
+  font-size: 18px;
+  font-family: "Meiryo";
+  margin-top: -10px; 
+}
+
+h4 {
+  font-size: 18px;
+  font-family: "Meiryo";
+  margin-top: -10px; 
+}
+
+p {
+  font-family: "Meiryo";
+  font-size: 16.5px;
+}
+
+ul {
+  font-size: 15.5px;
+  font-family: "Meiryo";
+}
+
+ol {
+  font-size: 15.5px;
+  font-family: "Meiryo";
+}
+
+li {
+  font-size: 15.5px;
+  font-family: "Meiryo";
+  margin-bottom: 10px; 
+}
+
+.book .book-body .page-wrapper .page-inner {
+    max-width: 1000px !important;
+}
+
+.math {
+  font-size: 16px;
+  line-height: 150% !important;
+  margin-bottom: 600px;
+  margin-top: 600px;
+}
+
+p.caption {
+  margin-bottom: 50px; 
+  font-style: italic;
+  font-size: 13.5px;
+  color: gray;
+  font-weight: bold;
+}
+
+#TOC {
+  margin: -15px;
+}

@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>5 群れの離合集散動態をどのように分析すべきか | Fission-fusion dynamics in B1 troop</title>
+  <meta name="description" content="5 群れの離合集散動態をどのように分析すべきか | Fission-fusion dynamics in B1 troop" />
+  <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="5 群れの離合集散動態をどのように分析すべきか | Fission-fusion dynamics in B1 troop" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="5 群れの離合集散動態をどのように分析すべきか | Fission-fusion dynamics in B1 troop" />
+  
+  
+  
+
+<meta name="author" content="Tsubasa Yamaguchi" />
+
+
+<meta name="date" content="2023-11-14" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="05_decide_duration.html"/>
+<link rel="next" href="sessioninfo.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
+<script src="libs/pagedtable-1.1/js/pagedtable.js"></script>
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<script src="libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
+<link href="libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="libs/datatables-binding-0.30/datatables.js"></script>
+<link href="libs/dt-core-1.13.4/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="libs/dt-core-1.13.4/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="libs/dt-core-1.13.4/js/jquery.dataTables.min.js"></script>
+<link href="libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<link rel="stylesheet" href="custom_style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>本稿の目的</a></li>
+<li class="chapter" data-level="" data-path="01_library.html"><a href="01_library.html"><i class="fa fa-check"></i>0. パッケージの読み込み</a></li>
+<li class="chapter" data-level="1" data-path="02_Basicdata.html"><a href="02_Basicdata.html"><i class="fa fa-check"></i><b>1</b> データの読み込み</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="02_Basicdata.html"><a href="02_Basicdata.html#daily-data-の読み込み"><i class="fa fa-check"></i><b>1.1</b> Daily data の読み込み</a></li>
+<li class="chapter" data-level="1.2" data-path="02_Basicdata.html"><a href="02_Basicdata.html#個体追跡データの読み込み"><i class="fa fa-check"></i><b>1.2</b> 個体追跡データの読み込み</a></li>
+<li class="chapter" data-level="1.3" data-path="02_Basicdata.html"><a href="02_Basicdata.html#群れの詳細な出欠データを読み込む"><i class="fa fa-check"></i><b>1.3</b> 群れの詳細な出欠データを読み込む</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="03_CSI_female.html"><a href="03_CSI_female.html"><i class="fa fa-check"></i><b>2</b> メス同士のCSIの算出</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="03_CSI_female.html"><a href="03_CSI_female.html#csiの定義"><i class="fa fa-check"></i><b>2.1</b> CSIの定義</a></li>
+<li class="chapter" data-level="2.2" data-path="03_CSI_female.html"><a href="03_CSI_female.html#データの加工"><i class="fa fa-check"></i><b>2.2</b> データの加工</a></li>
+<li class="chapter" data-level="2.3" data-path="03_CSI_female.html"><a href="03_CSI_female.html#csiの算出全期間"><i class="fa fa-check"></i><b>2.3</b> CSIの算出(全期間)</a>
+<ul>
+<li class="chapter" data-level="2.3.1" data-path="03_CSI_female.html"><a href="03_CSI_female.html#毛づくろい時間割合の算出"><i class="fa fa-check"></i><b>2.3.1</b> 毛づくろい時間割合の算出</a></li>
+<li class="chapter" data-level="2.3.2" data-path="03_CSI_female.html"><a href="03_CSI_female.html#近接時間割合の算出"><i class="fa fa-check"></i><b>2.3.2</b> 近接時間割合の算出</a></li>
+<li class="chapter" data-level="2.3.3" data-path="03_CSI_female.html"><a href="03_CSI_female.html#csiの算出"><i class="fa fa-check"></i><b>2.3.3</b> CSIの算出</a></li>
+</ul></li>
+<li class="chapter" data-level="2.4" data-path="03_CSI_female.html"><a href="03_CSI_female.html#csiの算出2018交尾期2019交尾期"><i class="fa fa-check"></i><b>2.4</b> CSIの算出(2018交尾期～2019交尾期)</a>
+<ul>
+<li class="chapter" data-level="2.4.1" data-path="03_CSI_female.html"><a href="03_CSI_female.html#毛づくろい時間割合の算出-1"><i class="fa fa-check"></i><b>2.4.1</b> 毛づくろい時間割合の算出</a></li>
+<li class="chapter" data-level="2.4.2" data-path="03_CSI_female.html"><a href="03_CSI_female.html#近接時間割合の算出-1"><i class="fa fa-check"></i><b>2.4.2</b> 近接時間割合の算出</a></li>
+<li class="chapter" data-level="2.4.3" data-path="03_CSI_female.html"><a href="03_CSI_female.html#csiの算出-1"><i class="fa fa-check"></i><b>2.4.3</b> CSIの算出</a></li>
+</ul></li>
+<li class="chapter" data-level="2.5" data-path="03_CSI_female.html"><a href="03_CSI_female.html#csiの算出調査期間ごと"><i class="fa fa-check"></i><b>2.5</b> CSIの算出(調査期間ごと)</a>
+<ul>
+<li class="chapter" data-level="2.5.1" data-path="03_CSI_female.html"><a href="03_CSI_female.html#毛づくろい時間割合の算出-2"><i class="fa fa-check"></i><b>2.5.1</b> 毛づくろい時間割合の算出</a></li>
+<li class="chapter" data-level="2.5.2" data-path="03_CSI_female.html"><a href="03_CSI_female.html#近接時間割合の算出-2"><i class="fa fa-check"></i><b>2.5.2</b> 近接時間割合の算出</a></li>
+<li class="chapter" data-level="2.5.3" data-path="03_CSI_female.html"><a href="03_CSI_female.html#csiの算出-2"><i class="fa fa-check"></i><b>2.5.3</b> CSIの算出</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html"><i class="fa fa-check"></i><b>3</b> TYとメスのCSIの計算</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの定義-1"><i class="fa fa-check"></i><b>3.1</b> CSIの定義</a></li>
+<li class="chapter" data-level="3.2" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#データの読み込みと加工"><i class="fa fa-check"></i><b>3.2</b> データの読み込みと加工</a></li>
+<li class="chapter" data-level="3.3" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出全調査期間"><i class="fa fa-check"></i><b>3.3</b> CSIの算出(全調査期間)</a>
+<ul>
+<li class="chapter" data-level="3.3.1" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#毛づくろい時間割合の算出-3"><i class="fa fa-check"></i><b>3.3.1</b> 毛づくろい時間割合の算出</a></li>
+<li class="chapter" data-level="3.3.2" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#近接時間割合"><i class="fa fa-check"></i><b>3.3.2</b> 近接時間割合</a></li>
+<li class="chapter" data-level="3.3.3" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出-3"><i class="fa fa-check"></i><b>3.3.3</b> CSIの算出</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出2018交尾期2019交尾期-1"><i class="fa fa-check"></i><b>3.4</b> CSIの算出(2018交尾期～2019交尾期)</a>
+<ul>
+<li class="chapter" data-level="3.4.1" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#毛づくろい時間割合の算出-4"><i class="fa fa-check"></i><b>3.4.1</b> 毛づくろい時間割合の算出</a></li>
+<li class="chapter" data-level="3.4.2" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#近接時間割合-1"><i class="fa fa-check"></i><b>3.4.2</b> 近接時間割合</a></li>
+<li class="chapter" data-level="3.4.3" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出-4"><i class="fa fa-check"></i><b>3.4.3</b> CSIの算出</a></li>
+</ul></li>
+<li class="chapter" data-level="3.5" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出非交尾期のみ"><i class="fa fa-check"></i><b>3.5</b> CSIの算出(非交尾期のみ)</a>
+<ul>
+<li class="chapter" data-level="3.5.1" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#毛づくろい時間割合の算出-5"><i class="fa fa-check"></i><b>3.5.1</b> 毛づくろい時間割合の算出</a></li>
+<li class="chapter" data-level="3.5.2" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#近接時間割合-2"><i class="fa fa-check"></i><b>3.5.2</b> 近接時間割合</a></li>
+<li class="chapter" data-level="3.5.3" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出-5"><i class="fa fa-check"></i><b>3.5.3</b> CSIの算出</a></li>
+</ul></li>
+<li class="chapter" data-level="3.6" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出調査期間ごと-1"><i class="fa fa-check"></i><b>3.6</b> CSIの算出(調査期間ごと)</a>
+<ul>
+<li class="chapter" data-level="3.6.1" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#毛づくろい時間割合の算出-6"><i class="fa fa-check"></i><b>3.6.1</b> 毛づくろい時間割合の算出</a></li>
+<li class="chapter" data-level="3.6.2" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#近接時間割合-3"><i class="fa fa-check"></i><b>3.6.2</b> 近接時間割合</a></li>
+<li class="chapter" data-level="3.6.3" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出-6"><i class="fa fa-check"></i><b>3.6.3</b> CSIの算出</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="05_decide_duration.html"><a href="05_decide_duration.html"><i class="fa fa-check"></i><b>4</b> メスの発見までに要する時間</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="05_decide_duration.html"><a href="05_decide_duration.html#データの読み込み加工"><i class="fa fa-check"></i><b>4.1</b> データの読み込み・加工</a>
+<ul>
+<li class="chapter" data-level="4.1.1" data-path="05_decide_duration.html"><a href="05_decide_duration.html#データの読み込み-1"><i class="fa fa-check"></i><b>4.1.1</b> データの読み込み</a></li>
+<li class="chapter" data-level="4.1.2" data-path="05_decide_duration.html"><a href="05_decide_duration.html#データの加工-1"><i class="fa fa-check"></i><b>4.1.2</b> データの加工</a></li>
+</ul></li>
+<li class="chapter" data-level="4.2" data-path="05_decide_duration.html"><a href="05_decide_duration.html#生存時間分析"><i class="fa fa-check"></i><b>4.2</b> 生存時間分析</a>
+<ul>
+<li class="chapter" data-level="4.2.1" data-path="05_decide_duration.html"><a href="05_decide_duration.html#データの確認"><i class="fa fa-check"></i><b>4.2.1</b> データの確認</a></li>
+<li class="chapter" data-level="4.2.2" data-path="05_decide_duration.html"><a href="05_decide_duration.html#コックス比例ハザードモデル"><i class="fa fa-check"></i><b>4.2.2</b> コックス比例ハザードモデル</a>
+<ul>
+<li class="chapter" data-level="4.2.2.1" data-path="05_decide_duration.html"><a href="05_decide_duration.html#モデリング"><i class="fa fa-check"></i><b>4.2.2.1</b> モデリング</a></li>
+</ul></li>
+<li class="chapter" data-level="4.2.3" data-path="05_decide_duration.html"><a href="05_decide_duration.html#離散時間モデル"><i class="fa fa-check"></i><b>4.2.3</b> 離散時間モデル</a>
+<ul>
+<li class="chapter" data-level="4.2.3.1" data-path="05_decide_duration.html"><a href="05_decide_duration.html#データの加工-2"><i class="fa fa-check"></i><b>4.2.3.1</b> データの加工</a></li>
+<li class="chapter" data-level="4.2.3.2" data-path="05_decide_duration.html"><a href="05_decide_duration.html#モデリング-1"><i class="fa fa-check"></i><b>4.2.3.2</b> モデリング</a></li>
+<li class="chapter" data-level="4.2.3.3" data-path="05_decide_duration.html"><a href="05_decide_duration.html#結果の図示"><i class="fa fa-check"></i><b>4.2.3.3</b> 結果の図示</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="06_male_presence.html"><a href="06_male_presence.html"><i class="fa fa-check"></i><b>5</b> 群れの離合集散動態をどのように分析すべきか</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="06_male_presence.html"><a href="06_male_presence.html#サブグループパーティの定義とデータ収集法"><i class="fa fa-check"></i><b>5.1</b> サブグループ/パーティの定義とデータ収集法</a></li>
+<li class="chapter" data-level="5.2" data-path="06_male_presence.html"><a href="06_male_presence.html#どのような日のデータを用いるべきか"><i class="fa fa-check"></i><b>5.2</b> どのような日のデータを用いるべきか</a></li>
+<li class="chapter" data-level="5.3" data-path="06_male_presence.html"><a href="06_male_presence.html#データの加工-3"><i class="fa fa-check"></i><b>5.3</b> データの加工</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="sessioninfo.html"><a href="sessioninfo.html"><i class="fa fa-check"></i>実行環境</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Fission-fusion dynamics in B1 troop</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="群れの離合集散動態をどのように分析すべきか" class="section level1 hasAnchor" number="5">
+<h1><span class="header-section-number">5</span> 群れの離合集散動態をどのように分析すべきか<a href="06_male_presence.html#群れの離合集散動態をどのように分析すべきか" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="サブグループパーティの定義とデータ収集法" class="section level2 hasAnchor" number="5.1">
+<h2><span class="header-section-number">5.1</span> サブグループ/パーティの定義とデータ収集法<a href="06_male_presence.html#サブグループパーティの定義とデータ収集法" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>離合集散動態(fission-fusion dynamics: FFD)とは、集団内のまとまりや確認できる個体の数や構成の時空間的変動のことを指す<span class="citation">(<a href="#ref-Aureli2008">Aureli et al., 2008</a>)</span>。FFDの程度は種内でも種間でも多様である。例えば、FFDの程度が高いチンパンジー<span class="citation">(e.g., <a href="#ref-Hashimoto2001">Hashimoto et al., 2001</a>; <a href="#ref-Itoh2007">Itoh &amp; Nishida, 2007</a>)</span>やクモザル<span class="citation">(e.g., <a href="#ref-Asensio2009">Asensio et al., 2009</a>; <a href="#ref-Ramos2014">Ramos-Fernández &amp; Morales, 2014</a>)</span>は一日を通してサイズや構成が変化するパーティ/サブグループに別れて生活している。一方で、FFDの程度が低いニホンザルなどでは、個体間距離は一日の中でも変動し、2つ以上のサブグループに分かれて行動をすることもあるが<span class="citation">(<a href="#ref-Sugiura2011">Sugiura et al., 2011</a>; <a href="#ref-Yamaguchi2022">Yamaguchi &amp; Kazahari, 2022</a>)</span>、基本的には群れの全個体が一日中行動を共にする。</p>
+<p>FFDの研究はこれまで主にその程度が高いチンパンジーやクモザルを中心に行われ、パーティあるいはサブグループのサイズや構成が短期的・長期的にどのように変化するのかが調べられてきた<span class="citation">(<a href="#ref-Aguilar2018">Aguilar-Melo et al., 2018</a>, <a href="#ref-Aguilar2020">2020</a>; <a href="#ref-Anderson2002">Anderson et al., 2002</a>; <a href="#ref-Asensio2009">Asensio et al., 2009</a>; <a href="#ref-Busia2016">Busia et al., 2016</a>, <a href="#ref-Busia2017">2017</a>; <a href="#ref-Chapman1995">Chapman et al., 1995</a>, <a href="#ref-Chapman1995">1995</a>; <a href="#ref-Hartwell2021">Hartwell et al., 2021</a>; <a href="#ref-Hashimoto2001">Hashimoto et al., 2001</a>, <a href="#ref-Hashimoto2003">2003</a>; <a href="#ref-Itoh2007">Itoh &amp; Nishida, 2007</a>; <a href="#ref-Matsumoto-Oda1998">Matsumoto-Oda et al., 1998</a>; <a href="#ref-Matthews2021">Matthews et al., 2021</a>; <a href="#ref-Mitani2002">Mitani et al., 2002</a>; <a href="#ref-Newton-Fisher2000">Newton-Fisher et al., 2000</a>; <a href="#ref-Pinacho2017">Pinacho-Guendulain &amp; Ramos-Fernández, 2017</a>; <a href="#ref-Potts2011">Potts et al., 2011</a>; <a href="#ref-Ramos2014">Ramos-Fernández &amp; Morales, 2014</a>; <a href="#ref-Shibata2022">Shibata et al., 2022</a>; <a href="#ref-Villioth2022">Villioth et al., 2022</a>; <a href="#ref-Wakefield2008">Wakefield, 2008</a>; <a href="#ref-Wittiger2013">Wittiger &amp; Boesch, 2013</a>)</span>。これらの研究でパーティ/サブグループを定量化する際には、主に2種類の方法が用いられている、その他の種の研究でもサブグルーピングについて扱う場合はいずれかに類似した方法を用いることが多い<span class="citation">(<a href="#ref-Bowler2009">Bowler &amp; Bodmer, 2009</a>; <a href="#ref-Coles2012">Coles et al., 2012</a>; <a href="#ref-Dolado2016">Dolado et al., 2016</a>; <a href="#ref-Holmes2016">Holmes et al., 2016</a>)</span>。</p>
+<ol style="list-style-type: decimal">
+<li><p>スキャンサンプリングに基づく方法<br />
+ある一定時間ごと(1分、15分、20分など)に観察者がスキャンサンプリングで視界内の個体、あるいは一定のルールに従って(e.g., 追跡個体の35m, 50m/30mのchain rule)同じパーティ/サブグループにいるとみなされる個体を記録する。研究によっては、連続記録で個体構成の変動を記録する場合もある。そのときどきの追跡個体/観察者の周囲で確認できる個体の集まりをパーティ/サブグループとみなす方法。チンパンジーの研究の半分くらいとほとんどすべてのクモザルの研究で採用されている。<span class="citation">Itoh &amp; Nishida (<a href="#ref-Itoh2007">2007</a>)</span> はこのような方法によって観察されたパーティをface-to-face partyとした。</p></li>
+<li><p>累積記録法<br />
+ある一定時間内(1時間~1日)に観察された個体を全てアドリブで記録し、確認された全個体を同じパーティ/サブグループにいたとみなす。1よりもより緩いつながりを評価することができる。主に日本人のチンパンジー研究者に用いられている<span class="citation">(<a href="#ref-Hashimoto2001">Hashimoto et al., 2001</a>; <a href="#ref-Itoh2007">Itoh &amp; Nishida, 2007</a>; <a href="#ref-Matsumoto-Oda1998">Matsumoto-Oda et al., 1998</a>; <a href="#ref-Shibata2022">Shibata et al., 2022</a>)</span>。<span class="citation">Itoh &amp; Nishida (<a href="#ref-Itoh2007">2007</a>)</span> はこのような方法によって観察されたパーティをnomadic partyとした。</p></li>
+</ol>
+<p>1の方法はそのときどきのメンバーシップを細かく連続的に評価できるという利点があるものの、</p>
+</div>
+<div id="どのような日のデータを用いるべきか" class="section level2 hasAnchor" number="5.2">
+<h2><span class="header-section-number">5.2</span> どのような日のデータを用いるべきか<a href="06_male_presence.html#どのような日のデータを用いるべきか" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>群れの離合集散が生じていると考えられる状況においては、<strong>観察者がどのサブグループを発見したかによって個体の確認状況が大きく左右される</strong>。例えば、群れが2つに分派しているとき(Subgroup 1とSubgroup 2)に3日間観察を行ったとする(図<a href="06_male_presence.html#fig:subgroup">5.1</a>)。このとき、サブグループの個体構成が全く変化しなかったとしても、日によって観察者が発見したサブグループが異なれば(e.g., 1日目と3日目にSubgroup 1、2日目にSubgroup 2)、確認できたメスの数は<span class="math inline">\(7 \rightarrow 5 \rightarrow 7\)</span>となってしまう。同様に、オスの確認状況も観察者がどの集団を発見するかに左右される。これは、個体の確認状況を分析したいときには大きな問題になる。</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:subgroup"></span>
+<img src="image/subgroup.png" alt="離合集散が生じている状況での個体の確認状況" width="60%" />
+<p class="caption">
+図5.1: 離合集散が生じている状況での個体の確認状況
+</p>
+</div>
+<p><br/></p>
+<p>これを解決するため、本研究では<u>6歳以上のメスが50%以上</u>確認できた集団(= 以下、<strong>群れ本体</strong>)を観察した日のデータ<strong>のみ</strong>を用いて個体の確認状況の分析を行う。これにより、上記の問題を完全に解決することはできないが、観察者がどの集団を発見するかによって生じるバイアスをある程度減らすことができると考えられる。上記の例では、2日目のデータは用いないことで、サブグループの個体構成に変化がなければ、個体の確認状況が一定に保たれる。</p>
+</div>
+<div id="データの加工-3" class="section level2 hasAnchor" number="5.3">
+<h2><span class="header-section-number">5.3</span> データの加工<a href="06_male_presence.html#データの加工-3" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb93-1"><a href="06_male_presence.html#cb93-1" tabindex="-1"></a>group_all <span class="sc">%&gt;%</span> </span>
+<span id="cb93-2"><a href="06_male_presence.html#cb93-2" tabindex="-1"></a>  <span class="fu">select</span>(groupID, study_period, date, Kur<span class="sc">:</span>Yun) <span class="sc">%&gt;%</span> </span>
+<span id="cb93-3"><a href="06_male_presence.html#cb93-3" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(TY,IT, LK,KR,KM,TG)) <span class="sc">%&gt;%</span> </span>
+<span id="cb93-4"><a href="06_male_presence.html#cb93-4" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> Kur<span class="sc">:</span>Yun,</span>
+<span id="cb93-5"><a href="06_male_presence.html#cb93-5" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">&quot;femaleID&quot;</span>,</span>
+<span id="cb93-6"><a href="06_male_presence.html#cb93-6" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">&quot;presence&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb93-7"><a href="06_male_presence.html#cb93-7" tabindex="-1"></a>  <span class="fu">left_join</span>(att, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;study_period&quot;</span>,<span class="st">&quot;femaleID&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb93-8"><a href="06_male_presence.html#cb93-8" tabindex="-1"></a>  <span class="fu">filter</span>(age <span class="sc">&gt;=</span> <span class="dv">6</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb93-9"><a href="06_male_presence.html#cb93-9" tabindex="-1"></a>  <span class="fu">group_by</span>(date, groupID) <span class="sc">%&gt;%</span> </span>
+<span id="cb93-10"><a href="06_male_presence.html#cb93-10" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">no_female =</span> <span class="fu">sum</span>(presence, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb93-11"><a href="06_male_presence.html#cb93-11" tabindex="-1"></a>  <span class="fu">ungroup</span>() </span></code></pre></div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["date"],"name":[1],"type":["date"],"align":["right"]},{"label":["groupID"],"name":[2],"type":["chr"],"align":["left"]},{"label":["no_female"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"2018-10-01","2":"m18_1","3":"16"},{"1":"2018-10-02","2":"m18_2","3":"17"},{"1":"2018-10-03","2":"m18_3","3":"17"},{"1":"2018-10-04","2":"m18_4","3":"17"},{"1":"2018-10-05","2":"m18_5","3":"17"},{"1":"2018-10-06","2":"m18_6","3":"0"},{"1":"2018-10-07","2":"m18_7","3":"0"},{"1":"2018-10-08","2":"m18_8","3":"14"},{"1":"2018-10-09","2":"m18_9","3":"17"},{"1":"2018-10-10","2":"m18_10","3":"17"},{"1":"2018-10-11","2":"m18_11","3":"17"},{"1":"2018-10-12","2":"m18_12","3":"17"},{"1":"2018-10-13","2":"m18_13","3":"16"},{"1":"2018-10-14","2":"m18_14","3":"17"},{"1":"2018-10-15","2":"m18_15","3":"17"},{"1":"2018-10-16","2":"m18_16","3":"17"},{"1":"2018-10-17","2":"m18_17","3":"17"},{"1":"2018-10-18","2":"m18_18","3":"17"},{"1":"2018-10-19","2":"m18_19","3":"17"},{"1":"2018-10-20","2":"m18_20","3":"16"},{"1":"2018-10-21","2":"m18_21","3":"16"},{"1":"2018-10-22","2":"m18_22","3":"16"},{"1":"2018-10-23","2":"m18_23","3":"16"},{"1":"2018-10-24","2":"m18_24","3":"16"},{"1":"2018-10-25","2":"m18_25","3":"16"},{"1":"2018-10-26","2":"m18_26","3":"17"},{"1":"2018-10-27","2":"m18_27","3":"16"},{"1":"2018-10-28","2":"m18_28","3":"16"},{"1":"2018-10-29","2":"m18_29","3":"16"},{"1":"2018-10-30","2":"m18_30","3":"16"},{"1":"2018-10-31","2":"m18_31","3":"17"},{"1":"2018-11-01","2":"m18_32","3":"17"},{"1":"2018-11-02","2":"m18_33","3":"16"},{"1":"2018-11-03","2":"m18_34","3":"0"},{"1":"2018-11-04","2":"m18_35","3":"0"},{"1":"2018-11-05","2":"m18_36","3":"16"},{"1":"2018-11-06","2":"m18_37","3":"16"},{"1":"2018-11-07","2":"m18_38","3":"16"},{"1":"2018-11-08","2":"m18_39","3":"16"},{"1":"2018-11-09","2":"m18_40","3":"16"},{"1":"2018-11-10","2":"m18_41","3":"16"},{"1":"2018-11-11","2":"m18_42","3":"16"},{"1":"2018-11-12","2":"m18_43","3":"16"},{"1":"2018-11-13","2":"m18_44","3":"16"},{"1":"2018-11-14","2":"m18_45","3":"17"},{"1":"2018-11-15","2":"m18_46","3":"17"},{"1":"2018-11-16","2":"m18_47","3":"16"},{"1":"2018-11-17","2":"m18_48","3":"1"},{"1":"2018-11-18","2":"m18_49","3":"0"},{"1":"2018-11-19","2":"m18_50","3":"8"},{"1":"2018-11-20","2":"m18_51","3":"8"},{"1":"2018-11-21","2":"m18_52","3":"15"},{"1":"2018-11-22","2":"m18_53","3":"17"},{"1":"2018-11-23","2":"m18_54","3":"0"},{"1":"2018-11-24","2":"m18_55","3":"0"},{"1":"2018-11-25","2":"m18_56","3":"0"},{"1":"2018-11-26","2":"m18_57","3":"17"},{"1":"2018-11-27","2":"m18_58","3":"17"},{"1":"2018-11-28","2":"m18_59","3":"17"},{"1":"2018-11-29","2":"m18_60","3":"17"},{"1":"2018-11-30","2":"m18_61","3":"17"},{"1":"2018-12-01","2":"m18_62","3":"17"},{"1":"2019-02-14","2":"nm19_1","3":"17"},{"1":"2019-02-15","2":"nm19_2","3":"17"},{"1":"2019-02-16","2":"nm19_3","3":"17"},{"1":"2019-02-17","2":"nm19_4","3":"17"},{"1":"2019-02-18","2":"nm19_5","3":"17"},{"1":"2019-02-19","2":"nm19_6","3":"17"},{"1":"2019-02-20","2":"nm19_7","3":"17"},{"1":"2019-02-21","2":"nm19_8","3":"17"},{"1":"2019-02-22","2":"nm19_9","3":"16"},{"1":"2019-02-23","2":"nm19_10","3":"17"},{"1":"2019-02-24","2":"nm19_11","3":"17"},{"1":"2019-02-25","2":"nm19_12","3":"17"},{"1":"2019-02-26","2":"nm19_13","3":"17"},{"1":"2019-02-27","2":"nm19_14","3":"17"},{"1":"2019-02-28","2":"nm19_15","3":"17"},{"1":"2019-03-01","2":"nm19_16","3":"5"},{"1":"2019-03-04","2":"nm19_17","3":"17"},{"1":"2019-03-05","2":"nm19_18","3":"17"},{"1":"2019-03-06","2":"nm19_19","3":"17"},{"1":"2019-03-07","2":"nm19_20","3":"17"},{"1":"2019-03-08","2":"nm19_21","3":"17"},{"1":"2019-03-09","2":"nm19_22","3":"17"},{"1":"2019-03-10","2":"nm19_23","3":"17"},{"1":"2019-03-12","2":"nm19_24","3":"17"},{"1":"2019-03-13","2":"nm19_25","3":"17"},{"1":"2019-03-14","2":"nm19_26","3":"17"},{"1":"2019-03-15","2":"nm19_27","3":"16"},{"1":"2019-03-16","2":"nm19_28","3":"17"},{"1":"2019-03-17","2":"nm19_29","3":"17"},{"1":"2019-03-18","2":"nm19_30","3":"17"},{"1":"2019-03-19","2":"nm19_31","3":"17"},{"1":"2019-03-20","2":"nm19_32","3":"17"},{"1":"2019-03-21","2":"nm19_33","3":"17"},{"1":"2019-03-25","2":"nm19_34","3":"17"},{"1":"2019-03-26","2":"nm19_35","3":"17"},{"1":"2019-03-27","2":"nm19_36","3":"17"},{"1":"2019-03-28","2":"nm19_37","3":"17"},{"1":"2019-03-29","2":"nm19_38","3":"17"},{"1":"2019-09-08","2":"m19_1","3":"18"},{"1":"2019-09-09","2":"m19_2","3":"10"},{"1":"2019-09-10","2":"m19_3","3":"17"},{"1":"2019-09-11","2":"m19_4","3":"16"},{"1":"2019-09-12","2":"m19_5","3":"16"},{"1":"2019-09-13","2":"m19_6","3":"17"},{"1":"2019-09-14","2":"m19_7","3":"17"},{"1":"2019-09-15","2":"m19_8","3":"17"},{"1":"2019-09-16","2":"m19_9","3":"18"},{"1":"2019-09-17","2":"m19_10","3":"18"},{"1":"2019-09-18","2":"m19_11","3":"17"},{"1":"2019-09-19","2":"m19_12","3":"17"},{"1":"2019-09-20","2":"m19_13","3":"17"},{"1":"2019-09-21","2":"m19_14","3":"17"},{"1":"2019-09-22","2":"m19_15","3":"17"},{"1":"2019-09-23","2":"m19_16","3":"17"},{"1":"2019-09-24","2":"m19_17","3":"17"},{"1":"2019-09-25","2":"m19_18","3":"0"},{"1":"2019-09-26","2":"m19_19","3":"16"},{"1":"2019-09-27","2":"m19_20","3":"17"},{"1":"2019-09-28","2":"m19_21","3":"4"},{"1":"2019-09-29","2":"m19_22","3":"1"},{"1":"2019-09-30","2":"m19_23","3":"1"},{"1":"2019-09-30","2":"m19_24","3":"1"},{"1":"2019-09-30","2":"m19_25","3":"2"},{"1":"2019-10-01","2":"m19_26","3":"10"},{"1":"2019-10-02","2":"m19_27","3":"17"},{"1":"2019-10-03","2":"m19_28","3":"17"},{"1":"2019-10-04","2":"m19_29","3":"17"},{"1":"2019-10-05","2":"m19_30","3":"17"},{"1":"2019-10-06","2":"m19_31","3":"16"},{"1":"2019-10-07","2":"m19_32","3":"17"},{"1":"2019-10-08","2":"m19_33","3":"15"},{"1":"2019-10-09","2":"m19_34","3":"17"},{"1":"2019-10-10","2":"m19_35","3":"17"},{"1":"2019-10-11","2":"m19_36","3":"0"},{"1":"2019-10-12","2":"m19_37","3":"0"},{"1":"2019-10-13","2":"m19_38","3":"9"},{"1":"2019-10-14","2":"m19_39","3":"14"},{"1":"2019-10-15","2":"m19_40","3":"15"},{"1":"2019-10-15","2":"m19_41","3":"2"},{"1":"2019-10-16","2":"m19_42","3":"16"},{"1":"2019-10-17","2":"m19_43","3":"17"},{"1":"2019-10-18","2":"m19_44","3":"17"},{"1":"2019-10-19","2":"m19_45","3":"0"},{"1":"2019-10-20","2":"m19_46","3":"0"},{"1":"2019-10-21","2":"m19_47","3":"0"},{"1":"2019-10-22","2":"m19_48","3":"0"},{"1":"2019-10-23","2":"m19_49","3":"16"},{"1":"2019-10-24","2":"m19_50","3":"16"},{"1":"2019-10-25","2":"m19_51","3":"16"},{"1":"2019-10-26","2":"m19_52","3":"15"},{"1":"2019-10-26","2":"m19_53","3":"8"},{"1":"2019-10-26","2":"m19_54","3":"6"},{"1":"2019-10-27","2":"m19_55","3":"10"},{"1":"2019-10-28","2":"m19_56","3":"9"},{"1":"2019-10-29","2":"m19_57","3":"9"},{"1":"2019-10-30","2":"m19_58","3":"9"},{"1":"2019-10-31","2":"m19_59","3":"9"},{"1":"2019-11-01","2":"m19_60","3":"9"},{"1":"2019-11-02","2":"m19_61","3":"10"},{"1":"2019-11-03","2":"m19_62","3":"12"},{"1":"2019-11-04","2":"m19_63","3":"11"},{"1":"2019-11-05","2":"m19_64","3":"10"},{"1":"2019-11-06","2":"m19_65","3":"11"},{"1":"2019-11-07","2":"m19_66","3":"10"},{"1":"2019-11-08","2":"m19_67","3":"11"},{"1":"2019-11-09","2":"m19_68","3":"11"},{"1":"2019-11-10","2":"m19_69","3":"11"},{"1":"2020-03-09","2":"nm20_1","3":"0"},{"1":"2020-03-11","2":"nm20_2","3":"0"},{"1":"2020-03-12","2":"nm20_3","3":"15"},{"1":"2020-03-13","2":"nm20_4","3":"17"},{"1":"2020-03-14","2":"nm20_5","3":"17"},{"1":"2020-03-15","2":"nm20_6","3":"17"},{"1":"2020-03-16","2":"nm20_7","3":"17"},{"1":"2020-03-17","2":"nm20_8","3":"17"},{"1":"2020-03-18","2":"nm20_9","3":"17"},{"1":"2020-03-19","2":"nm20_10","3":"17"},{"1":"2020-03-20","2":"nm20_11","3":"17"},{"1":"2020-03-22","2":"nm20_12","3":"17"},{"1":"2020-09-21","2":"m20_1","3":"20"},{"1":"2020-09-22","2":"m20_2","3":"15"},{"1":"2020-09-23","2":"m20_3","3":"19"},{"1":"2020-09-24","2":"m20_4","3":"17"},{"1":"2020-09-25","2":"m20_5","3":"21"},{"1":"2020-09-26","2":"m20_6","3":"19"},{"1":"2020-09-28","2":"m20_7","3":"20"},{"1":"2020-09-29","2":"m20_8","3":"21"},{"1":"2020-09-30","2":"m20_9","3":"20"},{"1":"2020-10-01","2":"m20_10","3":"18"},{"1":"2020-10-02","2":"m20_11","3":"20"},{"1":"2020-10-03","2":"m20_12","3":"16"},{"1":"2020-10-04","2":"m20_13","3":"18"},{"1":"2020-10-07","2":"m20_14","3":"10"},{"1":"2020-10-08","2":"m20_15","3":"18"},{"1":"2020-10-09","2":"m20_16","3":"18"},{"1":"2020-10-10","2":"m20_17","3":"21"},{"1":"2020-10-11","2":"m20_18","3":"16"},{"1":"2020-10-12","2":"m20_19","3":"19"},{"1":"2020-10-13","2":"m20_20","3":"18"},{"1":"2020-10-14","2":"m20_21","3":"18"},{"1":"2020-10-15","2":"m20_22","3":"18"},{"1":"2020-10-16","2":"m20_23","3":"18"},{"1":"2020-10-17","2":"m20_24","3":"18"},{"1":"2020-10-18","2":"m20_25","3":"18"},{"1":"2020-10-19","2":"m20_26","3":"18"},{"1":"2020-10-20","2":"m20_27","3":"19"},{"1":"2020-10-21","2":"m20_28","3":"15"},{"1":"2020-10-22","2":"m20_29","3":"17"},{"1":"2020-10-23","2":"m20_30","3":"17"},{"1":"2020-10-24","2":"m20_31","3":"17"},{"1":"2020-10-25","2":"m20_32","3":"17"},{"1":"2020-10-26","2":"m20_33","3":"17"},{"1":"2020-10-27","2":"m20_34","3":"19"},{"1":"2020-10-28","2":"m20_35","3":"17"},{"1":"2020-10-29","2":"m20_36","3":"16"},{"1":"2020-10-30","2":"m20_37","3":"16"},{"1":"2020-10-31","2":"m20_38","3":"15"},{"1":"2020-11-01","2":"m20_39","3":"1"},{"1":"2020-11-02","2":"m20_40","3":"2"},{"1":"2020-11-03","2":"m20_41","3":"15"},{"1":"2020-11-04","2":"m20_42","3":"15"},{"1":"2020-11-05","2":"m20_43","3":"14"},{"1":"2020-11-06","2":"m20_44","3":"14"},{"1":"2020-11-07","2":"m20_45","3":"15"},{"1":"2020-11-08","2":"m20_46","3":"13"},{"1":"2020-11-09","2":"m20_47","3":"16"},{"1":"2020-11-10","2":"m20_48","3":"16"},{"1":"2020-11-11","2":"m20_49","3":"15"},{"1":"2020-11-12","2":"m20_50","3":"15"},{"1":"2020-11-13","2":"m20_51","3":"15"},{"1":"2020-11-13","2":"m20_52","3":"5"},{"1":"2020-11-14","2":"m20_53","3":"5"},{"1":"2020-11-15","2":"m20_54","3":"2"},{"1":"2020-11-16","2":"m20_55","3":"2"},{"1":"2020-11-17","2":"m20_56","3":"15"},{"1":"2020-11-17","2":"m20_57","3":"1"},{"1":"2020-11-18","2":"m20_58","3":"17"},{"1":"2020-11-19","2":"m20_59","3":"17"},{"1":"2020-11-20","2":"m20_60","3":"16"},{"1":"2020-11-21","2":"m20_61","3":"21"},{"1":"2020-11-22","2":"m20_62","3":"21"},{"1":"2020-11-23","2":"m20_63","3":"21"},{"1":"2020-11-24","2":"m20_64","3":"21"},{"1":"2020-11-25","2":"m20_65","3":"21"},{"1":"2020-11-26","2":"m20_66","3":"21"},{"1":"2020-11-27","2":"m20_67","3":"21"},{"1":"2020-11-28","2":"m20_68","3":"21"},{"1":"2020-11-29","2":"m20_69","3":"21"},{"1":"2020-11-30","2":"m20_70","3":"21"},{"1":"2020-12-01","2":"m20_71","3":"20"},{"1":"2020-12-02","2":"m20_72","3":"21"},{"1":"2020-12-03","2":"m20_73","3":"19"},{"1":"2020-12-04","2":"m20_74","3":"21"},{"1":"2020-12-05","2":"m20_75","3":"20"},{"1":"2020-12-06","2":"m20_76","3":"21"},{"1":"2020-12-07","2":"m20_77","3":"21"},{"1":"2020-12-08","2":"m20_78","3":"21"},{"1":"2020-12-09","2":"m20_79","3":"19"},{"1":"2020-12-10","2":"m20_80","3":"19"},{"1":"2020-12-11","2":"m20_81","3":"19"},{"1":"2020-12-12","2":"m20_82","3":"18"},{"1":"2020-12-13","2":"m20_83","3":"19"},{"1":"2020-12-14","2":"m20_84","3":"18"},{"1":"2020-12-15","2":"m20_85","3":"19"},{"1":"2020-12-16","2":"m20_86","3":"21"},{"1":"2020-12-17","2":"m20_87","3":"21"},{"1":"2020-12-18","2":"m20_88","3":"21"},{"1":"2020-12-19","2":"m20_89","3":"21"},{"1":"2021-02-08","2":"nm21_1","3":"21"},{"1":"2021-02-09","2":"nm21_2","3":"21"},{"1":"2021-02-10","2":"nm21_3","3":"21"},{"1":"2021-02-11","2":"nm21_4","3":"21"},{"1":"2021-02-12","2":"nm21_5","3":"21"},{"1":"2021-02-13","2":"nm21_6","3":"21"},{"1":"2021-02-14","2":"nm21_7","3":"21"},{"1":"2021-02-15","2":"nm21_8","3":"21"},{"1":"2021-02-16","2":"nm21_9","3":"21"},{"1":"2021-02-17","2":"nm21_10","3":"21"},{"1":"2021-02-18","2":"nm21_11","3":"21"},{"1":"2021-02-19","2":"nm21_12","3":"21"},{"1":"2021-02-20","2":"nm21_13","3":"21"},{"1":"2021-02-21","2":"nm21_14","3":"21"},{"1":"2021-02-22","2":"nm21_15","3":"9"},{"1":"2021-02-23","2":"nm21_16","3":"9"},{"1":"2021-02-24","2":"nm21_17","3":"9"},{"1":"2021-02-25","2":"nm21_18","3":"9"},{"1":"2021-02-26","2":"nm21_19","3":"9"},{"1":"2021-02-27","2":"nm21_20","3":"9"},{"1":"2021-02-27","2":"nm21_21","3":"12"},{"1":"2021-02-28","2":"nm21_22","3":"11"},{"1":"2021-02-28","2":"nm21_23","3":"12"},{"1":"2021-03-01","2":"nm21_24","3":"11"},{"1":"2021-03-02","2":"nm21_25","3":"11"},{"1":"2021-03-03","2":"nm21_26","3":"11"},{"1":"2021-03-04","2":"nm21_27","3":"11"},{"1":"2021-03-05","2":"nm21_28","3":"11"},{"1":"2021-03-06","2":"nm21_29","3":"11"},{"1":"2021-03-07","2":"nm21_30","3":"0"},{"1":"2021-03-08","2":"nm21_31","3":"0"},{"1":"2021-03-09","2":"nm21_32","3":"21"},{"1":"2021-03-10","2":"nm21_33","3":"21"},{"1":"2021-03-11","2":"nm21_34","3":"21"},{"1":"2021-03-12","2":"nm21_35","3":"21"},{"1":"2021-03-13","2":"nm21_36","3":"21"},{"1":"2021-03-14","2":"nm21_37","3":"21"},{"1":"2021-03-15","2":"nm21_38","3":"20"},{"1":"2021-03-16","2":"nm21_39","3":"20"},{"1":"2021-03-17","2":"nm21_40","3":"15"},{"1":"2021-03-18","2":"nm21_41","3":"15"},{"1":"2021-03-19","2":"nm21_42","3":"15"},{"1":"2021-03-20","2":"nm21_43","3":"5"},{"1":"2021-03-20","2":"nm21_44","3":"20"},{"1":"2021-03-21","2":"nm21_45","3":"20"},{"1":"2021-03-22","2":"nm21_46","3":"20"},{"1":"2021-03-23","2":"nm21_47","3":"20"},{"1":"2021-03-24","2":"nm21_48","3":"20"},{"1":"2021-03-25","2":"nm21_49","3":"20"},{"1":"2021-03-26","2":"nm21_50","3":"20"},{"1":"2021-03-27","2":"nm21_51","3":"20"},{"1":"2021-09-20","2":"m21_1","3":"16"},{"1":"2021-09-21","2":"m21_2","3":"21"},{"1":"2021-09-22","2":"m21_3","3":"19"},{"1":"2021-09-23","2":"m21_4","3":"19"},{"1":"2021-09-24","2":"m21_5","3":"20"},{"1":"2021-09-25","2":"m21_6","3":"20"},{"1":"2021-09-26","2":"m21_7","3":"20"},{"1":"2021-09-27","2":"m21_8","3":"15"},{"1":"2021-09-28","2":"m21_9","3":"19"},{"1":"2021-09-29","2":"m21_10","3":"18"},{"1":"2021-09-30","2":"m21_11","3":"20"},{"1":"2021-10-01","2":"m21_12","3":"0"},{"1":"2021-10-02","2":"m21_13","3":"19"},{"1":"2021-10-03","2":"m21_14","3":"18"},{"1":"2021-10-04","2":"m21_15","3":"17"},{"1":"2021-10-05","2":"m21_16","3":"16"},{"1":"2021-10-06","2":"m21_17","3":"18"},{"1":"2021-10-07","2":"m21_18","3":"18"},{"1":"2021-10-08","2":"m21_19","3":"21"},{"1":"2021-10-09","2":"m21_20","3":"18"},{"1":"2021-10-10","2":"m21_21","3":"20"},{"1":"2021-10-11","2":"m21_22","3":"20"},{"1":"2021-10-12","2":"m21_23","3":"0"},{"1":"2021-10-13","2":"m21_24","3":"18"},{"1":"2021-10-14","2":"m21_25","3":"17"},{"1":"2021-10-15","2":"m21_26","3":"16"},{"1":"2021-10-16","2":"m21_27","3":"17"},{"1":"2021-10-17","2":"m21_28","3":"18"},{"1":"2021-10-18","2":"m21_29","3":"19"},{"1":"2021-10-19","2":"m21_30","3":"21"},{"1":"2021-10-20","2":"m21_31","3":"17"},{"1":"2021-10-21","2":"m21_32","3":"17"},{"1":"2021-10-22","2":"m21_33","3":"18"},{"1":"2021-10-23","2":"m21_34","3":"16"},{"1":"2021-10-23","2":"m21_35","3":"1"},{"1":"2021-10-24","2":"m21_36","3":"19"},{"1":"2021-10-25","2":"m21_37","3":"19"},{"1":"2021-10-26","2":"m21_38","3":"19"},{"1":"2021-10-27","2":"m21_39","3":"19"},{"1":"2021-10-28","2":"m21_40","3":"19"},{"1":"2021-10-29","2":"m21_41","3":"18"},{"1":"2021-10-30","2":"m21_42","3":"18"},{"1":"2021-10-31","2":"m21_43","3":"18"},{"1":"2021-11-01","2":"m21_44","3":"17"},{"1":"2021-11-02","2":"m21_45","3":"18"},{"1":"2021-11-03","2":"m21_46","3":"17"},{"1":"2021-11-04","2":"m21_47","3":"17"},{"1":"2021-11-05","2":"m21_48","3":"18"},{"1":"2021-11-06","2":"m21_49","3":"19"},{"1":"2021-11-07","2":"m21_50","3":"19"},{"1":"2021-11-08","2":"m21_51","3":"18"},{"1":"2021-11-09","2":"m21_52","3":"19"},{"1":"2021-11-10","2":"m21_53","3":"19"},{"1":"2021-11-10","2":"m21_54","3":"3"},{"1":"2021-11-11","2":"m21_55","3":"18"},{"1":"2021-11-12","2":"m21_56","3":"0"},{"1":"2021-11-13","2":"m21_57","3":"7"},{"1":"2021-11-14","2":"m21_58","3":"18"},{"1":"2021-11-15","2":"m21_59","3":"18"},{"1":"2021-11-16","2":"m21_60","3":"17"},{"1":"2021-11-17","2":"m21_61","3":"21"},{"1":"2021-11-18","2":"m21_62","3":"21"},{"1":"2021-11-19","2":"m21_63","3":"17"},{"1":"2021-11-20","2":"m21_64","3":"12"},{"1":"2021-11-21","2":"m21_65","3":"17"},{"1":"2021-11-22","2":"m21_66","3":"0"},{"1":"2021-11-23","2":"m21_67","3":"3"},{"1":"2021-11-24","2":"m21_68","3":"20"},{"1":"2021-11-25","2":"m21_69","3":"20"},{"1":"2021-11-26","2":"m21_70","3":"17"},{"1":"2021-11-27","2":"m21_71","3":"17"},{"1":"2021-11-28","2":"m21_72","3":"17"},{"1":"2021-11-29","2":"m21_73","3":"17"},{"1":"2021-11-30","2":"m21_74","3":"20"},{"1":"2021-12-01","2":"m21_75","3":"20"},{"1":"2021-12-02","2":"m21_76","3":"20"},{"1":"2021-12-03","2":"m21_77","3":"20"},{"1":"2021-12-04","2":"m21_78","3":"17"},{"1":"2021-12-05","2":"m21_79","3":"17"},{"1":"2021-12-06","2":"m21_80","3":"20"},{"1":"2021-12-07","2":"m21_81","3":"20"},{"1":"2021-12-08","2":"m21_82","3":"0"},{"1":"2021-12-09","2":"m21_83","3":"21"},{"1":"2021-12-10","2":"m21_84","3":"21"},{"1":"2021-12-11","2":"m21_85","3":"21"},{"1":"2021-12-12","2":"m21_86","3":"21"},{"1":"2021-12-13","2":"m21_87","3":"21"},{"1":"2021-12-14","2":"m21_88","3":"21"},{"1":"2021-12-15","2":"m21_89","3":"21"},{"1":"2021-12-16","2":"m21_90","3":"21"},{"1":"2021-12-17","2":"m21_91","3":"21"},{"1":"2022-02-14","2":"nm22_1","3":"0"},{"1":"2022-02-15","2":"nm22_2","3":"0"},{"1":"2022-02-16","2":"nm22_3","3":"21"},{"1":"2022-02-17","2":"nm22_4","3":"21"},{"1":"2022-02-18","2":"nm22_5","3":"21"},{"1":"2022-02-19","2":"nm22_6","3":"21"},{"1":"2022-02-20","2":"nm22_7","3":"21"},{"1":"2022-02-21","2":"nm22_8","3":"21"},{"1":"2022-02-22","2":"nm22_9","3":"21"},{"1":"2022-02-23","2":"nm22_10","3":"21"},{"1":"2022-02-24","2":"nm22_11","3":"21"},{"1":"2022-02-25","2":"nm22_12","3":"21"},{"1":"2022-02-26","2":"nm22_13","3":"21"},{"1":"2022-02-27","2":"nm22_14","3":"21"},{"1":"2022-02-28","2":"nm22_15","3":"21"},{"1":"2022-03-01","2":"nm22_16","3":"21"},{"1":"2022-03-02","2":"nm22_17","3":"21"},{"1":"2022-03-03","2":"nm22_18","3":"21"},{"1":"2022-03-04","2":"nm22_19","3":"21"},{"1":"2022-03-05","2":"nm22_20","3":"21"},{"1":"2022-03-06","2":"nm22_21","3":"21"},{"1":"2022-03-07","2":"nm22_22","3":"21"},{"1":"2022-03-08","2":"nm22_23","3":"21"},{"1":"2022-03-09","2":"nm22_24","3":"21"},{"1":"2022-03-10","2":"nm22_25","3":"21"},{"1":"2022-03-11","2":"nm22_26","3":"21"},{"1":"2022-03-12","2":"nm22_27","3":"21"},{"1":"2022-03-13","2":"nm22_28","3":"21"},{"1":"2022-03-14","2":"nm22_29","3":"21"},{"1":"2022-03-15","2":"nm22_30","3":"21"},{"1":"2022-03-16","2":"nm22_31","3":"20"},{"1":"2022-03-17","2":"nm22_32","3":"21"},{"1":"2022-03-18","2":"nm22_33","3":"21"},{"1":"2022-03-19","2":"nm22_34","3":"21"},{"1":"2022-03-20","2":"nm22_35","3":"21"},{"1":"2022-03-21","2":"nm22_36","3":"21"},{"1":"2022-03-22","2":"nm22_37","3":"21"},{"1":"2022-03-23","2":"nm22_38","3":"21"},{"1":"2022-03-24","2":"nm22_39","3":"21"},{"1":"2022-03-25","2":"nm22_40","3":"21"},{"1":"2022-03-26","2":"nm22_41","3":"21"},{"1":"2022-03-27","2":"nm22_42","3":"0"},{"1":"2022-03-28","2":"nm22_43","3":"0"},{"1":"2022-03-29","2":"nm22_44","3":"21"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="06_male_presence.html#cb94-1" tabindex="-1"></a>group_all <span class="sc">%&gt;%</span> </span>
+<span id="cb94-2"><a href="06_male_presence.html#cb94-2" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">dur =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(suspend), <span class="fu">as.numeric</span>(fin <span class="sc">-</span> start)<span class="sc">/</span><span class="dv">60</span>,</span>
+<span id="cb94-3"><a href="06_male_presence.html#cb94-3" tabindex="-1"></a>                      <span class="fu">as.numeric</span>(fin <span class="sc">-</span> start <span class="sc">-</span> (restart <span class="sc">-</span> suspend))<span class="sc">/</span><span class="dv">60</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb94-4"><a href="06_male_presence.html#cb94-4" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(TY,IT, LK,KR,KM,TG)) <span class="sc">%&gt;%</span> </span>
+<span id="cb94-5"><a href="06_male_presence.html#cb94-5" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> Kur<span class="sc">:</span>Yun,</span>
+<span id="cb94-6"><a href="06_male_presence.html#cb94-6" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">&quot;femaleID&quot;</span>,</span>
+<span id="cb94-7"><a href="06_male_presence.html#cb94-7" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">&quot;presence&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb94-8"><a href="06_male_presence.html#cb94-8" tabindex="-1"></a>  <span class="fu">filter</span>(presence <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb94-9"><a href="06_male_presence.html#cb94-9" tabindex="-1"></a>  <span class="fu">left_join</span>(att, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;femaleID&quot;</span>, <span class="st">&quot;study_period&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb94-10"><a href="06_male_presence.html#cb94-10" tabindex="-1"></a>  <span class="fu">filter</span>(age <span class="sc">&gt;=</span> <span class="dv">6</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb94-11"><a href="06_male_presence.html#cb94-11" tabindex="-1"></a>  <span class="fu">group_by</span>(groupID) <span class="sc">%&gt;%</span> </span>
+<span id="cb94-12"><a href="06_male_presence.html#cb94-12" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">no_female =</span> <span class="fu">sum</span>(presence),</span>
+<span id="cb94-13"><a href="06_male_presence.html#cb94-13" tabindex="-1"></a>            <span class="at">date =</span> <span class="fu">unique</span>(date),</span>
+<span id="cb94-14"><a href="06_male_presence.html#cb94-14" tabindex="-1"></a>            <span class="at">dur =</span> <span class="fu">unique</span>(dur),</span>
+<span id="cb94-15"><a href="06_male_presence.html#cb94-15" tabindex="-1"></a>            <span class="at">study_period =</span> <span class="fu">unique</span>(study_period)) <span class="sc">%&gt;%</span> </span>
+<span id="cb94-16"><a href="06_male_presence.html#cb94-16" tabindex="-1"></a>  <span class="fu">left_join</span>(max_female, <span class="at">by =</span> <span class="st">&quot;date&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb94-17"><a href="06_male_presence.html#cb94-17" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb94-18"><a href="06_male_presence.html#cb94-18" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">prop =</span> no_female<span class="sc">/</span>max_female) <span class="sc">%&gt;%</span> </span>
+<span id="cb94-19"><a href="06_male_presence.html#cb94-19" tabindex="-1"></a>  <span class="fu">filter</span>(prop <span class="sc">&gt;=</span> <span class="fl">0.5</span>)</span></code></pre></div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["groupID"],"name":[1],"type":["chr"],"align":["left"]},{"label":["no_female"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["date"],"name":[3],"type":["date"],"align":["right"]},{"label":["dur"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["study_period"],"name":[5],"type":["chr"],"align":["left"]},{"label":["max_female"],"name":[6],"type":["int"],"align":["right"]},{"label":["prop"],"name":[7],"type":["dbl"],"align":["right"]}],"data":[{"1":"m18_1","2":"16","3":"2018-10-01","4":"501","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_10","2":"17","3":"2018-10-10","4":"680","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_11","2":"17","3":"2018-10-11","4":"663","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_12","2":"17","3":"2018-10-12","4":"660","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_13","2":"16","3":"2018-10-13","4":"668","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_14","2":"17","3":"2018-10-14","4":"682","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_15","2":"17","3":"2018-10-15","4":"675","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_16","2":"17","3":"2018-10-16","4":"687","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_17","2":"17","3":"2018-10-17","4":"615","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_18","2":"17","3":"2018-10-18","4":"684","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_19","2":"17","3":"2018-10-19","4":"678","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_2","2":"17","3":"2018-10-02","4":"710","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_20","2":"16","3":"2018-10-20","4":"664","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_21","2":"16","3":"2018-10-21","4":"670","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_22","2":"16","3":"2018-10-22","4":"677","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_23","2":"16","3":"2018-10-23","4":"647","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_24","2":"16","3":"2018-10-24","4":"360","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_25","2":"16","3":"2018-10-25","4":"678","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_26","2":"17","3":"2018-10-26","4":"663","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_27","2":"16","3":"2018-10-27","4":"64","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_28","2":"16","3":"2018-10-28","4":"656","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_29","2":"16","3":"2018-10-29","4":"642","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_3","2":"17","3":"2018-10-03","4":"692","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_30","2":"16","3":"2018-10-30","4":"197","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_31","2":"17","3":"2018-10-31","4":"666","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_32","2":"17","3":"2018-11-01","4":"588","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_33","2":"16","3":"2018-11-02","4":"667","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_36","2":"16","3":"2018-11-05","4":"536","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_37","2":"16","3":"2018-11-06","4":"631","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_38","2":"16","3":"2018-11-07","4":"573","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_39","2":"16","3":"2018-11-08","4":"653","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_4","2":"17","3":"2018-10-04","4":"645","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_40","2":"16","3":"2018-11-09","4":"617","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_41","2":"16","3":"2018-11-10","4":"658","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_42","2":"16","3":"2018-11-11","4":"640","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_43","2":"16","3":"2018-11-12","4":"663","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_44","2":"16","3":"2018-11-13","4":"652","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_45","2":"17","3":"2018-11-14","4":"638","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_46","2":"17","3":"2018-11-15","4":"640","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_47","2":"16","3":"2018-11-16","4":"648","5":"m18","6":"17","7":"0.9411765"},{"1":"m18_5","2":"17","3":"2018-10-05","4":"648","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_52","2":"15","3":"2018-11-21","4":"613","5":"m18","6":"17","7":"0.8823529"},{"1":"m18_53","2":"17","3":"2018-11-22","4":"270","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_57","2":"17","3":"2018-11-26","4":"562","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_58","2":"17","3":"2018-11-27","4":"564","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_59","2":"17","3":"2018-11-28","4":"606","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_60","2":"17","3":"2018-11-29","4":"605","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_61","2":"17","3":"2018-11-30","4":"619","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_62","2":"17","3":"2018-12-01","4":"618","5":"m18","6":"17","7":"1.0000000"},{"1":"m18_8","2":"14","3":"2018-10-08","4":"554","5":"m18","6":"17","7":"0.8235294"},{"1":"m18_9","2":"17","3":"2018-10-09","4":"635","5":"m18","6":"17","7":"1.0000000"},{"1":"m19_1","2":"18","3":"2019-09-08","4":"747","5":"m19","6":"18","7":"1.0000000"},{"1":"m19_10","2":"18","3":"2019-09-17","4":"722","5":"m19","6":"18","7":"1.0000000"},{"1":"m19_11","2":"17","3":"2019-09-18","4":"711","5":"m19","6":"17","7":"1.0000000"},{"1":"m19_12","2":"17","3":"2019-09-19","4":"730","5":"m19","6":"17","7":"1.0000000"},{"1":"m19_13","2":"17","3":"2019-09-20","4":"675","5":"m19","6":"17","7":"1.0000000"},{"1":"m19_14","2":"17","3":"2019-09-21","4":"703","5":"m19","6":"17","7":"1.0000000"},{"1":"m19_15","2":"17","3":"2019-09-22","4":"583","5":"m19","6":"17","7":"1.0000000"},{"1":"m19_16","2":"17","3":"2019-09-23","4":"723","5":"m19","6":"17","7":"1.0000000"},{"1":"m19_17","2":"17","3":"2019-09-24","4":"722","5":"m19","6":"17","7":"1.0000000"},{"1":"m19_19","2":"16","3":"2019-09-26","4":"266","5":"m19","6":"17","7":"0.9411765"},{"1":"m19_2","2":"10","3":"2019-09-09","4":"31","5":"m19","6":"18","7":"0.5555556"},{"1":"m19_20","2":"17","3":"2019-09-27","4":"252","5":"m19","6":"17","7":"1.0000000"},{"1":"m19_26","2":"10","3":"2019-10-01","4":"667","5":"m19","6":"17","7":"0.5882353"},{"1":"m19_27","2":"17","3":"2019-10-02","4":"723","5":"m19","6":"17","7":"1.0000000"},{"1":"m19_28","2":"17","3":"2019-10-03","4":"680","5":"m19","6":"17","7":"1.0000000"},{"1":"m19_29","2":"17","3":"2019-10-04","4":"708","5":"m19","6":"17","7":"1.0000000"},{"1":"m19_3","2":"17","3":"2019-09-10","4":"728","5":"m19","6":"18","7":"0.9444444"},{"1":"m19_30","2":"17","3":"2019-10-05","4":"719","5":"m19","6":"17","7":"1.0000000"},{"1":"m19_31","2":"16","3":"2019-10-06","4":"709","5":"m19","6":"17","7":"0.9411765"},{"1":"m19_32","2":"17","3":"2019-10-07","4":"688","5":"m19","6":"17","7":"1.0000000"},{"1":"m19_33","2":"15","3":"2019-10-08","4":"546","5":"m19","6":"17","7":"0.8823529"},{"1":"m19_34","2":"17","3":"2019-10-09","4":"704","5":"m19","6":"17","7":"1.0000000"},{"1":"m19_35","2":"17","3":"2019-10-10","4":"703","5":"m19","6":"17","7":"1.0000000"},{"1":"m19_38","2":"9","3":"2019-10-13","4":"149","5":"m19","6":"17","7":"0.5294118"},{"1":"m19_39","2":"14","3":"2019-10-14","4":"681","5":"m19","6":"17","7":"0.8235294"},{"1":"m19_4","2":"16","3":"2019-09-11","4":"650","5":"m19","6":"18","7":"0.8888889"},{"1":"m19_40","2":"15","3":"2019-10-15","4":"691","5":"m19","6":"17","7":"0.8823529"},{"1":"m19_42","2":"16","3":"2019-10-16","4":"708","5":"m19","6":"17","7":"0.9411765"},{"1":"m19_43","2":"17","3":"2019-10-17","4":"711","5":"m19","6":"17","7":"1.0000000"},{"1":"m19_44","2":"17","3":"2019-10-18","4":"704","5":"m19","6":"17","7":"1.0000000"},{"1":"m19_49","2":"16","3":"2019-10-23","4":"704","5":"m19","6":"17","7":"0.9411765"},{"1":"m19_5","2":"16","3":"2019-09-12","4":"755","5":"m19","6":"18","7":"0.8888889"},{"1":"m19_50","2":"16","3":"2019-10-24","4":"710","5":"m19","6":"17","7":"0.9411765"},{"1":"m19_51","2":"16","3":"2019-10-25","4":"655","5":"m19","6":"17","7":"0.9411765"},{"1":"m19_52","2":"15","3":"2019-10-26","4":"515","5":"m19","6":"17","7":"0.8823529"},{"1":"m19_55","2":"10","3":"2019-10-27","4":"697","5":"m19","6":"17","7":"0.5882353"},{"1":"m19_56","2":"9","3":"2019-10-28","4":"702","5":"m19","6":"17","7":"0.5294118"},{"1":"m19_57","2":"9","3":"2019-10-29","4":"677","5":"m19","6":"17","7":"0.5294118"},{"1":"m19_58","2":"9","3":"2019-10-30","4":"672","5":"m19","6":"17","7":"0.5294118"},{"1":"m19_59","2":"9","3":"2019-10-31","4":"661","5":"m19","6":"17","7":"0.5294118"},{"1":"m19_6","2":"17","3":"2019-09-13","4":"727","5":"m19","6":"18","7":"0.9444444"},{"1":"m19_60","2":"9","3":"2019-11-01","4":"675","5":"m19","6":"17","7":"0.5294118"},{"1":"m19_61","2":"10","3":"2019-11-02","4":"672","5":"m19","6":"17","7":"0.5882353"},{"1":"m19_62","2":"12","3":"2019-11-03","4":"669","5":"m19","6":"17","7":"0.7058824"},{"1":"m19_63","2":"11","3":"2019-11-04","4":"682","5":"m19","6":"17","7":"0.6470588"},{"1":"m19_64","2":"10","3":"2019-11-05","4":"676","5":"m19","6":"17","7":"0.5882353"},{"1":"m19_65","2":"11","3":"2019-11-06","4":"673","5":"m19","6":"17","7":"0.6470588"},{"1":"m19_66","2":"10","3":"2019-11-07","4":"663","5":"m19","6":"17","7":"0.5882353"},{"1":"m19_67","2":"11","3":"2019-11-08","4":"664","5":"m19","6":"17","7":"0.6470588"},{"1":"m19_68","2":"11","3":"2019-11-09","4":"677","5":"m19","6":"17","7":"0.6470588"},{"1":"m19_69","2":"11","3":"2019-11-10","4":"103","5":"m19","6":"17","7":"0.6470588"},{"1":"m19_7","2":"17","3":"2019-09-14","4":"725","5":"m19","6":"18","7":"0.9444444"},{"1":"m19_8","2":"17","3":"2019-09-15","4":"711","5":"m19","6":"18","7":"0.9444444"},{"1":"m19_9","2":"18","3":"2019-09-16","4":"448","5":"m19","6":"18","7":"1.0000000"},{"1":"m20_1","2":"20","3":"2020-09-21","4":"612","5":"m20","6":"21","7":"0.9523810"},{"1":"m20_10","2":"18","3":"2020-10-01","4":"633","5":"m20","6":"21","7":"0.8571429"},{"1":"m20_11","2":"20","3":"2020-10-02","4":"388","5":"m20","6":"21","7":"0.9523810"},{"1":"m20_12","2":"16","3":"2020-10-03","4":"186","5":"m20","6":"21","7":"0.7619048"},{"1":"m20_13","2":"18","3":"2020-10-04","4":"660","5":"m20","6":"21","7":"0.8571429"},{"1":"m20_15","2":"18","3":"2020-10-08","4":"328","5":"m20","6":"21","7":"0.8571429"},{"1":"m20_16","2":"18","3":"2020-10-09","4":"675","5":"m20","6":"21","7":"0.8571429"},{"1":"m20_17","2":"21","3":"2020-10-10","4":"469","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_18","2":"16","3":"2020-10-11","4":"692","5":"m20","6":"21","7":"0.7619048"},{"1":"m20_19","2":"19","3":"2020-10-12","4":"667","5":"m20","6":"21","7":"0.9047619"},{"1":"m20_2","2":"15","3":"2020-09-22","4":"692","5":"m20","6":"21","7":"0.7142857"},{"1":"m20_20","2":"18","3":"2020-10-13","4":"645","5":"m20","6":"21","7":"0.8571429"},{"1":"m20_21","2":"18","3":"2020-10-14","4":"668","5":"m20","6":"21","7":"0.8571429"},{"1":"m20_22","2":"18","3":"2020-10-15","4":"662","5":"m20","6":"21","7":"0.8571429"},{"1":"m20_23","2":"18","3":"2020-10-16","4":"666","5":"m20","6":"21","7":"0.8571429"},{"1":"m20_24","2":"18","3":"2020-10-17","4":"677","5":"m20","6":"21","7":"0.8571429"},{"1":"m20_25","2":"18","3":"2020-10-18","4":"683","5":"m20","6":"21","7":"0.8571429"},{"1":"m20_26","2":"18","3":"2020-10-19","4":"688","5":"m20","6":"21","7":"0.8571429"},{"1":"m20_27","2":"19","3":"2020-10-20","4":"704","5":"m20","6":"21","7":"0.9047619"},{"1":"m20_28","2":"15","3":"2020-10-21","4":"672","5":"m20","6":"21","7":"0.7142857"},{"1":"m20_29","2":"17","3":"2020-10-22","4":"700","5":"m20","6":"21","7":"0.8095238"},{"1":"m20_3","2":"19","3":"2020-09-23","4":"659","5":"m20","6":"21","7":"0.9047619"},{"1":"m20_30","2":"17","3":"2020-10-23","4":"683","5":"m20","6":"21","7":"0.8095238"},{"1":"m20_31","2":"17","3":"2020-10-24","4":"656","5":"m20","6":"21","7":"0.8095238"},{"1":"m20_32","2":"17","3":"2020-10-25","4":"691","5":"m20","6":"21","7":"0.8095238"},{"1":"m20_33","2":"17","3":"2020-10-26","4":"663","5":"m20","6":"21","7":"0.8095238"},{"1":"m20_34","2":"19","3":"2020-10-27","4":"686","5":"m20","6":"21","7":"0.9047619"},{"1":"m20_35","2":"17","3":"2020-10-28","4":"699","5":"m20","6":"21","7":"0.8095238"},{"1":"m20_36","2":"16","3":"2020-10-29","4":"681","5":"m20","6":"21","7":"0.7619048"},{"1":"m20_37","2":"16","3":"2020-10-30","4":"681","5":"m20","6":"21","7":"0.7619048"},{"1":"m20_38","2":"15","3":"2020-10-31","4":"271","5":"m20","6":"21","7":"0.7142857"},{"1":"m20_4","2":"17","3":"2020-09-24","4":"391","5":"m20","6":"21","7":"0.8095238"},{"1":"m20_41","2":"15","3":"2020-11-03","4":"676","5":"m20","6":"21","7":"0.7142857"},{"1":"m20_42","2":"15","3":"2020-11-04","4":"683","5":"m20","6":"21","7":"0.7142857"},{"1":"m20_43","2":"14","3":"2020-11-05","4":"687","5":"m20","6":"21","7":"0.6666667"},{"1":"m20_44","2":"14","3":"2020-11-06","4":"660","5":"m20","6":"21","7":"0.6666667"},{"1":"m20_45","2":"15","3":"2020-11-07","4":"638","5":"m20","6":"21","7":"0.7142857"},{"1":"m20_46","2":"13","3":"2020-11-08","4":"679","5":"m20","6":"21","7":"0.6190476"},{"1":"m20_47","2":"16","3":"2020-11-09","4":"553","5":"m20","6":"21","7":"0.7619048"},{"1":"m20_48","2":"16","3":"2020-11-10","4":"679","5":"m20","6":"21","7":"0.7619048"},{"1":"m20_49","2":"15","3":"2020-11-11","4":"665","5":"m20","6":"21","7":"0.7142857"},{"1":"m20_5","2":"21","3":"2020-09-25","4":"291","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_50","2":"15","3":"2020-11-12","4":"654","5":"m20","6":"21","7":"0.7142857"},{"1":"m20_51","2":"15","3":"2020-11-13","4":"487","5":"m20","6":"21","7":"0.7142857"},{"1":"m20_56","2":"15","3":"2020-11-17","4":"314","5":"m20","6":"21","7":"0.7142857"},{"1":"m20_58","2":"17","3":"2020-11-18","4":"667","5":"m20","6":"21","7":"0.8095238"},{"1":"m20_59","2":"17","3":"2020-11-19","4":"655","5":"m20","6":"21","7":"0.8095238"},{"1":"m20_6","2":"19","3":"2020-09-26","4":"509","5":"m20","6":"21","7":"0.9047619"},{"1":"m20_60","2":"16","3":"2020-11-20","4":"330","5":"m20","6":"21","7":"0.7619048"},{"1":"m20_61","2":"21","3":"2020-11-21","4":"648","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_62","2":"21","3":"2020-11-22","4":"656","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_63","2":"21","3":"2020-11-23","4":"655","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_64","2":"21","3":"2020-11-24","4":"652","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_65","2":"21","3":"2020-11-25","4":"629","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_66","2":"21","3":"2020-11-26","4":"639","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_67","2":"21","3":"2020-11-27","4":"656","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_68","2":"21","3":"2020-11-28","4":"649","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_69","2":"21","3":"2020-11-29","4":"474","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_7","2":"20","3":"2020-09-28","4":"656","5":"m20","6":"21","7":"0.9523810"},{"1":"m20_70","2":"21","3":"2020-11-30","4":"638","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_71","2":"20","3":"2020-12-01","4":"652","5":"m20","6":"21","7":"0.9523810"},{"1":"m20_72","2":"21","3":"2020-12-02","4":"688","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_73","2":"19","3":"2020-12-03","4":"664","5":"m20","6":"21","7":"0.9047619"},{"1":"m20_74","2":"21","3":"2020-12-04","4":"648","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_75","2":"20","3":"2020-12-05","4":"649","5":"m20","6":"21","7":"0.9523810"},{"1":"m20_76","2":"21","3":"2020-12-06","4":"650","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_77","2":"21","3":"2020-12-07","4":"634","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_78","2":"21","3":"2020-12-08","4":"638","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_79","2":"19","3":"2020-12-09","4":"641","5":"m20","6":"21","7":"0.9047619"},{"1":"m20_8","2":"21","3":"2020-09-29","4":"698","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_80","2":"19","3":"2020-12-10","4":"659","5":"m20","6":"21","7":"0.9047619"},{"1":"m20_81","2":"19","3":"2020-12-11","4":"635","5":"m20","6":"21","7":"0.9047619"},{"1":"m20_82","2":"18","3":"2020-12-12","4":"585","5":"m20","6":"21","7":"0.8571429"},{"1":"m20_83","2":"19","3":"2020-12-13","4":"519","5":"m20","6":"21","7":"0.9047619"},{"1":"m20_84","2":"18","3":"2020-12-14","4":"641","5":"m20","6":"21","7":"0.8571429"},{"1":"m20_85","2":"19","3":"2020-12-15","4":"641","5":"m20","6":"21","7":"0.9047619"},{"1":"m20_86","2":"21","3":"2020-12-16","4":"613","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_87","2":"21","3":"2020-12-17","4":"601","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_88","2":"21","3":"2020-12-18","4":"641","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_89","2":"21","3":"2020-12-19","4":"636","5":"m20","6":"21","7":"1.0000000"},{"1":"m20_9","2":"20","3":"2020-09-30","4":"642","5":"m20","6":"21","7":"0.9523810"},{"1":"m21_1","2":"16","3":"2021-09-20","4":"66","5":"m21","6":"21","7":"0.7619048"},{"1":"m21_10","2":"18","3":"2021-09-29","4":"703","5":"m21","6":"21","7":"0.8571429"},{"1":"m21_11","2":"20","3":"2021-09-30","4":"717","5":"m21","6":"21","7":"0.9523810"},{"1":"m21_13","2":"19","3":"2021-10-02","4":"716","5":"m21","6":"21","7":"0.9047619"},{"1":"m21_14","2":"18","3":"2021-10-03","4":"707","5":"m21","6":"21","7":"0.8571429"},{"1":"m21_15","2":"17","3":"2021-10-04","4":"620","5":"m21","6":"21","7":"0.8095238"},{"1":"m21_16","2":"16","3":"2021-10-05","4":"712","5":"m21","6":"21","7":"0.7619048"},{"1":"m21_17","2":"18","3":"2021-10-06","4":"699","5":"m21","6":"21","7":"0.8571429"},{"1":"m21_18","2":"18","3":"2021-10-07","4":"686","5":"m21","6":"21","7":"0.8571429"},{"1":"m21_19","2":"21","3":"2021-10-08","4":"700","5":"m21","6":"21","7":"1.0000000"},{"1":"m21_2","2":"21","3":"2021-09-21","4":"684","5":"m21","6":"21","7":"1.0000000"},{"1":"m21_20","2":"18","3":"2021-10-09","4":"604","5":"m21","6":"21","7":"0.8571429"},{"1":"m21_21","2":"20","3":"2021-10-10","4":"653","5":"m21","6":"21","7":"0.9523810"},{"1":"m21_22","2":"20","3":"2021-10-11","4":"698","5":"m21","6":"21","7":"0.9523810"},{"1":"m21_24","2":"18","3":"2021-10-13","4":"555","5":"m21","6":"21","7":"0.8571429"},{"1":"m21_25","2":"17","3":"2021-10-14","4":"235","5":"m21","6":"21","7":"0.8095238"},{"1":"m21_26","2":"16","3":"2021-10-15","4":"251","5":"m21","6":"21","7":"0.7619048"},{"1":"m21_27","2":"17","3":"2021-10-16","4":"652","5":"m21","6":"21","7":"0.8095238"},{"1":"m21_28","2":"18","3":"2021-10-17","4":"650","5":"m21","6":"21","7":"0.8571429"},{"1":"m21_29","2":"19","3":"2021-10-18","4":"678","5":"m21","6":"21","7":"0.9047619"},{"1":"m21_3","2":"19","3":"2021-09-22","4":"662","5":"m21","6":"21","7":"0.9047619"},{"1":"m21_30","2":"21","3":"2021-10-19","4":"650","5":"m21","6":"21","7":"1.0000000"},{"1":"m21_31","2":"17","3":"2021-10-20","4":"674","5":"m21","6":"21","7":"0.8095238"},{"1":"m21_32","2":"17","3":"2021-10-21","4":"666","5":"m21","6":"21","7":"0.8095238"},{"1":"m21_33","2":"18","3":"2021-10-22","4":"502","5":"m21","6":"21","7":"0.8571429"},{"1":"m21_34","2":"16","3":"2021-10-23","4":"385","5":"m21","6":"21","7":"0.7619048"},{"1":"m21_36","2":"19","3":"2021-10-24","4":"662","5":"m21","6":"21","7":"0.9047619"},{"1":"m21_37","2":"19","3":"2021-10-25","4":"667","5":"m21","6":"21","7":"0.9047619"},{"1":"m21_38","2":"19","3":"2021-10-26","4":"192","5":"m21","6":"21","7":"0.9047619"},{"1":"m21_39","2":"19","3":"2021-10-27","4":"673","5":"m21","6":"21","7":"0.9047619"},{"1":"m21_4","2":"19","3":"2021-09-23","4":"627","5":"m21","6":"21","7":"0.9047619"},{"1":"m21_40","2":"19","3":"2021-10-28","4":"660","5":"m21","6":"21","7":"0.9047619"},{"1":"m21_41","2":"18","3":"2021-10-29","4":"678","5":"m21","6":"21","7":"0.8571429"},{"1":"m21_42","2":"18","3":"2021-10-30","4":"670","5":"m21","6":"21","7":"0.8571429"},{"1":"m21_43","2":"18","3":"2021-10-31","4":"632","5":"m21","6":"21","7":"0.8571429"},{"1":"m21_44","2":"17","3":"2021-11-01","4":"646","5":"m21","6":"21","7":"0.8095238"},{"1":"m21_45","2":"18","3":"2021-11-02","4":"677","5":"m21","6":"21","7":"0.8571429"},{"1":"m21_46","2":"17","3":"2021-11-03","4":"670","5":"m21","6":"21","7":"0.8095238"},{"1":"m21_47","2":"17","3":"2021-11-04","4":"657","5":"m21","6":"21","7":"0.8095238"},{"1":"m21_48","2":"18","3":"2021-11-05","4":"673","5":"m21","6":"21","7":"0.8571429"},{"1":"m21_49","2":"19","3":"2021-11-06","4":"674","5":"m21","6":"21","7":"0.9047619"},{"1":"m21_5","2":"20","3":"2021-09-24","4":"719","5":"m21","6":"21","7":"0.9523810"},{"1":"m21_50","2":"19","3":"2021-11-07","4":"682","5":"m21","6":"21","7":"0.9047619"},{"1":"m21_51","2":"18","3":"2021-11-08","4":"648","5":"m21","6":"21","7":"0.8571429"},{"1":"m21_52","2":"19","3":"2021-11-09","4":"545","5":"m21","6":"21","7":"0.9047619"},{"1":"m21_53","2":"19","3":"2021-11-10","4":"439","5":"m21","6":"21","7":"0.9047619"},{"1":"m21_55","2":"18","3":"2021-11-11","4":"649","5":"m21","6":"21","7":"0.8571429"},{"1":"m21_58","2":"18","3":"2021-11-14","4":"651","5":"m21","6":"21","7":"0.8571429"},{"1":"m21_59","2":"18","3":"2021-11-15","4":"650","5":"m21","6":"21","7":"0.8571429"},{"1":"m21_6","2":"20","3":"2021-09-25","4":"720","5":"m21","6":"21","7":"0.9523810"},{"1":"m21_60","2":"17","3":"2021-11-16","4":"663","5":"m21","6":"21","7":"0.8095238"},{"1":"m21_61","2":"21","3":"2021-11-17","4":"659","5":"m21","6":"21","7":"1.0000000"},{"1":"m21_62","2":"21","3":"2021-11-18","4":"660","5":"m21","6":"21","7":"1.0000000"},{"1":"m21_63","2":"17","3":"2021-11-19","4":"656","5":"m21","6":"21","7":"0.8095238"},{"1":"m21_64","2":"12","3":"2021-11-20","4":"452","5":"m21","6":"21","7":"0.5714286"},{"1":"m21_65","2":"17","3":"2021-11-21","4":"657","5":"m21","6":"21","7":"0.8095238"},{"1":"m21_68","2":"20","3":"2021-11-24","4":"477","5":"m21","6":"21","7":"0.9523810"},{"1":"m21_69","2":"20","3":"2021-11-25","4":"482","5":"m21","6":"21","7":"0.9523810"},{"1":"m21_7","2":"20","3":"2021-09-26","4":"703","5":"m21","6":"21","7":"0.9523810"},{"1":"m21_70","2":"17","3":"2021-11-26","4":"610","5":"m21","6":"21","7":"0.8095238"},{"1":"m21_71","2":"17","3":"2021-11-27","4":"645","5":"m21","6":"21","7":"0.8095238"},{"1":"m21_72","2":"17","3":"2021-11-28","4":"621","5":"m21","6":"21","7":"0.8095238"},{"1":"m21_73","2":"17","3":"2021-11-29","4":"625","5":"m21","6":"21","7":"0.8095238"},{"1":"m21_74","2":"20","3":"2021-11-30","4":"641","5":"m21","6":"21","7":"0.9523810"},{"1":"m21_75","2":"20","3":"2021-12-01","4":"391","5":"m21","6":"21","7":"0.9523810"},{"1":"m21_76","2":"20","3":"2021-12-02","4":"625","5":"m21","6":"21","7":"0.9523810"},{"1":"m21_77","2":"20","3":"2021-12-03","4":"622","5":"m21","6":"21","7":"0.9523810"},{"1":"m21_78","2":"17","3":"2021-12-04","4":"633","5":"m21","6":"21","7":"0.8095238"},{"1":"m21_79","2":"17","3":"2021-12-05","4":"623","5":"m21","6":"21","7":"0.8095238"},{"1":"m21_8","2":"15","3":"2021-09-27","4":"715","5":"m21","6":"21","7":"0.7142857"},{"1":"m21_80","2":"20","3":"2021-12-06","4":"639","5":"m21","6":"21","7":"0.9523810"},{"1":"m21_81","2":"20","3":"2021-12-07","4":"627","5":"m21","6":"21","7":"0.9523810"},{"1":"m21_83","2":"21","3":"2021-12-09","4":"400","5":"m21","6":"21","7":"1.0000000"},{"1":"m21_84","2":"21","3":"2021-12-10","4":"631","5":"m21","6":"21","7":"1.0000000"},{"1":"m21_85","2":"21","3":"2021-12-11","4":"631","5":"m21","6":"21","7":"1.0000000"},{"1":"m21_86","2":"21","3":"2021-12-12","4":"627","5":"m21","6":"21","7":"1.0000000"},{"1":"m21_87","2":"21","3":"2021-12-13","4":"632","5":"m21","6":"21","7":"1.0000000"},{"1":"m21_88","2":"21","3":"2021-12-14","4":"630","5":"m21","6":"21","7":"1.0000000"},{"1":"m21_89","2":"21","3":"2021-12-15","4":"639","5":"m21","6":"21","7":"1.0000000"},{"1":"m21_9","2":"19","3":"2021-09-28","4":"715","5":"m21","6":"21","7":"0.9047619"},{"1":"m21_90","2":"21","3":"2021-12-16","4":"628","5":"m21","6":"21","7":"1.0000000"},{"1":"m21_91","2":"21","3":"2021-12-17","4":"627","5":"m21","6":"21","7":"1.0000000"},{"1":"nm19_1","2":"17","3":"2019-02-14","4":"657","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_10","2":"17","3":"2019-02-23","4":"675","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_11","2":"17","3":"2019-02-24","4":"678","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_12","2":"17","3":"2019-02-25","4":"655","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_13","2":"17","3":"2019-02-26","4":"675","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_14","2":"17","3":"2019-02-27","4":"669","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_15","2":"17","3":"2019-02-28","4":"635","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_17","2":"17","3":"2019-03-04","4":"395","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_18","2":"17","3":"2019-03-05","4":"668","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_19","2":"17","3":"2019-03-06","4":"690","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_2","2":"17","3":"2019-02-15","4":"671","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_20","2":"17","3":"2019-03-07","4":"627","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_21","2":"17","3":"2019-03-08","4":"665","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_22","2":"17","3":"2019-03-09","4":"670","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_23","2":"17","3":"2019-03-10","4":"649","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_24","2":"17","3":"2019-03-12","4":"539","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_25","2":"17","3":"2019-03-13","4":"681","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_26","2":"17","3":"2019-03-14","4":"691","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_27","2":"16","3":"2019-03-15","4":"696","5":"nm19","6":"17","7":"0.9411765"},{"1":"nm19_28","2":"17","3":"2019-03-16","4":"676","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_29","2":"17","3":"2019-03-17","4":"684","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_3","2":"17","3":"2019-02-16","4":"674","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_30","2":"17","3":"2019-03-18","4":"659","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_31","2":"17","3":"2019-03-19","4":"689","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_32","2":"17","3":"2019-03-20","4":"690","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_33","2":"17","3":"2019-03-21","4":"687","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_34","2":"17","3":"2019-03-25","4":"697","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_35","2":"17","3":"2019-03-26","4":"708","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_36","2":"17","3":"2019-03-27","4":"561","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_37","2":"17","3":"2019-03-28","4":"690","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_38","2":"17","3":"2019-03-29","4":"719","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_4","2":"17","3":"2019-02-17","4":"667","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_5","2":"17","3":"2019-02-18","4":"655","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_6","2":"17","3":"2019-02-19","4":"585","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_7","2":"17","3":"2019-02-20","4":"647","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_8","2":"17","3":"2019-02-21","4":"662","5":"nm19","6":"17","7":"1.0000000"},{"1":"nm19_9","2":"16","3":"2019-02-22","4":"672","5":"nm19","6":"17","7":"0.9411765"},{"1":"nm20_10","2":"17","3":"2020-03-19","4":"563","5":"nm20","6":"17","7":"1.0000000"},{"1":"nm20_11","2":"17","3":"2020-03-20","4":"656","5":"nm20","6":"17","7":"1.0000000"},{"1":"nm20_12","2":"17","3":"2020-03-22","4":"357","5":"nm20","6":"17","7":"1.0000000"},{"1":"nm20_3","2":"15","3":"2020-03-12","4":"242","5":"nm20","6":"17","7":"0.8823529"},{"1":"nm20_4","2":"17","3":"2020-03-13","4":"690","5":"nm20","6":"17","7":"1.0000000"},{"1":"nm20_5","2":"17","3":"2020-03-14","4":"654","5":"nm20","6":"17","7":"1.0000000"},{"1":"nm20_6","2":"17","3":"2020-03-15","4":"669","5":"nm20","6":"17","7":"1.0000000"},{"1":"nm20_7","2":"17","3":"2020-03-16","4":"639","5":"nm20","6":"17","7":"1.0000000"},{"1":"nm20_8","2":"17","3":"2020-03-17","4":"689","5":"nm20","6":"17","7":"1.0000000"},{"1":"nm20_9","2":"17","3":"2020-03-18","4":"476","5":"nm20","6":"17","7":"1.0000000"},{"1":"nm21_1","2":"21","3":"2021-02-08","4":"129","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm21_10","2":"21","3":"2021-02-17","4":"674","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm21_11","2":"21","3":"2021-02-18","4":"680","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm21_12","2":"21","3":"2021-02-19","4":"678","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm21_13","2":"21","3":"2021-02-20","4":"674","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm21_14","2":"21","3":"2021-02-21","4":"689","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm21_2","2":"21","3":"2021-02-09","4":"617","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm21_21","2":"12","3":"2021-02-27","4":"221","5":"nm21","6":"21","7":"0.5714286"},{"1":"nm21_22","2":"11","3":"2021-02-28","4":"580","5":"nm21","6":"21","7":"0.5238095"},{"1":"nm21_23","2":"12","3":"2021-02-28","4":"412","5":"nm21","6":"21","7":"0.5714286"},{"1":"nm21_24","2":"11","3":"2021-03-01","4":"679","5":"nm21","6":"21","7":"0.5238095"},{"1":"nm21_25","2":"11","3":"2021-03-02","4":"661","5":"nm21","6":"21","7":"0.5238095"},{"1":"nm21_26","2":"11","3":"2021-03-03","4":"716","5":"nm21","6":"21","7":"0.5238095"},{"1":"nm21_27","2":"11","3":"2021-03-04","4":"665","5":"nm21","6":"21","7":"0.5238095"},{"1":"nm21_28","2":"11","3":"2021-03-05","4":"660","5":"nm21","6":"21","7":"0.5238095"},{"1":"nm21_29","2":"11","3":"2021-03-06","4":"283","5":"nm21","6":"21","7":"0.5238095"},{"1":"nm21_3","2":"21","3":"2021-02-10","4":"592","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm21_32","2":"21","3":"2021-03-09","4":"290","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm21_33","2":"21","3":"2021-03-10","4":"700","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm21_34","2":"21","3":"2021-03-11","4":"691","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm21_35","2":"21","3":"2021-03-12","4":"706","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm21_36","2":"21","3":"2021-03-13","4":"570","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm21_37","2":"21","3":"2021-03-14","4":"655","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm21_38","2":"20","3":"2021-03-15","4":"722","5":"nm21","6":"20","7":"1.0000000"},{"1":"nm21_39","2":"20","3":"2021-03-16","4":"707","5":"nm21","6":"20","7":"1.0000000"},{"1":"nm21_4","2":"21","3":"2021-02-11","4":"672","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm21_40","2":"15","3":"2021-03-17","4":"692","5":"nm21","6":"20","7":"0.7500000"},{"1":"nm21_41","2":"15","3":"2021-03-18","4":"714","5":"nm21","6":"20","7":"0.7500000"},{"1":"nm21_42","2":"15","3":"2021-03-19","4":"158","5":"nm21","6":"20","7":"0.7500000"},{"1":"nm21_44","2":"20","3":"2021-03-20","4":"642","5":"nm21","6":"20","7":"1.0000000"},{"1":"nm21_45","2":"20","3":"2021-03-21","4":"511","5":"nm21","6":"20","7":"1.0000000"},{"1":"nm21_46","2":"20","3":"2021-03-22","4":"726","5":"nm21","6":"20","7":"1.0000000"},{"1":"nm21_47","2":"20","3":"2021-03-23","4":"730","5":"nm21","6":"20","7":"1.0000000"},{"1":"nm21_48","2":"20","3":"2021-03-24","4":"734","5":"nm21","6":"20","7":"1.0000000"},{"1":"nm21_49","2":"20","3":"2021-03-25","4":"725","5":"nm21","6":"20","7":"1.0000000"},{"1":"nm21_5","2":"21","3":"2021-02-12","4":"671","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm21_50","2":"20","3":"2021-03-26","4":"735","5":"nm21","6":"20","7":"1.0000000"},{"1":"nm21_51","2":"20","3":"2021-03-27","4":"728","5":"nm21","6":"20","7":"1.0000000"},{"1":"nm21_6","2":"21","3":"2021-02-13","4":"694","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm21_7","2":"21","3":"2021-02-14","4":"650","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm21_8","2":"21","3":"2021-02-15","4":"512","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm21_9","2":"21","3":"2021-02-16","4":"631","5":"nm21","6":"21","7":"1.0000000"},{"1":"nm22_10","2":"21","3":"2022-02-23","4":"669","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_11","2":"21","3":"2022-02-24","4":"660","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_12","2":"21","3":"2022-02-25","4":"675","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_13","2":"21","3":"2022-02-26","4":"664","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_14","2":"21","3":"2022-02-27","4":"632","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_15","2":"21","3":"2022-02-28","4":"657","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_16","2":"21","3":"2022-03-01","4":"676","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_17","2":"21","3":"2022-03-02","4":"700","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_18","2":"21","3":"2022-03-03","4":"682","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_19","2":"21","3":"2022-03-04","4":"692","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_20","2":"21","3":"2022-03-05","4":"603","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_21","2":"21","3":"2022-03-06","4":"678","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_22","2":"21","3":"2022-03-07","4":"679","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_23","2":"21","3":"2022-03-08","4":"682","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_24","2":"21","3":"2022-03-09","4":"683","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_25","2":"21","3":"2022-03-10","4":"707","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_26","2":"21","3":"2022-03-11","4":"697","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_27","2":"21","3":"2022-03-12","4":"705","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_28","2":"21","3":"2022-03-13","4":"696","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_29","2":"21","3":"2022-03-14","4":"658","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_3","2":"21","3":"2022-02-16","4":"211","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_30","2":"21","3":"2022-03-15","4":"574","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_31","2":"20","3":"2022-03-16","4":"691","5":"nm22","6":"21","7":"0.9523810"},{"1":"nm22_32","2":"21","3":"2022-03-17","4":"409","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_33","2":"21","3":"2022-03-18","4":"638","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_34","2":"21","3":"2022-03-19","4":"480","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_35","2":"21","3":"2022-03-20","4":"685","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_36","2":"21","3":"2022-03-21","4":"713","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_37","2":"21","3":"2022-03-22","4":"693","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_38","2":"21","3":"2022-03-23","4":"697","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_39","2":"21","3":"2022-03-24","4":"293","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_4","2":"21","3":"2022-02-17","4":"676","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_40","2":"21","3":"2022-03-25","4":"440","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_41","2":"21","3":"2022-03-26","4":"280","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_44","2":"21","3":"2022-03-29","4":"731","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_5","2":"21","3":"2022-02-18","4":"602","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_6","2":"21","3":"2022-02-19","4":"693","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_7","2":"21","3":"2022-02-20","4":"682","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_8","2":"21","3":"2022-02-21","4":"632","5":"nm22","6":"21","7":"1.0000000"},{"1":"nm22_9","2":"21","3":"2022-02-22","4":"667","5":"nm22","6":"21","7":"1.0000000"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+
+</div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references csl-bib-body hanging-indent" line-spacing="2">
+<div id="ref-Aguilar2020" class="csl-entry">
+Aguilar-Melo, A. R., Calmé, S., Pinacho-Guendulain, B., Smith-Aguilar, S. E., &amp; Ramos-Fernández, G. (2020). Ecological and social determinants of association and proximity patterns in the fission-fusion society of spider monkeys (ateles geoffroyi). <em>Am. J. Primatol.</em>, <em>82</em>(1), e23077.
+</div>
+<div id="ref-Aguilar2018" class="csl-entry">
+Aguilar-Melo, A. R., Calmé, S., Smith-Aguilar, S. E., &amp; Ramos-Fernandez, G. (2018). Fission-fusion dynamics as a temporally and spatially flexible behavioral strategy in spider monkeys. <em>Behav. Ecol. Sociobiol.</em>, <em>72</em>(9).
+</div>
+<div id="ref-Anderson2002" class="csl-entry">
+Anderson, D. P., Nordheim, E. V., Boesch, C., &amp; Moermond, T. C. (2002). Factors influencing fission–fusion grouping in chimpanzees in the ta<span>ı̈</span> national park, c<span>ô</span>te d’ivoire. In <em>Behavioural diversity in chimpanzees and bonobos</em> (pp. 90–101). Cambridge University Press.
+</div>
+<div id="ref-Asensio2009" class="csl-entry">
+Asensio, N., Korstjens, A. H., &amp; Aureli, F. (2009). Fissioning minimizes ranging costs in spider monkeys: A multiple-level approach. <em>Behav. Ecol. Sociobiol.</em>, <em>63</em>(5), 649–659.
+</div>
+<div id="ref-Aureli2008" class="csl-entry">
+Aureli, F., Schaffner, C. M., Boesch, C., Bearder, S. K., Call, J., Chapman, C. A., Connor, R., Fiore, A. D., Dunbar, R. I. M., Henzi, S. P., &amp; Others. (2008). Fission-fusion dynamics: New research frameworks. <em>Curr. Anthropol.</em>, <em>49</em>(4), 627–654.
+</div>
+<div id="ref-Bowler2009" class="csl-entry">
+Bowler, M., &amp; Bodmer, R. (2009). Social behavior in fission-fusion groups of red uakari monkeys (cacajao calvus ucayalii). <em>Am. J. Primatol.</em>, <em>71</em>(12), 976–987.
+</div>
+<div id="ref-Busia2017" class="csl-entry">
+Busia, L., Schaffner, C. M., &amp; Aureli, F. (2017). Relationship quality affects fission decisions in wild spider monkeys (ateles geoffroyi). <em>Ethology</em>, <em>123</em>(6-7), 405–411.
+</div>
+<div id="ref-Busia2016" class="csl-entry">
+Busia, L., Schaffner, C. M., Rothman, J. M., Aureli, F., &amp; Setchell, J. M. (2016). Do fruit nutrients affect subgrouping patterns in wild spider monkeys (ateles geoffroyi)? <em>Int. J. Primatol.</em>, <em>37</em>, 738–751.
+</div>
+<div id="ref-Chapman1995" class="csl-entry">
+Chapman, C. A., Chapman, L. J., &amp; Wrangham, R. W. (1995). Ecological constraints on group size: An analysis of spider monkey and chimpanzee subgroups. <em>Behav. Ecol. Sociobiol.</em>, <em>36</em>(1), 59–70.
+</div>
+<div id="ref-Coles2012" class="csl-entry">
+Coles, R. C., Lee, P. C., &amp; Talebi, M. (2012). <span>Fission–Fusion</span> dynamics in southern muriquis (brachyteles arachnoides) in continuous brazilian atlantic forest. <em>Int. J. Primatol.</em>, <em>33</em>(1), 93–114.
+</div>
+<div id="ref-Dolado2016" class="csl-entry">
+Dolado, R., Cooke, C., &amp; Beltran, F. S. (2016). How many for lunch today? Seasonal <span>Fission-Fusion</span> dynamics as a feeding strategy in wild <span>Red-Capped</span> mangabeys (cercocebus torquatus). <em>Folia Primatol.</em>, <em>87</em>(3), 197–212.
+</div>
+<div id="ref-Hartwell2021" class="csl-entry">
+Hartwell, K. S., Notman, H., Kalbitzer, U., Chapman, C. A., &amp; Pavelka, M. M. S. M. (2021). Fruit availability has a complex relationship with fission-fusion dynamics in spider monkeys. <em>Primates</em>, <em>62</em>(1), 165–175.
+</div>
+<div id="ref-Hashimoto2001" class="csl-entry">
+Hashimoto, C., Furuichi, T., &amp; Tashiro, Y. (2001). What factors affect the size of chimpanzee parties in the kalinzu forest, uganda? Examination of fruit abundance and number of estrous females. <em>Int. J. Primatol.</em>, <em>22</em>(6), 947–959.
+</div>
+<div id="ref-Hashimoto2003" class="csl-entry">
+Hashimoto, C., Suzuki, S., Takenoshita, Y., Yamagiwa, J., Basabose, A. K., &amp; Furuichi, T. (2003). How fruit abundance affects the chimpanzee party size: A comparison between four study sites. <em>Primates</em>, <em>44</em>(2), 77–81.
+</div>
+<div id="ref-Holmes2016" class="csl-entry">
+Holmes, S. M., Gordon, A. D., Louis, E. E., &amp; Johnson, S. E. (2016). Fission-fusion dynamics in black-and-white ruffed lemurs may facilitate both feeding strategies and communal care of infants in a spatially and temporally variable environment. <em>Behav. Ecol. Sociobiol.</em>, <em>70</em>(11), 1949–1960.
+</div>
+<div id="ref-Itoh2007" class="csl-entry">
+Itoh, N., &amp; Nishida, T. (2007). Chimpanzee grouping patterns and food availability in mahale mountains national park, tanzania. <em>Primates</em>, <em>48</em>(2), 87–96.
+</div>
+<div id="ref-Matsumoto-Oda1998" class="csl-entry">
+Matsumoto-Oda, A., Hosaka, K., Huffman, M. A., &amp; Kawanaka, K. (1998). Factors affecting party size in chimpanzees of the mahale mountains. <em>Int. J. Primatol.</em>, <em>19</em>(6), 999–1011.
+</div>
+<div id="ref-Matthews2021" class="csl-entry">
+Matthews, J. K., Ridley, A., Kaplin, B. A., &amp; Grueter, C. C. (2021). Ecological and reproductive drivers of fission-fusion dynamics in chimpanzees (pan troglodytes schweinfurthii) inhabiting a montane forest. <em>Behav. Ecol. Sociobiol.</em>, <em>75</em>(1), 23.
+</div>
+<div id="ref-Mitani2002" class="csl-entry">
+Mitani, J. C., Watts, D. P., &amp; Lwanga, J. S. (2002). Ecological and social correlates of chimpanzee party size and composition. In <em>Behavioural diversity in chimpanzees and bonobos</em> (pp. 102–111). Cambridge University Press.
+</div>
+<div id="ref-Newton-Fisher2000" class="csl-entry">
+Newton-Fisher, N. E., Reynolds, V., &amp; Plumptre, A. J. (2000). Food supply and chimpanzee (pan troglodytes schweinfurthii) party size in the budongo forest reserve, uganda. <em>Int. J. Primatol.</em>
+</div>
+<div id="ref-Pinacho2017" class="csl-entry">
+Pinacho-Guendulain, B., &amp; Ramos-Fernández, G. (2017). Influence of fruit availability on the fission–fusion dynamics of spider monkeys (ateles geoffroyi). <em>Int. J. Primatol.</em>, <em>38</em>(3), 466–484.
+</div>
+<div id="ref-Potts2011" class="csl-entry">
+Potts, K. B., Watts, D. P., &amp; Wrangham, R. W. (2011). Comparative feeding ecology of two communities of chimpanzees (pan troglodytes) in kibale national park, uganda. <em>Int. J. Primatol.</em>, <em>32</em>(3), 669–690.
+</div>
+<div id="ref-Ramos2014" class="csl-entry">
+Ramos-Fernández, G., &amp; Morales, J. M. (2014). Unraveling fission-fusion dynamics: How subgroup properties and dyadic interactions influence individual decisions. <em>Behav. Ecol. Sociobiol.</em>, <em>68</em>(8), 1225–1235.
+</div>
+<div id="ref-Shibata2022" class="csl-entry">
+Shibata, S., Furuichi, T., &amp; Hashimoto, C. (2022). Adaptive party choice of <span>Low-Ranking</span> males in <span>Fission–Fusion</span> dynamics of chimpanzees in kalinzu forest reserve, uganda. <em>Animals</em>, <em>12</em>(17), 2240.
+</div>
+<div id="ref-Sugiura2011" class="csl-entry">
+Sugiura, H., Shimooka, Y., &amp; Tsuji, Y. (2011). Variation in spatial cohesiveness in a group of japanese macaques (macaca fuscata). <em>Int. J. Primatol.</em>, <em>32</em>(6), 1348–1366.
+</div>
+<div id="ref-Villioth2022" class="csl-entry">
+Villioth, J., Zuberbühler, K., &amp; Newton-Fisher, N. E. (2022). Patch choice decisions by a fission–fusion forager as a test of the ecological constraints model. <em>Behav. Ecol. Sociobiol.</em>, <em>76</em>(12), 156.
+</div>
+<div id="ref-Wakefield2008" class="csl-entry">
+Wakefield, M. L. (2008). Grouping patterns and competition among female pan troglodytes schweinfurthii at ngogo, kibale national park, uganda. <em>Int. J. Primatol.</em>, <em>29</em>(4), 907–929.
+</div>
+<div id="ref-Wittiger2013" class="csl-entry">
+Wittiger, L., &amp; Boesch, C. (2013). Female gregariousness in western chimpanzees (pan troglodytes verus) is influenced by resource aggregation and the number of females in estrus. <em>Behav. Ecol. Sociobiol.</em>, <em>67</em>(7), 1097–1111.
+</div>
+<div id="ref-Yamaguchi2022" class="csl-entry">
+Yamaguchi, T., &amp; Kazahari, N. (2022). Fission–fusion dynamics in a wild group of japanese macaques (macaca fuscata) on kinkazan island caused by the repeated separation of an alpha male being followed by females. <em>Primates</em>, <em>63</em>(6), 575–582.
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="05_decide_duration.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="sessioninfo.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

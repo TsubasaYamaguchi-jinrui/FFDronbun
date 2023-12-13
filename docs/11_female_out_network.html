@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>10 メス間の社会関係と離合集散の関係(ネットワーク分析) | Fission-fusion dynamics in B1 troop</title>
+  <meta name="description" content="10 メス間の社会関係と離合集散の関係(ネットワーク分析) | Fission-fusion dynamics in B1 troop" />
+  <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="10 メス間の社会関係と離合集散の関係(ネットワーク分析) | Fission-fusion dynamics in B1 troop" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="10 メス間の社会関係と離合集散の関係(ネットワーク分析) | Fission-fusion dynamics in B1 troop" />
+  
+  
+  
+
+<meta name="author" content="Tsubasa Yamaguchi" />
+
+
+<meta name="date" content="2023-12-11" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="10_female_out_analysis.html"/>
+<link rel="next" href="12_female_in_analysis.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
+<script src="libs/pagedtable-1.1/js/pagedtable.js"></script>
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<script src="libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
+<link href="libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="libs/datatables-binding-0.30/datatables.js"></script>
+<link href="libs/dt-core-1.13.4/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="libs/dt-core-1.13.4/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="libs/dt-core-1.13.4/js/jquery.dataTables.min.js"></script>
+<link href="libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+<link href="libs/tabwid-1.1.3/tabwid.css" rel="stylesheet" />
+<script src="libs/tabwid-1.1.3/tabwid.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<link rel="stylesheet" href="custom_style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>本稿の目的</a></li>
+<li class="chapter" data-level="" data-path="01_library.html"><a href="01_library.html"><i class="fa fa-check"></i>0. パッケージの読み込み</a></li>
+<li class="chapter" data-level="1" data-path="02_Basicdata.html"><a href="02_Basicdata.html"><i class="fa fa-check"></i><b>1</b> データの読み込み</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="02_Basicdata.html"><a href="02_Basicdata.html#daily-data-の読み込み"><i class="fa fa-check"></i><b>1.1</b> Daily data の読み込み</a></li>
+<li class="chapter" data-level="1.2" data-path="02_Basicdata.html"><a href="02_Basicdata.html#個体追跡データの読み込み"><i class="fa fa-check"></i><b>1.2</b> 個体追跡データの読み込み</a></li>
+<li class="chapter" data-level="1.3" data-path="02_Basicdata.html"><a href="02_Basicdata.html#群れの詳細な出欠データを読み込む"><i class="fa fa-check"></i><b>1.3</b> 群れの詳細な出欠データを読み込む</a></li>
+<li class="chapter" data-level="1.4" data-path="02_Basicdata.html"><a href="02_Basicdata.html#オスの攻撃データを読み込む"><i class="fa fa-check"></i><b>1.4</b> オスの攻撃データを読み込む</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="03_CSI_female.html"><a href="03_CSI_female.html"><i class="fa fa-check"></i><b>2</b> メス同士のCSIの算出</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="03_CSI_female.html"><a href="03_CSI_female.html#csiの定義"><i class="fa fa-check"></i><b>2.1</b> CSIの定義</a></li>
+<li class="chapter" data-level="2.2" data-path="03_CSI_female.html"><a href="03_CSI_female.html#データの加工"><i class="fa fa-check"></i><b>2.2</b> データの加工</a></li>
+<li class="chapter" data-level="2.3" data-path="03_CSI_female.html"><a href="03_CSI_female.html#csiの算出全期間"><i class="fa fa-check"></i><b>2.3</b> CSIの算出(全期間)</a>
+<ul>
+<li class="chapter" data-level="2.3.1" data-path="03_CSI_female.html"><a href="03_CSI_female.html#毛づくろい時間割合の算出"><i class="fa fa-check"></i><b>2.3.1</b> 毛づくろい時間割合の算出</a></li>
+<li class="chapter" data-level="2.3.2" data-path="03_CSI_female.html"><a href="03_CSI_female.html#近接時間割合の算出"><i class="fa fa-check"></i><b>2.3.2</b> 近接時間割合の算出</a></li>
+<li class="chapter" data-level="2.3.3" data-path="03_CSI_female.html"><a href="03_CSI_female.html#csiの算出"><i class="fa fa-check"></i><b>2.3.3</b> CSIの算出</a></li>
+</ul></li>
+<li class="chapter" data-level="2.4" data-path="03_CSI_female.html"><a href="03_CSI_female.html#csiの算出2018交尾期2019交尾期"><i class="fa fa-check"></i><b>2.4</b> CSIの算出(2018交尾期～2019交尾期)</a>
+<ul>
+<li class="chapter" data-level="2.4.1" data-path="03_CSI_female.html"><a href="03_CSI_female.html#毛づくろい時間割合の算出-1"><i class="fa fa-check"></i><b>2.4.1</b> 毛づくろい時間割合の算出</a></li>
+<li class="chapter" data-level="2.4.2" data-path="03_CSI_female.html"><a href="03_CSI_female.html#近接時間割合の算出-1"><i class="fa fa-check"></i><b>2.4.2</b> 近接時間割合の算出</a></li>
+<li class="chapter" data-level="2.4.3" data-path="03_CSI_female.html"><a href="03_CSI_female.html#csiの算出-1"><i class="fa fa-check"></i><b>2.4.3</b> CSIの算出</a></li>
+</ul></li>
+<li class="chapter" data-level="2.5" data-path="03_CSI_female.html"><a href="03_CSI_female.html#csiの算出tam生存前まで"><i class="fa fa-check"></i><b>2.5</b> CSIの算出(Tam生存前まで)</a>
+<ul>
+<li class="chapter" data-level="2.5.1" data-path="03_CSI_female.html"><a href="03_CSI_female.html#毛づくろい時間割合の算出-2"><i class="fa fa-check"></i><b>2.5.1</b> 毛づくろい時間割合の算出</a></li>
+<li class="chapter" data-level="2.5.2" data-path="03_CSI_female.html"><a href="03_CSI_female.html#近接時間割合の算出-2"><i class="fa fa-check"></i><b>2.5.2</b> 近接時間割合の算出</a></li>
+<li class="chapter" data-level="2.5.3" data-path="03_CSI_female.html"><a href="03_CSI_female.html#csiの算出-2"><i class="fa fa-check"></i><b>2.5.3</b> CSIの算出</a></li>
+</ul></li>
+<li class="chapter" data-level="2.6" data-path="03_CSI_female.html"><a href="03_CSI_female.html#csiの算出調査期間ごと"><i class="fa fa-check"></i><b>2.6</b> CSIの算出(調査期間ごと)</a>
+<ul>
+<li class="chapter" data-level="2.6.1" data-path="03_CSI_female.html"><a href="03_CSI_female.html#毛づくろい時間割合の算出-3"><i class="fa fa-check"></i><b>2.6.1</b> 毛づくろい時間割合の算出</a></li>
+<li class="chapter" data-level="2.6.2" data-path="03_CSI_female.html"><a href="03_CSI_female.html#近接時間割合の算出-3"><i class="fa fa-check"></i><b>2.6.2</b> 近接時間割合の算出</a></li>
+<li class="chapter" data-level="2.6.3" data-path="03_CSI_female.html"><a href="03_CSI_female.html#csiの算出-3"><i class="fa fa-check"></i><b>2.6.3</b> CSIの算出</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html"><i class="fa fa-check"></i><b>3</b> TY・ITとメスのCSIの計算</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの定義-1"><i class="fa fa-check"></i><b>3.1</b> CSIの定義</a></li>
+<li class="chapter" data-level="3.2" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#tyとメスのcsiの算出"><i class="fa fa-check"></i><b>3.2</b> TYとメスのCSIの算出</a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#データの読み込みと加工"><i class="fa fa-check"></i><b>3.2.1</b> データの読み込みと加工</a></li>
+<li class="chapter" data-level="3.2.2" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出全調査期間"><i class="fa fa-check"></i><b>3.2.2</b> CSIの算出(全調査期間)</a>
+<ul>
+<li class="chapter" data-level="3.2.2.1" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#毛づくろい時間割合の算出-4"><i class="fa fa-check"></i><b>3.2.2.1</b> 毛づくろい時間割合の算出</a></li>
+<li class="chapter" data-level="3.2.2.2" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#近接時間割合"><i class="fa fa-check"></i><b>3.2.2.2</b> 近接時間割合</a></li>
+<li class="chapter" data-level="3.2.2.3" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出-4"><i class="fa fa-check"></i><b>3.2.2.3</b> CSIの算出</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2.3" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出2018交尾期2019交尾期-1"><i class="fa fa-check"></i><b>3.2.3</b> CSIの算出(2018交尾期～2019交尾期)</a>
+<ul>
+<li class="chapter" data-level="3.2.3.1" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#毛づくろい時間割合の算出-5"><i class="fa fa-check"></i><b>3.2.3.1</b> 毛づくろい時間割合の算出</a></li>
+<li class="chapter" data-level="3.2.3.2" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#近接時間割合-1"><i class="fa fa-check"></i><b>3.2.3.2</b> 近接時間割合</a></li>
+<li class="chapter" data-level="3.2.3.3" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出-5"><i class="fa fa-check"></i><b>3.2.3.3</b> CSIの算出</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2.4" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出非交尾期のみ"><i class="fa fa-check"></i><b>3.2.4</b> CSIの算出(非交尾期のみ)</a>
+<ul>
+<li class="chapter" data-level="3.2.4.1" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#毛づくろい時間割合の算出-6"><i class="fa fa-check"></i><b>3.2.4.1</b> 毛づくろい時間割合の算出</a></li>
+<li class="chapter" data-level="3.2.4.2" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#近接時間割合-2"><i class="fa fa-check"></i><b>3.2.4.2</b> 近接時間割合</a></li>
+<li class="chapter" data-level="3.2.4.3" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出-6"><i class="fa fa-check"></i><b>3.2.4.3</b> CSIの算出</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2.5" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出調査期間ごと-1"><i class="fa fa-check"></i><b>3.2.5</b> CSIの算出(調査期間ごと)</a>
+<ul>
+<li class="chapter" data-level="3.2.5.1" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#毛づくろい時間割合の算出-7"><i class="fa fa-check"></i><b>3.2.5.1</b> 毛づくろい時間割合の算出</a></li>
+<li class="chapter" data-level="3.2.5.2" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#近接時間割合-3"><i class="fa fa-check"></i><b>3.2.5.2</b> 近接時間割合</a></li>
+<li class="chapter" data-level="3.2.5.3" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出-7"><i class="fa fa-check"></i><b>3.2.5.3</b> CSIの算出</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#itとメスのcsiの算出"><i class="fa fa-check"></i><b>3.3</b> ITとメスのCSIの算出</a>
+<ul>
+<li class="chapter" data-level="3.3.1" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#データの読み込みと加工-1"><i class="fa fa-check"></i><b>3.3.1</b> データの読み込みと加工</a></li>
+<li class="chapter" data-level="3.3.2" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出全調査期間-1"><i class="fa fa-check"></i><b>3.3.2</b> CSIの算出(全調査期間)</a>
+<ul>
+<li class="chapter" data-level="3.3.2.1" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#毛づくろい時間割合の算出-8"><i class="fa fa-check"></i><b>3.3.2.1</b> 毛づくろい時間割合の算出</a></li>
+<li class="chapter" data-level="3.3.2.2" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#近接時間割合-4"><i class="fa fa-check"></i><b>3.3.2.2</b> 近接時間割合</a></li>
+<li class="chapter" data-level="3.3.2.3" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出-8"><i class="fa fa-check"></i><b>3.3.2.3</b> CSIの算出</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3.3" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出2018交尾期2019交尾期-2"><i class="fa fa-check"></i><b>3.3.3</b> CSIの算出(2018交尾期～2019交尾期)</a>
+<ul>
+<li class="chapter" data-level="3.3.3.1" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#毛づくろい時間割合の算出-9"><i class="fa fa-check"></i><b>3.3.3.1</b> 毛づくろい時間割合の算出</a></li>
+<li class="chapter" data-level="3.3.3.2" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#近接時間割合-5"><i class="fa fa-check"></i><b>3.3.3.2</b> 近接時間割合</a></li>
+<li class="chapter" data-level="3.3.3.3" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出-9"><i class="fa fa-check"></i><b>3.3.3.3</b> CSIの算出</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3.4" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出非交尾期のみ-1"><i class="fa fa-check"></i><b>3.3.4</b> CSIの算出(非交尾期のみ)</a>
+<ul>
+<li class="chapter" data-level="3.3.4.1" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#毛づくろい時間割合の算出-10"><i class="fa fa-check"></i><b>3.3.4.1</b> 毛づくろい時間割合の算出</a></li>
+<li class="chapter" data-level="3.3.4.2" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#近接時間割合-6"><i class="fa fa-check"></i><b>3.3.4.2</b> 近接時間割合</a></li>
+<li class="chapter" data-level="3.3.4.3" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出-10"><i class="fa fa-check"></i><b>3.3.4.3</b> CSIの算出</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3.5" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出調査期間ごと-2"><i class="fa fa-check"></i><b>3.3.5</b> CSIの算出(調査期間ごと)</a>
+<ul>
+<li class="chapter" data-level="3.3.5.1" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#毛づくろい時間割合の算出-11"><i class="fa fa-check"></i><b>3.3.5.1</b> 毛づくろい時間割合の算出</a></li>
+<li class="chapter" data-level="3.3.5.2" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#近接時間割合-7"><i class="fa fa-check"></i><b>3.3.5.2</b> 近接時間割合</a></li>
+<li class="chapter" data-level="3.3.5.3" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出-11"><i class="fa fa-check"></i><b>3.3.5.3</b> CSIの算出</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="05_definition_group.html"><a href="05_definition_group.html"><i class="fa fa-check"></i><b>4</b> 群れの離合集散動態をどのように分析すべきか</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="05_definition_group.html"><a href="05_definition_group.html#サブグループパーティの定義とサンプリング方法"><i class="fa fa-check"></i><b>4.1</b> サブグループ/パーティの定義とサンプリング方法</a></li>
+<li class="chapter" data-level="4.2" data-path="05_definition_group.html"><a href="05_definition_group.html#ニホンザルではどのように集団サイズを測るべきか"><i class="fa fa-check"></i><b>4.2</b> ニホンザルではどのように集団サイズを測るべきか</a></li>
+<li class="chapter" data-level="4.3" data-path="05_definition_group.html"><a href="05_definition_group.html#どのような集団のデータを用いるべきか"><i class="fa fa-check"></i><b>4.3</b> どのような集団のデータを用いるべきか</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="06_decide_duration.html"><a href="06_decide_duration.html"><i class="fa fa-check"></i><b>5</b> メスの発見までに要する時間</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="06_decide_duration.html"><a href="06_decide_duration.html#データの読み込み加工"><i class="fa fa-check"></i><b>5.1</b> データの読み込み・加工</a>
+<ul>
+<li class="chapter" data-level="5.1.1" data-path="06_decide_duration.html"><a href="06_decide_duration.html#データの読み込み-1"><i class="fa fa-check"></i><b>5.1.1</b> データの読み込み</a></li>
+<li class="chapter" data-level="5.1.2" data-path="06_decide_duration.html"><a href="06_decide_duration.html#データの加工-1"><i class="fa fa-check"></i><b>5.1.2</b> データの加工</a></li>
+</ul></li>
+<li class="chapter" data-level="5.2" data-path="06_decide_duration.html"><a href="06_decide_duration.html#生存時間分析"><i class="fa fa-check"></i><b>5.2</b> 生存時間分析</a>
+<ul>
+<li class="chapter" data-level="5.2.1" data-path="06_decide_duration.html"><a href="06_decide_duration.html#全頭確認できた日のみ"><i class="fa fa-check"></i><b>5.2.1</b> 全頭確認できた日のみ</a>
+<ul>
+<li class="chapter" data-level="5.2.1.1" data-path="06_decide_duration.html"><a href="06_decide_duration.html#データの確認"><i class="fa fa-check"></i><b>5.2.1.1</b> データの確認</a></li>
+<li class="chapter" data-level="5.2.1.2" data-path="06_decide_duration.html"><a href="06_decide_duration.html#s6-2-1"><i class="fa fa-check"></i><b>5.2.1.2</b> コックス比例ハザードモデル</a></li>
+<li class="chapter" data-level="5.2.1.3" data-path="06_decide_duration.html"><a href="06_decide_duration.html#s6-2-2"><i class="fa fa-check"></i><b>5.2.1.3</b> 離散時間モデル</a></li>
+</ul></li>
+<li class="chapter" data-level="5.2.2" data-path="06_decide_duration.html"><a href="06_decide_duration.html#全個体のデータ"><i class="fa fa-check"></i><b>5.2.2</b> 全個体のデータ</a>
+<ul>
+<li class="chapter" data-level="5.2.2.1" data-path="06_decide_duration.html"><a href="06_decide_duration.html#データの確認-1"><i class="fa fa-check"></i><b>5.2.2.1</b> データの確認</a></li>
+<li class="chapter" data-level="5.2.2.2" data-path="06_decide_duration.html"><a href="06_decide_duration.html#コックス比例ハザードモデル"><i class="fa fa-check"></i><b>5.2.2.2</b> コックス比例ハザードモデル</a></li>
+<li class="chapter" data-level="5.2.2.3" data-path="06_decide_duration.html"><a href="06_decide_duration.html#離散時間モデル"><i class="fa fa-check"></i><b>5.2.2.3</b> 離散時間モデル</a></li>
+</ul></li>
+<li class="chapter" data-level="5.2.3" data-path="06_decide_duration.html"><a href="06_decide_duration.html#確認できた全個体のデータ"><i class="fa fa-check"></i><b>5.2.3</b> 確認できた全個体のデータ</a>
+<ul>
+<li class="chapter" data-level="5.2.3.1" data-path="06_decide_duration.html"><a href="06_decide_duration.html#コックス比例ハザードモデル-1"><i class="fa fa-check"></i><b>5.2.3.1</b> コックス比例ハザードモデル</a></li>
+<li class="chapter" data-level="5.2.3.2" data-path="06_decide_duration.html"><a href="06_decide_duration.html#離散時間モデル-1"><i class="fa fa-check"></i><b>5.2.3.2</b> 離散時間モデル</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="07_male_presence.html"><a href="07_male_presence.html"><i class="fa fa-check"></i><b>6</b> オスの確認状況の分析</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="07_male_presence.html"><a href="07_male_presence.html#データの加工-5"><i class="fa fa-check"></i><b>6.1</b> データの加工</a></li>
+<li class="chapter" data-level="6.2" data-path="07_male_presence.html"><a href="07_male_presence.html#確認日数割合の図示"><i class="fa fa-check"></i><b>6.2</b> 確認日数割合の図示</a>
+<ul>
+<li class="chapter" data-level="6.2.1" data-path="07_male_presence.html"><a href="07_male_presence.html#表"><i class="fa fa-check"></i><b>6.2.1</b> 表</a></li>
+<li class="chapter" data-level="6.2.2" data-path="07_male_presence.html"><a href="07_male_presence.html#グラフ"><i class="fa fa-check"></i><b>6.2.2</b> グラフ</a></li>
+</ul></li>
+<li class="chapter" data-level="6.3" data-path="07_male_presence.html"><a href="07_male_presence.html#群れを離れた頻度の算出"><i class="fa fa-check"></i><b>6.3</b> 群れを離れた頻度の算出</a>
+<ul>
+<li class="chapter" data-level="6.3.1" data-path="07_male_presence.html"><a href="07_male_presence.html#データの読み込み-2"><i class="fa fa-check"></i><b>6.3.1</b> データの読み込み</a></li>
+<li class="chapter" data-level="6.3.2" data-path="07_male_presence.html"><a href="07_male_presence.html#頻度の算出"><i class="fa fa-check"></i><b>6.3.2</b> 頻度の算出</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="08_female_presence.html"><a href="08_female_presence.html"><i class="fa fa-check"></i><b>7</b> 調査期間ごとのメスの確認状況</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="08_female_presence.html"><a href="08_female_presence.html#各観察日のメス確認割合"><i class="fa fa-check"></i><b>7.1</b> 各観察日のメス確認割合</a>
+<ul>
+<li class="chapter" data-level="7.1.1" data-path="08_female_presence.html"><a href="08_female_presence.html#データの確認-2"><i class="fa fa-check"></i><b>7.1.1</b> データの確認</a></li>
+<li class="chapter" data-level="7.1.2" data-path="08_female_presence.html"><a href="08_female_presence.html#調査期間間の比較"><i class="fa fa-check"></i><b>7.1.2</b> 調査期間間の比較</a>
+<ul>
+<li class="chapter" data-level="7.1.2.1" data-path="08_female_presence.html"><a href="08_female_presence.html#モデリング-6"><i class="fa fa-check"></i><b>7.1.2.1</b> モデリング</a></li>
+<li class="chapter" data-level="7.1.2.2" data-path="08_female_presence.html"><a href="08_female_presence.html#モデルチェック"><i class="fa fa-check"></i><b>7.1.2.2</b> モデルチェック</a></li>
+<li class="chapter" data-level="7.1.2.3" data-path="08_female_presence.html"><a href="08_female_presence.html#結果の確認-3"><i class="fa fa-check"></i><b>7.1.2.3</b> 結果の確認</a></li>
+<li class="chapter" data-level="7.1.2.4" data-path="08_female_presence.html"><a href="08_female_presence.html#結果の図示-3"><i class="fa fa-check"></i><b>7.1.2.4</b> 結果の図示</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="7.2" data-path="08_female_presence.html"><a href="08_female_presence.html#メスごとの確認日数割合"><i class="fa fa-check"></i><b>7.2</b> メスごとの確認日数割合</a>
+<ul>
+<li class="chapter" data-level="7.2.1" data-path="08_female_presence.html"><a href="08_female_presence.html#データの加工-6"><i class="fa fa-check"></i><b>7.2.1</b> データの加工</a></li>
+<li class="chapter" data-level="7.2.2" data-path="08_female_presence.html"><a href="08_female_presence.html#データの確認-3"><i class="fa fa-check"></i><b>7.2.2</b> データの確認</a></li>
+<li class="chapter" data-level="7.2.3" data-path="08_female_presence.html"><a href="08_female_presence.html#調査期間間の比較-1"><i class="fa fa-check"></i><b>7.2.3</b> 調査期間間の比較</a>
+<ul>
+<li class="chapter" data-level="7.2.3.1" data-path="08_female_presence.html"><a href="08_female_presence.html#モデリング-7"><i class="fa fa-check"></i><b>7.2.3.1</b> モデリング</a></li>
+<li class="chapter" data-level="7.2.3.2" data-path="08_female_presence.html"><a href="08_female_presence.html#モデルチェック-1"><i class="fa fa-check"></i><b>7.2.3.2</b> モデルチェック</a></li>
+<li class="chapter" data-level="7.2.3.3" data-path="08_female_presence.html"><a href="08_female_presence.html#結果の確認-4"><i class="fa fa-check"></i><b>7.2.3.3</b> 結果の確認</a></li>
+<li class="chapter" data-level="7.2.3.4" data-path="08_female_presence.html"><a href="08_female_presence.html#結果の図示-4"><i class="fa fa-check"></i><b>7.2.3.4</b> 結果の図示</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html"><i class="fa fa-check"></i><b>8</b> 各観察日の確認メス割合に関する時系列分析</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#データの加工-7"><i class="fa fa-check"></i><b>8.1</b> データの加工</a></li>
+<li class="chapter" data-level="8.2" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#全期間を合わせたモデル"><i class="fa fa-check"></i><b>8.2</b> 全期間を合わせたモデル</a>
+<ul>
+<li class="chapter" data-level="8.2.1" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#tyの有無-調査期間"><i class="fa fa-check"></i><b>8.2.1</b> TYの有無 + 調査期間</a>
+<ul>
+<li class="chapter" data-level="8.2.1.1" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#モデリング-8"><i class="fa fa-check"></i><b>8.2.1.1</b> モデリング</a></li>
+<li class="chapter" data-level="8.2.1.2" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#モデルの診断"><i class="fa fa-check"></i><b>8.2.1.2</b> モデルの診断</a></li>
+<li class="chapter" data-level="8.2.1.3" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#結果の確認-5"><i class="fa fa-check"></i><b>8.2.1.3</b> 結果の確認</a></li>
+<li class="chapter" data-level="8.2.1.4" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#結果の図示-5"><i class="fa fa-check"></i><b>8.2.1.4</b> 結果の図示</a></li>
+</ul></li>
+<li class="chapter" data-level="8.2.2" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#tyitの動向-調査期間"><i class="fa fa-check"></i><b>8.2.2</b> TY/ITの動向 + 調査期間</a>
+<ul>
+<li class="chapter" data-level="8.2.2.1" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#データの加工-8"><i class="fa fa-check"></i><b>8.2.2.1</b> データの加工</a></li>
+<li class="chapter" data-level="8.2.2.2" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#モデリング交尾期"><i class="fa fa-check"></i><b>8.2.2.2</b> モデリング(交尾期)</a></li>
+<li class="chapter" data-level="8.2.2.3" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#モデルの診断-1"><i class="fa fa-check"></i><b>8.2.2.3</b> モデルの診断</a></li>
+<li class="chapter" data-level="8.2.2.4" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#結果の確認-6"><i class="fa fa-check"></i><b>8.2.2.4</b> 結果の確認</a></li>
+</ul></li>
+<li class="chapter" data-level="8.2.3" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#調査期間のみ"><i class="fa fa-check"></i><b>8.2.3</b> 調査期間のみ</a>
+<ul>
+<li class="chapter" data-level="8.2.3.1" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#モデリング-9"><i class="fa fa-check"></i><b>8.2.3.1</b> モデリング</a></li>
+<li class="chapter" data-level="8.2.3.2" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#モデルの診断-2"><i class="fa fa-check"></i><b>8.2.3.2</b> モデルの診断</a></li>
+<li class="chapter" data-level="8.2.3.3" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#結果の確認-7"><i class="fa fa-check"></i><b>8.2.3.3</b> 結果の確認</a></li>
+<li class="chapter" data-level="8.2.3.4" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#結果の図示-6"><i class="fa fa-check"></i><b>8.2.3.4</b> 結果の図示</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="8.3" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#年非交尾期までのデータを用いたモデル"><i class="fa fa-check"></i><b>8.3</b> 2021年非交尾期までのデータを用いたモデル</a>
+<ul>
+<li class="chapter" data-level="8.3.1" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#tyの有無-itの有無-調査期間"><i class="fa fa-check"></i><b>8.3.1</b> TYの有無 + ITの有無 + 調査期間</a>
+<ul>
+<li class="chapter" data-level="8.3.1.1" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#データの加工-9"><i class="fa fa-check"></i><b>8.3.1.1</b> データの加工</a></li>
+<li class="chapter" data-level="8.3.1.2" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#モデリング-10"><i class="fa fa-check"></i><b>8.3.1.2</b> モデリング</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html"><i class="fa fa-check"></i><b>9</b> メスが群れを離れるメカニズム</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#データの加工-10"><i class="fa fa-check"></i><b>9.1</b> データの加工</a>
+<ul>
+<li class="chapter" data-level="9.1.1" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#オスが群れを離れた日の特定"><i class="fa fa-check"></i><b>9.1.1</b> オスが群れを離れた日の特定</a></li>
+<li class="chapter" data-level="9.1.2" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#メスが群れを離れた日の同定"><i class="fa fa-check"></i><b>9.1.2</b> メスが群れを離れた日の同定</a></li>
+<li class="chapter" data-level="9.1.3" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#オスの攻撃頻度"><i class="fa fa-check"></i><b>9.1.3</b> オスの攻撃頻度</a></li>
+<li class="chapter" data-level="9.1.4" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#血縁個体が群れを出たか否か"><i class="fa fa-check"></i><b>9.1.4</b> 血縁個体が群れを出たか否か</a></li>
+<li class="chapter" data-level="9.1.5" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#群れ外オス数の算出"><i class="fa fa-check"></i><b>9.1.5</b> 群れ外オス数の算出</a></li>
+<li class="chapter" data-level="9.1.6" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#全データの結合"><i class="fa fa-check"></i><b>9.1.6</b> 全データの結合</a></li>
+</ul></li>
+<li class="chapter" data-level="9.2" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#基本的な情報"><i class="fa fa-check"></i><b>9.2</b> 基本的な情報</a></li>
+<li class="chapter" data-level="9.3" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#分析モデリング"><i class="fa fa-check"></i><b>9.3</b> 分析(モデリング)</a>
+<ul>
+<li class="chapter" data-level="9.3.1" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#交尾期非発情メス"><i class="fa fa-check"></i><b>9.3.1</b> 交尾期(非発情メス)</a>
+<ul>
+<li class="chapter" data-level="9.3.1.1" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#データの加工-11"><i class="fa fa-check"></i><b>9.3.1.1</b> データの加工</a></li>
+<li class="chapter" data-level="9.3.1.2" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#モデリング1"><i class="fa fa-check"></i><b>9.3.1.2</b> モデリング1</a></li>
+<li class="chapter" data-level="9.3.1.3" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#モデリング2"><i class="fa fa-check"></i><b>9.3.1.3</b> モデリング2</a></li>
+<li class="chapter" data-level="9.3.1.4" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#s10-2-1-3"><i class="fa fa-check"></i><b>9.3.1.4</b> モデリング3</a></li>
+</ul></li>
+<li class="chapter" data-level="9.3.2" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#交尾期発情メス"><i class="fa fa-check"></i><b>9.3.2</b> 交尾期(発情メス)</a>
+<ul>
+<li class="chapter" data-level="9.3.2.1" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#データの加工-12"><i class="fa fa-check"></i><b>9.3.2.1</b> データの加工</a></li>
+<li class="chapter" data-level="9.3.2.2" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#モデリング1-1"><i class="fa fa-check"></i><b>9.3.2.2</b> モデリング1</a></li>
+<li class="chapter" data-level="9.3.2.3" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#モデリング2-1"><i class="fa fa-check"></i><b>9.3.2.3</b> モデリング2</a></li>
+</ul></li>
+<li class="chapter" data-level="9.3.3" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#非交尾期"><i class="fa fa-check"></i><b>9.3.3</b> 非交尾期</a>
+<ul>
+<li class="chapter" data-level="9.3.3.1" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#データの加工-13"><i class="fa fa-check"></i><b>9.3.3.1</b> データの加工</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="11_female_out_network.html"><a href="11_female_out_network.html"><i class="fa fa-check"></i><b>10</b> メス間の社会関係と離合集散の関係(ネットワーク分析)</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="11_female_out_network.html"><a href="11_female_out_network.html#メス間の社会関係と同じ日に群れ本体にいた割合sriの関連"><i class="fa fa-check"></i><b>10.1</b> メス間の社会関係と同じ日に群れ本体にいた割合(SRI)の関連</a>
+<ul>
+<li class="chapter" data-level="10.1.1" data-path="11_female_out_network.html"><a href="11_female_out_network.html#データの加工-14"><i class="fa fa-check"></i><b>10.1.1</b> データの加工</a></li>
+<li class="chapter" data-level="10.1.2" data-path="11_female_out_network.html"><a href="11_female_out_network.html#glmqap検定"><i class="fa fa-check"></i><b>10.1.2</b> GLMQAP検定</a>
+<ul>
+<li class="chapter" data-level="10.1.2.1" data-path="11_female_out_network.html"><a href="11_female_out_network.html#モデリング-11"><i class="fa fa-check"></i><b>10.1.2.1</b> モデリング</a></li>
+<li class="chapter" data-level="10.1.2.2" data-path="11_female_out_network.html"><a href="11_female_out_network.html#結果の確認-13"><i class="fa fa-check"></i><b>10.1.2.2</b> 結果の確認</a></li>
+<li class="chapter" data-level="10.1.2.3" data-path="11_female_out_network.html"><a href="11_female_out_network.html#ネットワークの確認"><i class="fa fa-check"></i><b>10.1.2.3</b> ネットワークの確認</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="10.2" data-path="11_female_out_network.html"><a href="11_female_out_network.html#メス間の社会関係と同じ日に群れを離れた割合の関連"><i class="fa fa-check"></i><b>10.2</b> メス間の社会関係と同じ日に群れを離れた割合の関連</a>
+<ul>
+<li class="chapter" data-level="10.2.1" data-path="11_female_out_network.html"><a href="11_female_out_network.html#データの加工-15"><i class="fa fa-check"></i><b>10.2.1</b> データの加工</a></li>
+<li class="chapter" data-level="10.2.2" data-path="11_female_out_network.html"><a href="11_female_out_network.html#glmqap検定-1"><i class="fa fa-check"></i><b>10.2.2</b> GLMQAP検定</a>
+<ul>
+<li class="chapter" data-level="10.2.2.1" data-path="11_female_out_network.html"><a href="11_female_out_network.html#モデリング-12"><i class="fa fa-check"></i><b>10.2.2.1</b> モデリング</a></li>
+<li class="chapter" data-level="10.2.2.2" data-path="11_female_out_network.html"><a href="11_female_out_network.html#結果の確認-14"><i class="fa fa-check"></i><b>10.2.2.2</b> 結果の確認</a></li>
+</ul></li>
+<li class="chapter" data-level="10.2.3" data-path="11_female_out_network.html"><a href="11_female_out_network.html#sriマトリックスに関する分析"><i class="fa fa-check"></i><b>10.2.3</b> SRIマトリックスに関する分析</a>
+<ul>
+<li class="chapter" data-level="10.2.3.1" data-path="11_female_out_network.html"><a href="11_female_out_network.html#下位集団の検出"><i class="fa fa-check"></i><b>10.2.3.1</b> 下位集団の検出</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html"><i class="fa fa-check"></i><b>11</b> メスが群れに戻るときのメカニズム</a>
+<ul>
+<li class="chapter" data-level="11.1" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#データの加工-16"><i class="fa fa-check"></i><b>11.1</b> データの加工</a>
+<ul>
+<li class="chapter" data-level="11.1.1" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#オスの出入り情報"><i class="fa fa-check"></i><b>11.1.1</b> オスの出入り情報</a></li>
+<li class="chapter" data-level="11.1.2" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#メスが群れに戻った日の同定"><i class="fa fa-check"></i><b>11.1.2</b> メスが群れに戻った日の同定</a></li>
+<li class="chapter" data-level="11.1.3" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#血縁個体が群れに戻ったか否か"><i class="fa fa-check"></i><b>11.1.3</b> 血縁個体が群れに戻ったか否か</a></li>
+<li class="chapter" data-level="11.1.4" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#全データの結合-1"><i class="fa fa-check"></i><b>11.1.4</b> 全データの結合</a></li>
+</ul></li>
+<li class="chapter" data-level="11.2" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#分析モデリング-1"><i class="fa fa-check"></i><b>11.2</b> 分析(モデリング)</a>
+<ul>
+<li class="chapter" data-level="11.2.1" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#交尾期"><i class="fa fa-check"></i><b>11.2.1</b> 交尾期</a>
+<ul>
+<li class="chapter" data-level="11.2.1.1" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#データの加工-17"><i class="fa fa-check"></i><b>11.2.1.1</b> データの加工</a></li>
+<li class="chapter" data-level="11.2.1.2" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#モデリング1-2"><i class="fa fa-check"></i><b>11.2.1.2</b> モデリング1</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html"><i class="fa fa-check"></i><b>12</b> TY、ITの有無とオスからの被攻撃頻度</a>
+<ul>
+<li class="chapter" data-level="12.1" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html#データの加工-18"><i class="fa fa-check"></i><b>12.1</b> データの加工</a>
+<ul>
+<li class="chapter" data-level="12.1.1" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html#各観察日の被攻撃頻度"><i class="fa fa-check"></i><b>12.1.1</b> 各観察日の被攻撃頻度</a></li>
+<li class="chapter" data-level="12.1.2" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html#tyとitの確認状況"><i class="fa fa-check"></i><b>12.1.2</b> TYとITの確認状況</a></li>
+<li class="chapter" data-level="12.1.3" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html#確認オス数と発情メス数"><i class="fa fa-check"></i><b>12.1.3</b> 確認オス数と発情メス数</a></li>
+<li class="chapter" data-level="12.1.4" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html#個体追跡状況"><i class="fa fa-check"></i><b>12.1.4</b> 個体追跡状況</a></li>
+<li class="chapter" data-level="12.1.5" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html#データの結合"><i class="fa fa-check"></i><b>12.1.5</b> データの結合</a></li>
+</ul></li>
+<li class="chapter" data-level="12.2" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html#分析"><i class="fa fa-check"></i><b>12.2</b> 分析</a>
+<ul>
+<li class="chapter" data-level="12.2.1" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html#発情と非発情を分けない"><i class="fa fa-check"></i><b>12.2.1</b> 発情と非発情を分けない</a>
+<ul>
+<li class="chapter" data-level="12.2.1.1" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html#全期間-tyitの有無"><i class="fa fa-check"></i><b>12.2.1.1</b> 全期間 + TY/ITの有無</a></li>
+<li class="chapter" data-level="12.2.1.2" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html#交尾期-tyの有無-itの有無"><i class="fa fa-check"></i><b>12.2.1.2</b> 2019~2020交尾期 + TYの有無 + ITの有無</a></li>
+</ul></li>
+<li class="chapter" data-level="12.2.2" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html#発情と非発情を分ける"><i class="fa fa-check"></i><b>12.2.2</b> 発情と非発情を分ける</a>
+<ul>
+<li class="chapter" data-level="12.2.2.1" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html#全期間-tyitの有無-1"><i class="fa fa-check"></i><b>12.2.2.1</b> 全期間 + TY/ITの有無</a></li>
+<li class="chapter" data-level="12.2.2.2" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html#交尾期-tyの有無-itの有無-1"><i class="fa fa-check"></i><b>12.2.2.2</b> 2019~2020交尾期 + TYの有無 + ITの有無</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="13" data-path="14_female_presence_aggression.html"><a href="14_female_presence_aggression.html"><i class="fa fa-check"></i><b>13</b> 群れ本体で確認された日数割合と被攻撃頻度</a>
+<ul>
+<li class="chapter" data-level="13.1" data-path="14_female_presence_aggression.html"><a href="14_female_presence_aggression.html#データの加工-23"><i class="fa fa-check"></i><b>13.1</b> データの加工</a></li>
+<li class="chapter" data-level="13.2" data-path="14_female_presence_aggression.html"><a href="14_female_presence_aggression.html#モデリング-17"><i class="fa fa-check"></i><b>13.2</b> モデリング</a>
+<ul>
+<li class="chapter" data-level="13.2.1" data-path="14_female_presence_aggression.html"><a href="14_female_presence_aggression.html#モデルの実行"><i class="fa fa-check"></i><b>13.2.1</b> モデルの実行</a></li>
+<li class="chapter" data-level="13.2.2" data-path="14_female_presence_aggression.html"><a href="14_female_presence_aggression.html#モデルチェック-8"><i class="fa fa-check"></i><b>13.2.2</b> モデルチェック</a></li>
+<li class="chapter" data-level="13.2.3" data-path="14_female_presence_aggression.html"><a href="14_female_presence_aggression.html#結果の確認-20"><i class="fa fa-check"></i><b>13.2.3</b> 結果の確認</a></li>
+<li class="chapter" data-level="13.2.4" data-path="14_female_presence_aggression.html"><a href="14_female_presence_aggression.html#結果の図示-18"><i class="fa fa-check"></i><b>13.2.4</b> 結果の図示</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="14" data-path="15_aggression_injury.html"><a href="15_aggression_injury.html"><i class="fa fa-check"></i><b>14</b> オスの攻撃と怪我の関連</a>
+<ul>
+<li class="chapter" data-level="14.1" data-path="15_aggression_injury.html"><a href="15_aggression_injury.html#データの加工-24"><i class="fa fa-check"></i><b>14.1</b> データの加工</a></li>
+<li class="chapter" data-level="14.2" data-path="15_aggression_injury.html"><a href="15_aggression_injury.html#分析-1"><i class="fa fa-check"></i><b>14.2</b> 分析</a>
+<ul>
+<li class="chapter" data-level="14.2.1" data-path="15_aggression_injury.html"><a href="15_aggression_injury.html#モデリング-18"><i class="fa fa-check"></i><b>14.2.1</b> モデリング</a></li>
+<li class="chapter" data-level="14.2.2" data-path="15_aggression_injury.html"><a href="15_aggression_injury.html#モデルチェック-9"><i class="fa fa-check"></i><b>14.2.2</b> モデルチェック</a></li>
+<li class="chapter" data-level="14.2.3" data-path="15_aggression_injury.html"><a href="15_aggression_injury.html#結果の確認-21"><i class="fa fa-check"></i><b>14.2.3</b> 結果の確認</a></li>
+<li class="chapter" data-level="14.2.4" data-path="15_aggression_injury.html"><a href="15_aggression_injury.html#結果の図示-19"><i class="fa fa-check"></i><b>14.2.4</b> 結果の図示</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="sessioninfo.html"><a href="sessioninfo.html"><i class="fa fa-check"></i>実行環境</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Fission-fusion dynamics in B1 troop</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="メス間の社会関係と離合集散の関係ネットワーク分析" class="section level1 hasAnchor" number="10">
+<h1><span class="header-section-number">10</span> メス間の社会関係と離合集散の関係(ネットワーク分析)<a href="11_female_out_network.html#メス間の社会関係と離合集散の関係ネットワーク分析" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>以下では、メス同士が群れ本体で同じ日に確認された割合や、メス同士が同じ日に群れを離れた割合とメス同士の社会関係(血縁度、CSI、順位差など)をネットワーク分析を用いて検討する。</p>
+<p>分析には、MRQAP検定<span class="citation">(<a href="#ref-Dekker2007">Dekker et al., 2007</a>)</span>を用いる。MRQAP検定は、簡単に言ってしまえばネットワークデータを用いた回帰分析である。MRQAP検定では、通常の<strong>GLMやGLMMと同様に、複数の隣接行列を用いた回帰分析を行うことができる</strong>(図<a href="11_female_out_network.html#fig:fig-mrqap">10.1</a>)。また、<code>aninet</code>パッケージ<span class="citation">(<a href="#ref-Weiss2023">Weiss &amp; Hart, 2023</a>)</span>の<code>glmqap</code>関数を用いれば、<strong>応答変数となる隣接行列の分布として様々なもの(e.g.,正規分布、ポワソン分布、二項分布など)を仮定することができる</strong>ので、データ形式に合った適切な分析を行うこともできる。</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-mrqap"></span>
+<img src="image/MRQAP.png" alt="MRQAP検定のイメージ図" width="100%" />
+<p class="caption">
+図10.1: MRQAP検定のイメージ図
+</p>
+</div>
+<p><br/></p>
+<div id="メス間の社会関係と同じ日に群れ本体にいた割合sriの関連" class="section level2 hasAnchor" number="10.1">
+<h2><span class="header-section-number">10.1</span> メス間の社会関係と同じ日に群れ本体にいた割合(SRI)の関連<a href="11_female_out_network.html#メス間の社会関係と同じ日に群れ本体にいた割合sriの関連" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="データの加工-14" class="section level3 hasAnchor" number="10.1.1">
+<h3><span class="header-section-number">10.1.1</span> データの加工<a href="11_female_out_network.html#データの加工-14" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>まず、メス同士が群れ本体にいた割合(以後、SRI)を算出する。用いるのは、2018年時点で6歳以上で、全期間生存していた以下の15頭である。</p>
+<div class="sourceCode" id="cb408"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb408-1"><a href="11_female_out_network.html#cb408-1" tabindex="-1"></a>femaleID <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">c</span>(<span class="st">&quot;Kil&quot;</span>,<span class="st">&quot;Mik&quot;</span>,<span class="st">&quot;Koh&quot;</span>,<span class="st">&quot;Aka&quot;</span>,<span class="st">&quot;Ten&quot;</span>,<span class="st">&quot;Ntr&quot;</span>,<span class="st">&quot;Hen&quot;</span>,<span class="st">&quot;Hot&quot;</span>,<span class="st">&quot;Tot&quot;</span>,<span class="st">&quot;Mei&quot;</span>,<span class="st">&quot;Ako&quot;</span>,<span class="st">&quot;Kol&quot;</span>,<span class="st">&quot;Mal&quot;</span>,<span class="st">&quot;Kit&quot;</span>,<span class="st">&quot;Kun&quot;</span>))</span></code></pre></div>
+<p>以下のように算出し、オスの出入りがあった期間の群れ本体でのSRIのマトリックスを作成する。</p>
+<div class="sourceCode" id="cb409"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb409-1"><a href="11_female_out_network.html#cb409-1" tabindex="-1"></a>no_female_over0<span class="fl">.5</span> <span class="sc">%&gt;%</span> </span>
+<span id="cb409-2"><a href="11_female_out_network.html#cb409-2" tabindex="-1"></a>  <span class="fu">select</span>(date, groupID) <span class="sc">%&gt;%</span> </span>
+<span id="cb409-3"><a href="11_female_out_network.html#cb409-3" tabindex="-1"></a>  <span class="fu">left_join</span>(group_all, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;date&quot;</span>, <span class="st">&quot;groupID&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb409-4"><a href="11_female_out_network.html#cb409-4" tabindex="-1"></a>  <span class="fu">select</span>(date, study_period, <span class="fu">one_of</span>(femaleID)) <span class="sc">%&gt;%</span> </span>
+<span id="cb409-5"><a href="11_female_out_network.html#cb409-5" tabindex="-1"></a>  <span class="fu">filter</span>(study_period <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;m19&quot;</span>, <span class="st">&quot;m20&quot;</span>,<span class="st">&quot;m21&quot;</span>, <span class="st">&quot;nm20&quot;</span>, <span class="st">&quot;nm21&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb409-6"><a href="11_female_out_network.html#cb409-6" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>date, <span class="sc">-</span>study_period) <span class="ot">-&gt;</span> no_female_over0<span class="fl">.5</span>_gbi</span>
+<span id="cb409-7"><a href="11_female_out_network.html#cb409-7" tabindex="-1"></a></span>
+<span id="cb409-8"><a href="11_female_out_network.html#cb409-8" tabindex="-1"></a><span class="do">## SRIの分子  </span></span>
+<span id="cb409-9"><a href="11_female_out_network.html#cb409-9" tabindex="-1"></a>sri_denom <span class="ot">&lt;-</span> <span class="fu">get_denominator</span>(no_female_over0<span class="fl">.5</span>_gbi,</span>
+<span id="cb409-10"><a href="11_female_out_network.html#cb409-10" tabindex="-1"></a>                             <span class="at">index =</span> <span class="st">&quot;SRI&quot;</span>,</span>
+<span id="cb409-11"><a href="11_female_out_network.html#cb409-11" tabindex="-1"></a>                             <span class="at">return =</span> <span class="st">&quot;matrix&quot;</span>)</span>
+<span id="cb409-12"><a href="11_female_out_network.html#cb409-12" tabindex="-1"></a></span>
+<span id="cb409-13"><a href="11_female_out_network.html#cb409-13" tabindex="-1"></a><span class="fu">diag</span>(sri_denom) <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb409-14"><a href="11_female_out_network.html#cb409-14" tabindex="-1"></a></span>
+<span id="cb409-15"><a href="11_female_out_network.html#cb409-15" tabindex="-1"></a><span class="do">## SROマトリックス  </span></span>
+<span id="cb409-16"><a href="11_female_out_network.html#cb409-16" tabindex="-1"></a>sri_mat <span class="ot">&lt;-</span> <span class="fu">get_network</span>(no_female_over0<span class="fl">.5</span>_gbi,</span>
+<span id="cb409-17"><a href="11_female_out_network.html#cb409-17" tabindex="-1"></a>                       <span class="at">data_format =</span> <span class="st">&quot;GBI&quot;</span>,</span>
+<span id="cb409-18"><a href="11_female_out_network.html#cb409-18" tabindex="-1"></a>                       <span class="at">association_index =</span> <span class="st">&quot;SRI&quot;</span>)</span></code></pre></div>
+<pre><code>## Generating  15  x  15  matrix</code></pre>
+<div class="sourceCode" id="cb411"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb411-1"><a href="11_female_out_network.html#cb411-1" tabindex="-1"></a><span class="fu">diag</span>(sri_mat) <span class="ot">&lt;-</span> <span class="cn">NA</span></span></code></pre></div>
+<p>続いて、血縁と順位、年齢のマトリックスを作成する。</p>
+<div class="sourceCode" id="cb412"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb412-1"><a href="11_female_out_network.html#cb412-1" tabindex="-1"></a><span class="do">## 血縁マトリックス  </span></span>
+<span id="cb412-2"><a href="11_female_out_network.html#cb412-2" tabindex="-1"></a>kin <span class="sc">%&gt;%</span> </span>
+<span id="cb412-3"><a href="11_female_out_network.html#cb412-3" tabindex="-1"></a>  <span class="fu">complete</span>(femaleID, femaleID2) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-4"><a href="11_female_out_network.html#cb412-4" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">fem1 =</span> femaleID, <span class="at">fem2 =</span> femaleID2) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-5"><a href="11_female_out_network.html#cb412-5" tabindex="-1"></a>  <span class="fu">filter</span>(fem1 <span class="sc">%in%</span> femaleID <span class="sc">&amp;</span> fem2 <span class="sc">%in%</span> femaleID) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-6"><a href="11_female_out_network.html#cb412-6" tabindex="-1"></a>  <span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">kin =</span> <span class="dv">0</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-7"><a href="11_female_out_network.html#cb412-7" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> fem1,</span>
+<span id="cb412-8"><a href="11_female_out_network.html#cb412-8" tabindex="-1"></a>              <span class="at">values_from =</span> kin) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-9"><a href="11_female_out_network.html#cb412-9" tabindex="-1"></a>  datawizard<span class="sc">::</span><span class="fu">column_as_rownames</span>(<span class="at">var =</span> <span class="st">&quot;fem2&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-10"><a href="11_female_out_network.html#cb412-10" tabindex="-1"></a>  <span class="fu">as.matrix</span>() <span class="ot">-&gt;</span> kin_mat</span>
+<span id="cb412-11"><a href="11_female_out_network.html#cb412-11" tabindex="-1"></a></span>
+<span id="cb412-12"><a href="11_female_out_network.html#cb412-12" tabindex="-1"></a><span class="fu">rownames</span>(kin_mat) <span class="ot">&lt;-</span> femaleID</span>
+<span id="cb412-13"><a href="11_female_out_network.html#cb412-13" tabindex="-1"></a><span class="fu">diag</span>(kin_mat) <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb412-14"><a href="11_female_out_network.html#cb412-14" tabindex="-1"></a></span>
+<span id="cb412-15"><a href="11_female_out_network.html#cb412-15" tabindex="-1"></a><span class="do">## 順位マトリックス  </span></span>
+<span id="cb412-16"><a href="11_female_out_network.html#cb412-16" tabindex="-1"></a>rank <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&quot;data/rank.csv&quot;</span>)</span>
+<span id="cb412-17"><a href="11_female_out_network.html#cb412-17" tabindex="-1"></a></span>
+<span id="cb412-18"><a href="11_female_out_network.html#cb412-18" tabindex="-1"></a>kin <span class="sc">%&gt;%</span> </span>
+<span id="cb412-19"><a href="11_female_out_network.html#cb412-19" tabindex="-1"></a>  <span class="fu">complete</span>(femaleID, femaleID2) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-20"><a href="11_female_out_network.html#cb412-20" tabindex="-1"></a>  <span class="fu">left_join</span>(rank, <span class="at">by =</span> <span class="st">&quot;femaleID&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-21"><a href="11_female_out_network.html#cb412-21" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">rank1 =</span> rank) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-22"><a href="11_female_out_network.html#cb412-22" tabindex="-1"></a>  <span class="fu">left_join</span>(rank, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;femaleID2&quot;</span> <span class="ot">=</span> <span class="st">&quot;femaleID&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-23"><a href="11_female_out_network.html#cb412-23" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">rank2 =</span> rank) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-24"><a href="11_female_out_network.html#cb412-24" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">fem1 =</span> femaleID, <span class="at">fem2 =</span> femaleID2) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-25"><a href="11_female_out_network.html#cb412-25" tabindex="-1"></a>  <span class="fu">filter</span>(fem1 <span class="sc">%in%</span> femaleID <span class="sc">&amp;</span> fem2 <span class="sc">%in%</span> femaleID) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-26"><a href="11_female_out_network.html#cb412-26" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">diff_rank =</span> <span class="fu">abs</span>(rank1 <span class="sc">-</span> rank2)) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-27"><a href="11_female_out_network.html#cb412-27" tabindex="-1"></a>  <span class="fu">select</span>(fem1, fem2, diff_rank) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-28"><a href="11_female_out_network.html#cb412-28" tabindex="-1"></a>  <span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">diff_rank =</span> <span class="dv">0</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-29"><a href="11_female_out_network.html#cb412-29" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> fem1,</span>
+<span id="cb412-30"><a href="11_female_out_network.html#cb412-30" tabindex="-1"></a>              <span class="at">values_from =</span> diff_rank) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-31"><a href="11_female_out_network.html#cb412-31" tabindex="-1"></a>  datawizard<span class="sc">::</span><span class="fu">column_as_rownames</span>(<span class="at">var =</span> <span class="st">&quot;fem2&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-32"><a href="11_female_out_network.html#cb412-32" tabindex="-1"></a>  <span class="fu">as.matrix</span>() <span class="ot">-&gt;</span> rank_mat</span>
+<span id="cb412-33"><a href="11_female_out_network.html#cb412-33" tabindex="-1"></a></span>
+<span id="cb412-34"><a href="11_female_out_network.html#cb412-34" tabindex="-1"></a><span class="fu">rownames</span>(rank_mat) <span class="ot">&lt;-</span> femaleID</span>
+<span id="cb412-35"><a href="11_female_out_network.html#cb412-35" tabindex="-1"></a><span class="fu">diag</span>(rank_mat) <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb412-36"><a href="11_female_out_network.html#cb412-36" tabindex="-1"></a></span>
+<span id="cb412-37"><a href="11_female_out_network.html#cb412-37" tabindex="-1"></a><span class="do">### 年齢マトリックス  </span></span>
+<span id="cb412-38"><a href="11_female_out_network.html#cb412-38" tabindex="-1"></a>kin <span class="sc">%&gt;%</span> </span>
+<span id="cb412-39"><a href="11_female_out_network.html#cb412-39" tabindex="-1"></a>  <span class="fu">complete</span>(femaleID, femaleID2) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-40"><a href="11_female_out_network.html#cb412-40" tabindex="-1"></a>  <span class="fu">left_join</span>(rank, <span class="at">by =</span> <span class="st">&quot;femaleID&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-41"><a href="11_female_out_network.html#cb412-41" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">age1 =</span> age) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-42"><a href="11_female_out_network.html#cb412-42" tabindex="-1"></a>  <span class="fu">left_join</span>(rank, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;femaleID2&quot;</span> <span class="ot">=</span> <span class="st">&quot;femaleID&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-43"><a href="11_female_out_network.html#cb412-43" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">age2 =</span> age) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-44"><a href="11_female_out_network.html#cb412-44" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">fem1 =</span> femaleID, <span class="at">fem2 =</span> femaleID2) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-45"><a href="11_female_out_network.html#cb412-45" tabindex="-1"></a>  <span class="fu">filter</span>(fem1 <span class="sc">%in%</span> femaleID <span class="sc">&amp;</span> fem2 <span class="sc">%in%</span> femaleID) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-46"><a href="11_female_out_network.html#cb412-46" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">diff_age =</span> <span class="fu">abs</span>(age1 <span class="sc">-</span> age2)) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-47"><a href="11_female_out_network.html#cb412-47" tabindex="-1"></a>  <span class="fu">select</span>(fem1, fem2, diff_age) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-48"><a href="11_female_out_network.html#cb412-48" tabindex="-1"></a>  <span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">diff_age =</span> <span class="dv">0</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-49"><a href="11_female_out_network.html#cb412-49" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> fem1,</span>
+<span id="cb412-50"><a href="11_female_out_network.html#cb412-50" tabindex="-1"></a>              <span class="at">values_from =</span> diff_age) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-51"><a href="11_female_out_network.html#cb412-51" tabindex="-1"></a>  datawizard<span class="sc">::</span><span class="fu">column_as_rownames</span>(<span class="at">var =</span> <span class="st">&quot;fem2&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb412-52"><a href="11_female_out_network.html#cb412-52" tabindex="-1"></a>  <span class="fu">as.matrix</span>() <span class="ot">-&gt;</span> age_mat</span>
+<span id="cb412-53"><a href="11_female_out_network.html#cb412-53" tabindex="-1"></a></span>
+<span id="cb412-54"><a href="11_female_out_network.html#cb412-54" tabindex="-1"></a><span class="fu">rownames</span>(age_mat) <span class="ot">&lt;-</span> femaleID</span>
+<span id="cb412-55"><a href="11_female_out_network.html#cb412-55" tabindex="-1"></a><span class="fu">diag</span>(age_mat) <span class="ot">&lt;-</span> <span class="cn">NA</span></span></code></pre></div>
+</div>
+<div id="glmqap検定" class="section level3 hasAnchor" number="10.1.2">
+<h3><span class="header-section-number">10.1.2</span> GLMQAP検定<a href="11_female_out_network.html#glmqap検定" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="モデリング-11" class="section level4 hasAnchor" number="10.1.2.1">
+<h4><span class="header-section-number">10.1.2.1</span> モデリング<a href="11_female_out_network.html#モデリング-11" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>それでは、分析を行う。SRIは0~1の間をとるため、応答変数の分布には二項分布を用いた。また、説明変数にはメス同士のCSI、血縁度、順位差を用いた。</p>
+<p>まず、説明変数に用いるマトリックスを標準化する。</p>
+<div class="sourceCode" id="cb413"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb413-1"><a href="11_female_out_network.html#cb413-1" tabindex="-1"></a><span class="fu">diag</span>(CSI_female) <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb413-2"><a href="11_female_out_network.html#cb413-2" tabindex="-1"></a></span>
+<span id="cb413-3"><a href="11_female_out_network.html#cb413-3" tabindex="-1"></a>CSI_female_std <span class="ot">&lt;-</span> (CSI_female <span class="sc">-</span> <span class="fu">mean</span>(CSI_female, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))<span class="sc">/</span><span class="fu">sd</span>(CSI_female, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb413-4"><a href="11_female_out_network.html#cb413-4" tabindex="-1"></a>kin_mat_std <span class="ot">&lt;-</span> (kin_mat <span class="sc">-</span> <span class="fu">mean</span>(kin_mat, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))<span class="sc">/</span><span class="fu">sd</span>(kin_mat, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb413-5"><a href="11_female_out_network.html#cb413-5" tabindex="-1"></a>rank_mat_std <span class="ot">&lt;-</span> (rank_mat <span class="sc">-</span> <span class="fu">mean</span>(rank_mat, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))<span class="sc">/</span><span class="fu">sd</span>(rank_mat, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb413-6"><a href="11_female_out_network.html#cb413-6" tabindex="-1"></a>age_mat_std <span class="ot">&lt;-</span> (age_mat <span class="sc">-</span> <span class="fu">mean</span>(age_mat, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))<span class="sc">/</span><span class="fu">sd</span>(age_mat, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p>分析は以下のように実行する。</p>
+<div class="sourceCode" id="cb414"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb414-1"><a href="11_female_out_network.html#cb414-1" tabindex="-1"></a><span class="co"># sri_qap &lt;- glmqap(sri_mat ~ CSI_female_std + kin_mat_std + rank_mat_std,</span></span>
+<span id="cb414-2"><a href="11_female_out_network.html#cb414-2" tabindex="-1"></a><span class="co">#                   weights = sri_denom,</span></span>
+<span id="cb414-3"><a href="11_female_out_network.html#cb414-3" tabindex="-1"></a><span class="co">#                   family = &quot;binomial&quot;,</span></span>
+<span id="cb414-4"><a href="11_female_out_network.html#cb414-4" tabindex="-1"></a><span class="co">#                   nperm = 10000,</span></span>
+<span id="cb414-5"><a href="11_female_out_network.html#cb414-5" tabindex="-1"></a><span class="co">#                   permutation = &quot;DSP&quot;)</span></span>
+<span id="cb414-6"><a href="11_female_out_network.html#cb414-6" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb414-7"><a href="11_female_out_network.html#cb414-7" tabindex="-1"></a><span class="co"># saveRDS(sri_qap, &quot;model/sri_qap.rds&quot;)</span></span>
+<span id="cb414-8"><a href="11_female_out_network.html#cb414-8" tabindex="-1"></a>sri_qap <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">&quot;model/sri_qap.rds&quot;</span>)</span></code></pre></div>
+</div>
+<div id="結果の確認-13" class="section level4 hasAnchor" number="10.1.2.2">
+<h4><span class="header-section-number">10.1.2.2</span> 結果の確認<a href="11_female_out_network.html#結果の確認-13" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>結果は以下の通り。いずれも有意な関連は見られなかった。</p>
+<div class="sourceCode" id="cb415"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb415-1"><a href="11_female_out_network.html#cb415-1" tabindex="-1"></a>sri_qap</span></code></pre></div>
+<pre><code>## GLMQAP with Doube-Semi-Partialling
+## 
+## Formula:  sri_mat ~ CSI_female_std + kin_mat_std + rank_mat_std 
+## Family:  binomial 
+## Weights: sri_denom 
+## Offset: NULL 
+## Permutations:  10000 
+## 
+## Coefficients:
+##                    Estimate   Std. Error            Z P(two-tailed)
+## Intercept       1.411108203  0.015649464                           
+## CSI_female_std  0.190938115  0.031209331  6.117981737   0.183381662
+## kin_mat_std    -0.002294871  0.026423152 -0.086850756   0.997900210
+## rank_mat_std    0.188720669  0.017684248 10.671681624   0.166183382
+## 
+## log-likelihood: -1501.172    AIC: 3010.345   BIC: 3020.961   </code></pre>
+</div>
+<div id="ネットワークの確認" class="section level4 hasAnchor" number="10.1.2.3">
+<h4><span class="header-section-number">10.1.2.3</span> ネットワークの確認<a href="11_female_out_network.html#ネットワークの確認" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>SRIネットワークを図示すると以下のようになる。ノードの大きさはネットワーク内における固有ベクトル中心性を表す。</p>
+<div class="sourceCode" id="cb417"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb417-1"><a href="11_female_out_network.html#cb417-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1223</span>)</span>
+<span id="cb417-2"><a href="11_female_out_network.html#cb417-2" tabindex="-1"></a></span>
+<span id="cb417-3"><a href="11_female_out_network.html#cb417-3" tabindex="-1"></a><span class="fu">diag</span>(sri_mat) <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb417-4"><a href="11_female_out_network.html#cb417-4" tabindex="-1"></a>att_sri <span class="ot">&lt;-</span> <span class="fu">met.eigen</span>(sri_mat,</span>
+<span id="cb417-5"><a href="11_female_out_network.html#cb417-5" tabindex="-1"></a>                     <span class="at">df =</span> rank <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">rank_cat =</span> <span class="fu">ifelse</span>(rank <span class="sc">&lt;=</span> <span class="dv">5</span>, <span class="st">&quot;high&quot;</span>,</span>
+<span id="cb417-6"><a href="11_female_out_network.html#cb417-6" tabindex="-1"></a>                                                            <span class="fu">ifelse</span>(rank <span class="sc">&lt;=</span> <span class="dv">10</span>, <span class="st">&quot;mid&quot;</span>, <span class="st">&quot;low&quot;</span>))),</span>
+<span id="cb417-7"><a href="11_female_out_network.html#cb417-7" tabindex="-1"></a>                     <span class="at">dfid =</span> <span class="dv">1</span>)</span>
+<span id="cb417-8"><a href="11_female_out_network.html#cb417-8" tabindex="-1"></a></span>
+<span id="cb417-9"><a href="11_female_out_network.html#cb417-9" tabindex="-1"></a>sri_mat <span class="sc">%&gt;%</span> </span>
+<span id="cb417-10"><a href="11_female_out_network.html#cb417-10" tabindex="-1"></a>  <span class="fu">as_tbl_graph</span>(<span class="at">directed =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb417-11"><a href="11_female_out_network.html#cb417-11" tabindex="-1"></a>  <span class="do">## 個体の属性を結合  </span></span>
+<span id="cb417-12"><a href="11_female_out_network.html#cb417-12" tabindex="-1"></a>  <span class="fu">left_join</span>(att_sri <span class="sc">%&gt;%</span> </span>
+<span id="cb417-13"><a href="11_female_out_network.html#cb417-13" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">rank_cat =</span> <span class="fu">fct_relevel</span>(rank_cat,<span class="st">&quot;high&quot;</span>,<span class="st">&quot;mid&quot;</span>)),</span>
+<span id="cb417-14"><a href="11_female_out_network.html#cb417-14" tabindex="-1"></a>            <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;name&quot;</span> <span class="ot">=</span> <span class="st">&quot;femaleID&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb417-15"><a href="11_female_out_network.html#cb417-15" tabindex="-1"></a>  <span class="fu">ggraph</span>(<span class="at">layout =</span> <span class="st">&quot;nicely&quot;</span>)<span class="sc">+</span></span>
+<span id="cb417-16"><a href="11_female_out_network.html#cb417-16" tabindex="-1"></a>  <span class="fu">geom_edge_link</span>(<span class="at">start_cap =</span> <span class="fu">circle</span>(<span class="fl">0.5</span>,<span class="st">&quot;cm&quot;</span>),</span>
+<span id="cb417-17"><a href="11_female_out_network.html#cb417-17" tabindex="-1"></a>                 <span class="at">end_cap =</span> <span class="fu">circle</span>(<span class="fl">0.5</span>,<span class="st">&quot;cm&quot;</span>),</span>
+<span id="cb417-18"><a href="11_female_out_network.html#cb417-18" tabindex="-1"></a>                 <span class="at">color =</span> <span class="st">&quot;grey55&quot;</span>,</span>
+<span id="cb417-19"><a href="11_female_out_network.html#cb417-19" tabindex="-1"></a>                 <span class="fu">aes</span>(<span class="at">width =</span> weight),</span>
+<span id="cb417-20"><a href="11_female_out_network.html#cb417-20" tabindex="-1"></a>                 <span class="at">alpha =</span> <span class="fl">0.6</span>)<span class="sc">+</span></span>
+<span id="cb417-21"><a href="11_female_out_network.html#cb417-21" tabindex="-1"></a>  <span class="fu">geom_node_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> rank_cat,</span>
+<span id="cb417-22"><a href="11_female_out_network.html#cb417-22" tabindex="-1"></a>                      <span class="at">size =</span> eigen),<span class="at">shape =</span> <span class="dv">19</span>)<span class="sc">+</span></span>
+<span id="cb417-23"><a href="11_female_out_network.html#cb417-23" tabindex="-1"></a>  <span class="fu">scale_edge_width</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="fl">0.2</span>,<span class="fl">1.5</span>))<span class="sc">+</span></span>
+<span id="cb417-24"><a href="11_female_out_network.html#cb417-24" tabindex="-1"></a>  <span class="fu">geom_node_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> name), <span class="at">color =</span> <span class="st">&quot;white&quot;</span>)<span class="sc">+</span></span>
+<span id="cb417-25"><a href="11_female_out_network.html#cb417-25" tabindex="-1"></a>  <span class="fu">scale_size</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">8</span>,<span class="dv">12</span>))<span class="sc">+</span></span>
+<span id="cb417-26"><a href="11_female_out_network.html#cb417-26" tabindex="-1"></a>  <span class="fu">theme_graph</span>()<span class="sc">+</span></span>
+<span id="cb417-27"><a href="11_female_out_network.html#cb417-27" tabindex="-1"></a>  <span class="fu">scale_color_nejm</span>()<span class="sc">+</span></span>
+<span id="cb417-28"><a href="11_female_out_network.html#cb417-28" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">color =</span> <span class="st">&quot;rank&quot;</span>) <span class="sc">+</span></span>
+<span id="cb417-29"><a href="11_female_out_network.html#cb417-29" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">size =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span></span>
+<span id="cb417-30"><a href="11_female_out_network.html#cb417-30" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="fl">0.9</span>)<span class="sc">+</span></span>
+<span id="cb417-31"><a href="11_female_out_network.html#cb417-31" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">expand =</span> <span class="fu">c</span>(<span class="fl">0.1</span>,<span class="fl">0.1</span>))<span class="sc">+</span></span>
+<span id="cb417-32"><a href="11_female_out_network.html#cb417-32" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">expand =</span> <span class="fu">c</span>(<span class="fl">0.12</span>,<span class="fl">0.11</span>)) <span class="ot">-&gt;</span> p_sri_mat</span>
+<span id="cb417-33"><a href="11_female_out_network.html#cb417-33" tabindex="-1"></a></span>
+<span id="cb417-34"><a href="11_female_out_network.html#cb417-34" tabindex="-1"></a>p_sri_mat</span></code></pre></div>
+<p><img src="Fission-fusion-dynamics-in-B1-troop_files/figure-html/unnamed-chunk-245-1.png" width="672" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb418"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb418-1"><a href="11_female_out_network.html#cb418-1" tabindex="-1"></a><span class="co"># ggsave(&quot;figures/p_sri_mat.png&quot;,p_sri_mat,</span></span>
+<span id="cb418-2"><a href="11_female_out_network.html#cb418-2" tabindex="-1"></a><span class="co">#         width = 140, height = 100, dpi = 600, units = &quot;mm&quot;)</span></span></code></pre></div>
+</div>
+</div>
+</div>
+<div id="メス間の社会関係と同じ日に群れを離れた割合の関連" class="section level2 hasAnchor" number="10.2">
+<h2><span class="header-section-number">10.2</span> メス間の社会関係と同じ日に群れを離れた割合の関連<a href="11_female_out_network.html#メス間の社会関係と同じ日に群れを離れた割合の関連" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="データの加工-15" class="section level3 hasAnchor" number="10.2.1">
+<h3><span class="header-section-number">10.2.1</span> データの加工<a href="11_female_out_network.html#データの加工-15" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>まず、メス同士が群れを同じ日に出た割合を表すマトリックスを作成する。</p>
+<div class="sourceCode" id="cb419"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb419-1"><a href="11_female_out_network.html#cb419-1" tabindex="-1"></a>tidyr<span class="sc">::</span><span class="fu">crossing</span>(<span class="at">date =</span> <span class="fu">unique</span>(female_out_final<span class="sc">$</span>date),</span>
+<span id="cb419-2"><a href="11_female_out_network.html#cb419-2" tabindex="-1"></a>                <span class="at">femaleID1 =</span> femaleID, </span>
+<span id="cb419-3"><a href="11_female_out_network.html#cb419-3" tabindex="-1"></a>                <span class="at">femaleID2 =</span> femaleID) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-4"><a href="11_female_out_network.html#cb419-4" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(femaleID1 <span class="sc">==</span> femaleID2)) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-5"><a href="11_female_out_network.html#cb419-5" tabindex="-1"></a>  <span class="fu">left_join</span>(female_out_final <span class="sc">%&gt;%</span> <span class="fu">select</span>(date, femaleID, female_out, presence_pre),</span>
+<span id="cb419-6"><a href="11_female_out_network.html#cb419-6" tabindex="-1"></a>            <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;date&quot;</span>, <span class="st">&quot;femaleID1&quot;</span> <span class="ot">=</span> <span class="st">&quot;femaleID&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-7"><a href="11_female_out_network.html#cb419-7" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">out1 =</span> female_out, <span class="at">presence_pre1 =</span> presence_pre) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-8"><a href="11_female_out_network.html#cb419-8" tabindex="-1"></a>  <span class="fu">left_join</span>(female_out_final <span class="sc">%&gt;%</span> <span class="fu">select</span>(date, femaleID, female_out, presence_pre),</span>
+<span id="cb419-9"><a href="11_female_out_network.html#cb419-9" tabindex="-1"></a>            <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;date&quot;</span>, <span class="st">&quot;femaleID2&quot;</span> <span class="ot">=</span> <span class="st">&quot;femaleID&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-10"><a href="11_female_out_network.html#cb419-10" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">out2 =</span> female_out, <span class="at">presence_pre2 =</span> presence_pre) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-11"><a href="11_female_out_network.html#cb419-11" tabindex="-1"></a>  <span class="fu">filter</span>(presence_pre1 <span class="sc">==</span> <span class="dv">1</span>  <span class="sc">&amp;</span> presence_pre2 <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-12"><a href="11_female_out_network.html#cb419-12" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">co_out =</span> <span class="fu">ifelse</span>(out1 <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> out2 <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb419-13"><a href="11_female_out_network.html#cb419-13" tabindex="-1"></a>         <span class="at">out_a =</span> <span class="fu">ifelse</span>(out1 <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> out2 <span class="sc">==</span> <span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>),</span>
+<span id="cb419-14"><a href="11_female_out_network.html#cb419-14" tabindex="-1"></a>         <span class="at">out_b =</span> <span class="fu">ifelse</span>(out1 <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;</span> out2 <span class="sc">==</span> <span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-15"><a href="11_female_out_network.html#cb419-15" tabindex="-1"></a>  <span class="fu">group_by</span>(femaleID1, femaleID2) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-16"><a href="11_female_out_network.html#cb419-16" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">sum_co_out =</span> <span class="fu">sum</span>(co_out),</span>
+<span id="cb419-17"><a href="11_female_out_network.html#cb419-17" tabindex="-1"></a>            <span class="at">sum_out_a =</span> <span class="fu">sum</span>(out_a),</span>
+<span id="cb419-18"><a href="11_female_out_network.html#cb419-18" tabindex="-1"></a>            <span class="at">sum_out_b =</span> <span class="fu">sum</span>(out_b)) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-19"><a href="11_female_out_network.html#cb419-19" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb419-20"><a href="11_female_out_network.html#cb419-20" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">denom =</span> sum_co_out <span class="sc">+</span> sum_out_a <span class="sc">+</span> sum_out_b) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-21"><a href="11_female_out_network.html#cb419-21" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sri =</span> sum_co_out<span class="sc">/</span>denom) <span class="ot">-&gt;</span> female_out_sri</span>
+<span id="cb419-22"><a href="11_female_out_network.html#cb419-22" tabindex="-1"></a></span>
+<span id="cb419-23"><a href="11_female_out_network.html#cb419-23" tabindex="-1"></a><span class="do">## 分母  </span></span>
+<span id="cb419-24"><a href="11_female_out_network.html#cb419-24" tabindex="-1"></a>out_sri_denom <span class="ot">&lt;-</span> female_out_sri <span class="sc">%&gt;%</span> </span>
+<span id="cb419-25"><a href="11_female_out_network.html#cb419-25" tabindex="-1"></a>  <span class="fu">select</span>(femaleID1, femaleID2, denom) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-26"><a href="11_female_out_network.html#cb419-26" tabindex="-1"></a>  <span class="fu">arrange</span>(femaleID2) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-27"><a href="11_female_out_network.html#cb419-27" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> femaleID2,</span>
+<span id="cb419-28"><a href="11_female_out_network.html#cb419-28" tabindex="-1"></a>              <span class="at">values_from =</span> denom) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-29"><a href="11_female_out_network.html#cb419-29" tabindex="-1"></a>  <span class="fu">arrange</span>(femaleID1) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-30"><a href="11_female_out_network.html#cb419-30" tabindex="-1"></a>  <span class="fu">column_as_rownames</span>(<span class="at">var =</span> <span class="st">&quot;femaleID1&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-31"><a href="11_female_out_network.html#cb419-31" tabindex="-1"></a>  <span class="fu">as.matrix</span>()</span>
+<span id="cb419-32"><a href="11_female_out_network.html#cb419-32" tabindex="-1"></a></span>
+<span id="cb419-33"><a href="11_female_out_network.html#cb419-33" tabindex="-1"></a><span class="fu">rownames</span>(out_sri_denom) <span class="ot">&lt;-</span> femaleID</span>
+<span id="cb419-34"><a href="11_female_out_network.html#cb419-34" tabindex="-1"></a></span>
+<span id="cb419-35"><a href="11_female_out_network.html#cb419-35" tabindex="-1"></a><span class="do">## sri</span></span>
+<span id="cb419-36"><a href="11_female_out_network.html#cb419-36" tabindex="-1"></a>out_sri_mat <span class="ot">&lt;-</span> female_out_sri <span class="sc">%&gt;%</span> </span>
+<span id="cb419-37"><a href="11_female_out_network.html#cb419-37" tabindex="-1"></a>  <span class="fu">select</span>(femaleID1, femaleID2, sri) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-38"><a href="11_female_out_network.html#cb419-38" tabindex="-1"></a>  <span class="fu">arrange</span>(femaleID2) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-39"><a href="11_female_out_network.html#cb419-39" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> femaleID2,</span>
+<span id="cb419-40"><a href="11_female_out_network.html#cb419-40" tabindex="-1"></a>              <span class="at">values_from =</span> sri) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-41"><a href="11_female_out_network.html#cb419-41" tabindex="-1"></a>  <span class="fu">arrange</span>(femaleID1) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-42"><a href="11_female_out_network.html#cb419-42" tabindex="-1"></a>  <span class="fu">column_as_rownames</span>(<span class="at">var =</span> <span class="st">&quot;femaleID1&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb419-43"><a href="11_female_out_network.html#cb419-43" tabindex="-1"></a>  <span class="fu">as.matrix</span>()</span>
+<span id="cb419-44"><a href="11_female_out_network.html#cb419-44" tabindex="-1"></a></span>
+<span id="cb419-45"><a href="11_female_out_network.html#cb419-45" tabindex="-1"></a><span class="fu">rownames</span>(out_sri_mat) <span class="ot">&lt;-</span> femaleID</span></code></pre></div>
+</div>
+<div id="glmqap検定-1" class="section level3 hasAnchor" number="10.2.2">
+<h3><span class="header-section-number">10.2.2</span> GLMQAP検定<a href="11_female_out_network.html#glmqap検定-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="モデリング-12" class="section level4 hasAnchor" number="10.2.2.1">
+<h4><span class="header-section-number">10.2.2.1</span> モデリング<a href="11_female_out_network.html#モデリング-12" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>それでは、分析を行う。SRIは先ほど同様に0~1の間をとるため、応答変数の分布には二項分布を用いた。また、説明変数にも先ほどと同じくメス同士のCSI、血縁度、順位差、年齢差を用いた。</p>
+<p>分析は以下のように実行する。</p>
+<div class="sourceCode" id="cb420"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb420-1"><a href="11_female_out_network.html#cb420-1" tabindex="-1"></a><span class="co"># out_sri_qap &lt;- glmqap(out_sri_mat ~ CSI_female_std + kin_mat_std + rank_mat_std,</span></span>
+<span id="cb420-2"><a href="11_female_out_network.html#cb420-2" tabindex="-1"></a><span class="co">#                       weights = out_sri_denom,</span></span>
+<span id="cb420-3"><a href="11_female_out_network.html#cb420-3" tabindex="-1"></a><span class="co">#                       family = &quot;binomial&quot;,</span></span>
+<span id="cb420-4"><a href="11_female_out_network.html#cb420-4" tabindex="-1"></a><span class="co">#                       nperm = 10000,</span></span>
+<span id="cb420-5"><a href="11_female_out_network.html#cb420-5" tabindex="-1"></a><span class="co">#                       permutation = &quot;DSP&quot;)</span></span>
+<span id="cb420-6"><a href="11_female_out_network.html#cb420-6" tabindex="-1"></a></span>
+<span id="cb420-7"><a href="11_female_out_network.html#cb420-7" tabindex="-1"></a><span class="co"># saveRDS(out_sri_qap, &quot;model/out_sri_qap.rds&quot;)</span></span>
+<span id="cb420-8"><a href="11_female_out_network.html#cb420-8" tabindex="-1"></a>out_sri_qap <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">&quot;model/out_sri_qap.rds&quot;</span>)</span></code></pre></div>
+</div>
+<div id="結果の確認-14" class="section level4 hasAnchor" number="10.2.2.2">
+<h4><span class="header-section-number">10.2.2.2</span> 結果の確認<a href="11_female_out_network.html#結果の確認-14" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>結果は以下の通り。CSIと順位差と有意に関連していることが分かった。</p>
+<div class="sourceCode" id="cb421"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb421-1"><a href="11_female_out_network.html#cb421-1" tabindex="-1"></a>out_sri_qap</span></code></pre></div>
+<pre><code>## GLMQAP with Doube-Semi-Partialling
+## 
+## Formula:  out_sri_mat ~ CSI_female_std + kin_mat_std + rank_mat_std 
+## Family:  binomial 
+## Weights: out_sri_denom 
+## Offset: NULL 
+## Permutations:  10000 
+## 
+## Coefficients:
+##                   Estimate  Std. Error           Z P(two-tailed)
+## Intercept      -2.84179882  0.13728755                          
+## CSI_female_std  0.38160515  0.10962314  3.48106396    0.01019898
+## kin_mat_std     0.04826786  0.15759486  0.30627815    0.74692531
+## rank_mat_std    0.37664468  0.15225615  2.47375673    0.01739826
+## 
+## log-likelihood: -101.3394    AIC: 210.6787   BIC: 221.2945   </code></pre>
+<p>CSIとSRIの関連を図示すると以下のようになる。</p>
+<div class="sourceCode" id="cb423"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb423-1"><a href="11_female_out_network.html#cb423-1" tabindex="-1"></a><span class="do">## モデルに基づく回帰曲線</span></span>
+<span id="cb423-2"><a href="11_female_out_network.html#cb423-2" tabindex="-1"></a>coef <span class="ot">&lt;-</span> <span class="fu">coef</span>(out_sri_qap)</span>
+<span id="cb423-3"><a href="11_female_out_network.html#cb423-3" tabindex="-1"></a></span>
+<span id="cb423-4"><a href="11_female_out_network.html#cb423-4" tabindex="-1"></a>fit_out_sri <span class="ot">&lt;-</span> tidyr<span class="sc">::</span><span class="fu">crossing</span>(<span class="at">CSI =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="fl">10.2</span>,<span class="at">length =</span> <span class="dv">100</span>),</span>
+<span id="cb423-5"><a href="11_female_out_network.html#cb423-5" tabindex="-1"></a>                        <span class="at">kin =</span> <span class="fu">mean</span>(kin_mat_std, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb423-6"><a href="11_female_out_network.html#cb423-6" tabindex="-1"></a>                        <span class="at">rank =</span> <span class="fu">mean</span>(rank_mat_std, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb423-7"><a href="11_female_out_network.html#cb423-7" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">CSI_std =</span> (CSI <span class="sc">-</span> <span class="fu">mean</span>(CSI_female, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))<span class="sc">/</span><span class="fu">sd</span>(CSI_female, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb423-8"><a href="11_female_out_network.html#cb423-8" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Estimate =</span> <span class="fu">inv_logit_scaled</span>(coef[<span class="dv">1</span>] <span class="sc">+</span> coef[<span class="dv">2</span>]<span class="sc">*</span>CSI_std <span class="sc">+</span> coef[<span class="dv">3</span>]<span class="sc">*</span>kin <span class="sc">+</span> coef[<span class="dv">4</span>]<span class="sc">*</span>rank))</span>
+<span id="cb423-9"><a href="11_female_out_network.html#cb423-9" tabindex="-1"></a></span>
+<span id="cb423-10"><a href="11_female_out_network.html#cb423-10" tabindex="-1"></a><span class="do">## CSIマトリックスを縦型に  </span></span>
+<span id="cb423-11"><a href="11_female_out_network.html#cb423-11" tabindex="-1"></a>CSI_female <span class="sc">%&gt;%</span> </span>
+<span id="cb423-12"><a href="11_female_out_network.html#cb423-12" tabindex="-1"></a>  <span class="fu">data.frame</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb423-13"><a href="11_female_out_network.html#cb423-13" tabindex="-1"></a>  <span class="fu">rownames_as_column</span>(<span class="at">var =</span> <span class="st">&quot;femaleID1&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb423-14"><a href="11_female_out_network.html#cb423-14" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">16</span>,</span>
+<span id="cb423-15"><a href="11_female_out_network.html#cb423-15" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">&quot;femaleID2&quot;</span>,</span>
+<span id="cb423-16"><a href="11_female_out_network.html#cb423-16" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">&quot;CSI&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb423-17"><a href="11_female_out_network.html#cb423-17" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(femaleID1 <span class="sc">==</span> femaleID2)) <span class="sc">%&gt;%</span> </span>
+<span id="cb423-18"><a href="11_female_out_network.html#cb423-18" tabindex="-1"></a>  <span class="do">## 重複を削除</span></span>
+<span id="cb423-19"><a href="11_female_out_network.html#cb423-19" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">pair =</span> <span class="fu">ifelse</span>(femaleID <span class="sc">&gt;</span> femaleID2, <span class="fu">str_c</span>(femaleID1,<span class="st">&quot;-&quot;</span>,femaleID2),</span>
+<span id="cb423-20"><a href="11_female_out_network.html#cb423-20" tabindex="-1"></a>                       <span class="fu">str_c</span>(femaleID2,<span class="st">&quot;-&quot;</span>,femaleID1))) <span class="sc">%&gt;%</span> </span>
+<span id="cb423-21"><a href="11_female_out_network.html#cb423-21" tabindex="-1"></a>  <span class="fu">distinct</span>(pair, CSI) <span class="ot">-&gt;</span> CSI_female_long</span>
+<span id="cb423-22"><a href="11_female_out_network.html#cb423-22" tabindex="-1"></a></span>
+<span id="cb423-23"><a href="11_female_out_network.html#cb423-23" tabindex="-1"></a><span class="do">## SRIマトリックスを縦型に</span></span>
+<span id="cb423-24"><a href="11_female_out_network.html#cb423-24" tabindex="-1"></a>out_sri_mat <span class="sc">%&gt;%</span> </span>
+<span id="cb423-25"><a href="11_female_out_network.html#cb423-25" tabindex="-1"></a>  <span class="fu">data.frame</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb423-26"><a href="11_female_out_network.html#cb423-26" tabindex="-1"></a>  <span class="fu">rownames_as_column</span>(<span class="at">var =</span> <span class="st">&quot;femaleID1&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb423-27"><a href="11_female_out_network.html#cb423-27" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">16</span>,</span>
+<span id="cb423-28"><a href="11_female_out_network.html#cb423-28" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">&quot;femaleID2&quot;</span>,</span>
+<span id="cb423-29"><a href="11_female_out_network.html#cb423-29" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">&quot;SRI&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb423-30"><a href="11_female_out_network.html#cb423-30" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(femaleID1 <span class="sc">==</span> femaleID2)) <span class="sc">%&gt;%</span> </span>
+<span id="cb423-31"><a href="11_female_out_network.html#cb423-31" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">pair =</span> <span class="fu">ifelse</span>(femaleID <span class="sc">&gt;</span> femaleID2, <span class="fu">str_c</span>(femaleID1,<span class="st">&quot;-&quot;</span>,femaleID2),</span>
+<span id="cb423-32"><a href="11_female_out_network.html#cb423-32" tabindex="-1"></a>                       <span class="fu">str_c</span>(femaleID2,<span class="st">&quot;-&quot;</span>,femaleID1))) <span class="sc">%&gt;%</span> </span>
+<span id="cb423-33"><a href="11_female_out_network.html#cb423-33" tabindex="-1"></a>  <span class="fu">distinct</span>(pair, SRI) <span class="sc">%&gt;%</span> </span>
+<span id="cb423-34"><a href="11_female_out_network.html#cb423-34" tabindex="-1"></a>  <span class="fu">left_join</span>(CSI_female_long) <span class="sc">%&gt;%</span> </span>
+<span id="cb423-35"><a href="11_female_out_network.html#cb423-35" tabindex="-1"></a>  <span class="do">## 図示</span></span>
+<span id="cb423-36"><a href="11_female_out_network.html#cb423-36" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> CSI, <span class="at">y =</span> SRI))<span class="sc">+</span></span>
+<span id="cb423-37"><a href="11_female_out_network.html#cb423-37" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>, <span class="at">alpha =</span> <span class="fl">0.8</span>,</span>
+<span id="cb423-38"><a href="11_female_out_network.html#cb423-38" tabindex="-1"></a>             <span class="at">shape =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb423-39"><a href="11_female_out_network.html#cb423-39" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">data =</span> fit_out_sri,</span>
+<span id="cb423-40"><a href="11_female_out_network.html#cb423-40" tabindex="-1"></a>            <span class="fu">aes</span>(<span class="at">y =</span> Estimate))<span class="sc">+</span></span>
+<span id="cb423-41"><a href="11_female_out_network.html#cb423-41" tabindex="-1"></a>  <span class="fu">theme_bw</span>(<span class="at">base_size =</span> <span class="dv">15</span>)</span></code></pre></div>
+<p><img src="Fission-fusion-dynamics-in-B1-troop_files/figure-html/unnamed-chunk-249-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>順位とSRIの関連を図示すると以下のようになる。</p>
+<div class="sourceCode" id="cb424"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb424-1"><a href="11_female_out_network.html#cb424-1" tabindex="-1"></a><span class="do">## モデルに基づく回帰曲線</span></span>
+<span id="cb424-2"><a href="11_female_out_network.html#cb424-2" tabindex="-1"></a>coef <span class="ot">&lt;-</span> <span class="fu">coef</span>(out_sri_qap)</span>
+<span id="cb424-3"><a href="11_female_out_network.html#cb424-3" tabindex="-1"></a></span>
+<span id="cb424-4"><a href="11_female_out_network.html#cb424-4" tabindex="-1"></a>fit_out_sri_b <span class="ot">&lt;-</span> tidyr<span class="sc">::</span><span class="fu">crossing</span>(<span class="at">CSI =</span> <span class="fu">mean</span>(CSI_female_std, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb424-5"><a href="11_female_out_network.html#cb424-5" tabindex="-1"></a>                        <span class="at">kin =</span> <span class="fu">mean</span>(kin_mat_std, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb424-6"><a href="11_female_out_network.html#cb424-6" tabindex="-1"></a>                        <span class="at">rank =</span> <span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">14</span>, <span class="at">length =</span> <span class="dv">100</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb424-7"><a href="11_female_out_network.html#cb424-7" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">rank_std =</span> (rank <span class="sc">-</span> <span class="fu">mean</span>(rank_mat, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))<span class="sc">/</span><span class="fu">sd</span>(rank_mat, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb424-8"><a href="11_female_out_network.html#cb424-8" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Estimate =</span> <span class="fu">inv_logit_scaled</span>(coef[<span class="dv">1</span>] <span class="sc">+</span> coef[<span class="dv">2</span>]<span class="sc">*</span>CSI <span class="sc">+</span> coef[<span class="dv">3</span>]<span class="sc">*</span>kin <span class="sc">+</span> coef[<span class="dv">4</span>]<span class="sc">*</span>rank_std))</span>
+<span id="cb424-9"><a href="11_female_out_network.html#cb424-9" tabindex="-1"></a></span>
+<span id="cb424-10"><a href="11_female_out_network.html#cb424-10" tabindex="-1"></a><span class="do">## CSIマトリックスを縦型に  </span></span>
+<span id="cb424-11"><a href="11_female_out_network.html#cb424-11" tabindex="-1"></a>rank_mat <span class="sc">%&gt;%</span> </span>
+<span id="cb424-12"><a href="11_female_out_network.html#cb424-12" tabindex="-1"></a>  <span class="fu">data.frame</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb424-13"><a href="11_female_out_network.html#cb424-13" tabindex="-1"></a>  <span class="fu">rownames_as_column</span>(<span class="at">var =</span> <span class="st">&quot;femaleID1&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb424-14"><a href="11_female_out_network.html#cb424-14" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">16</span>,</span>
+<span id="cb424-15"><a href="11_female_out_network.html#cb424-15" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">&quot;femaleID2&quot;</span>,</span>
+<span id="cb424-16"><a href="11_female_out_network.html#cb424-16" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">&quot;rank&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb424-17"><a href="11_female_out_network.html#cb424-17" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(femaleID1 <span class="sc">==</span> femaleID2)) <span class="sc">%&gt;%</span> </span>
+<span id="cb424-18"><a href="11_female_out_network.html#cb424-18" tabindex="-1"></a>  <span class="do">## 重複を削除</span></span>
+<span id="cb424-19"><a href="11_female_out_network.html#cb424-19" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">pair =</span> <span class="fu">ifelse</span>(femaleID <span class="sc">&gt;</span> femaleID2, <span class="fu">str_c</span>(femaleID1,<span class="st">&quot;-&quot;</span>,femaleID2),</span>
+<span id="cb424-20"><a href="11_female_out_network.html#cb424-20" tabindex="-1"></a>                       <span class="fu">str_c</span>(femaleID2,<span class="st">&quot;-&quot;</span>,femaleID1))) <span class="sc">%&gt;%</span> </span>
+<span id="cb424-21"><a href="11_female_out_network.html#cb424-21" tabindex="-1"></a>  <span class="fu">distinct</span>(pair, rank) <span class="ot">-&gt;</span> rank_female_long</span>
+<span id="cb424-22"><a href="11_female_out_network.html#cb424-22" tabindex="-1"></a></span>
+<span id="cb424-23"><a href="11_female_out_network.html#cb424-23" tabindex="-1"></a><span class="do">## SRIマトリックスを縦型に</span></span>
+<span id="cb424-24"><a href="11_female_out_network.html#cb424-24" tabindex="-1"></a>out_sri_mat <span class="sc">%&gt;%</span> </span>
+<span id="cb424-25"><a href="11_female_out_network.html#cb424-25" tabindex="-1"></a>  <span class="fu">data.frame</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb424-26"><a href="11_female_out_network.html#cb424-26" tabindex="-1"></a>  <span class="fu">rownames_as_column</span>(<span class="at">var =</span> <span class="st">&quot;femaleID1&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb424-27"><a href="11_female_out_network.html#cb424-27" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">16</span>,</span>
+<span id="cb424-28"><a href="11_female_out_network.html#cb424-28" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">&quot;femaleID2&quot;</span>,</span>
+<span id="cb424-29"><a href="11_female_out_network.html#cb424-29" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">&quot;SRI&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb424-30"><a href="11_female_out_network.html#cb424-30" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(femaleID1 <span class="sc">==</span> femaleID2)) <span class="sc">%&gt;%</span> </span>
+<span id="cb424-31"><a href="11_female_out_network.html#cb424-31" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">pair =</span> <span class="fu">ifelse</span>(femaleID <span class="sc">&gt;</span> femaleID2, <span class="fu">str_c</span>(femaleID1,<span class="st">&quot;-&quot;</span>,femaleID2),</span>
+<span id="cb424-32"><a href="11_female_out_network.html#cb424-32" tabindex="-1"></a>                       <span class="fu">str_c</span>(femaleID2,<span class="st">&quot;-&quot;</span>,femaleID1))) <span class="sc">%&gt;%</span> </span>
+<span id="cb424-33"><a href="11_female_out_network.html#cb424-33" tabindex="-1"></a>  <span class="fu">distinct</span>(pair, SRI) <span class="sc">%&gt;%</span> </span>
+<span id="cb424-34"><a href="11_female_out_network.html#cb424-34" tabindex="-1"></a>  <span class="fu">left_join</span>(rank_female_long) <span class="sc">%&gt;%</span> </span>
+<span id="cb424-35"><a href="11_female_out_network.html#cb424-35" tabindex="-1"></a>  <span class="fu">group_by</span>(rank) <span class="sc">%&gt;%</span> </span>
+<span id="cb424-36"><a href="11_female_out_network.html#cb424-36" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean =</span> <span class="fu">mean</span>(SRI)) <span class="sc">%&gt;%</span> </span>
+<span id="cb424-37"><a href="11_female_out_network.html#cb424-37" tabindex="-1"></a>  <span class="do">## 図示</span></span>
+<span id="cb424-38"><a href="11_female_out_network.html#cb424-38" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> rank, <span class="at">y =</span> mean))<span class="sc">+</span></span>
+<span id="cb424-39"><a href="11_female_out_network.html#cb424-39" tabindex="-1"></a>  <span class="fu">geom_count</span>(<span class="at">alpha =</span> <span class="fl">0.8</span>,</span>
+<span id="cb424-40"><a href="11_female_out_network.html#cb424-40" tabindex="-1"></a>             <span class="at">shape =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb424-41"><a href="11_female_out_network.html#cb424-41" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">data =</span> fit_out_sri_b,</span>
+<span id="cb424-42"><a href="11_female_out_network.html#cb424-42" tabindex="-1"></a>            <span class="fu">aes</span>(<span class="at">y =</span> Estimate))<span class="sc">+</span></span>
+<span id="cb424-43"><a href="11_female_out_network.html#cb424-43" tabindex="-1"></a>  <span class="fu">theme_bw</span>(<span class="at">base_size =</span> <span class="dv">15</span>)</span></code></pre></div>
+<p><img src="Fission-fusion-dynamics-in-B1-troop_files/figure-html/unnamed-chunk-250-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="sriマトリックスに関する分析" class="section level3 hasAnchor" number="10.2.3">
+<h3><span class="header-section-number">10.2.3</span> SRIマトリックスに関する分析<a href="11_female_out_network.html#sriマトリックスに関する分析" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="下位集団の検出" class="section level4 hasAnchor" number="10.2.3.1">
+<h4><span class="header-section-number">10.2.3.1</span> 下位集団の検出<a href="11_female_out_network.html#下位集団の検出" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>モジュラリティ―が最大になるように、ネットワークを複数の下位集団に分類する。</p>
+<div class="sourceCode" id="cb425"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb425-1"><a href="11_female_out_network.html#cb425-1" tabindex="-1"></a><span class="fu">diag</span>(out_sri_mat) <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb425-2"><a href="11_female_out_network.html#cb425-2" tabindex="-1"></a></span>
+<span id="cb425-3"><a href="11_female_out_network.html#cb425-3" tabindex="-1"></a>graph_sri_out <span class="ot">&lt;-</span> <span class="fu">graph_from_adjacency_matrix</span>(out_sri_mat,</span>
+<span id="cb425-4"><a href="11_female_out_network.html#cb425-4" tabindex="-1"></a>                                             <span class="do">## 有向グラフなら &quot;directed&quot;</span></span>
+<span id="cb425-5"><a href="11_female_out_network.html#cb425-5" tabindex="-1"></a>                                             <span class="at">mode=</span> <span class="st">&quot;undirected&quot;</span>, </span>
+<span id="cb425-6"><a href="11_female_out_network.html#cb425-6" tabindex="-1"></a>                                             <span class="do">## 重みなしなら NULL</span></span>
+<span id="cb425-7"><a href="11_female_out_network.html#cb425-7" tabindex="-1"></a>                                             <span class="at">weighted =</span> <span class="cn">TRUE</span>) </span>
+<span id="cb425-8"><a href="11_female_out_network.html#cb425-8" tabindex="-1"></a></span>
+<span id="cb425-9"><a href="11_female_out_network.html#cb425-9" tabindex="-1"></a>cluster_sri_out <span class="ot">&lt;-</span> <span class="fu">cluster_optimal</span>(graph_sri_out,</span>
+<span id="cb425-10"><a href="11_female_out_network.html#cb425-10" tabindex="-1"></a>                                   <span class="at">weights =</span> <span class="fu">E</span>(graph_sri_out)<span class="sc">$</span>weight) </span></code></pre></div>
+<p>結果は以下の通り。4つの集団に分類され、モジュラリティ―は0.33になった。</p>
+<div class="sourceCode" id="cb426"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb426-1"><a href="11_female_out_network.html#cb426-1" tabindex="-1"></a>cluster_sri_out</span></code></pre></div>
+<pre><code>## IGRAPH clustering optimal, groups: 4, mod: 0.33
+## + groups:
+##   $`1`
+##   [1] &quot;Aka&quot; &quot;Ako&quot; &quot;Mik&quot;
+##   
+##   $`2`
+##   [1] &quot;Hen&quot; &quot;Hot&quot; &quot;Kil&quot; &quot;Kit&quot; &quot;Koh&quot; &quot;Mal&quot;
+##   
+##   $`3`
+##   [1] &quot;Kol&quot; &quot;Kun&quot; &quot;Mei&quot; &quot;Ten&quot;
+##   
+##   $`4`
+##   + ... omitted several groups/vertices</code></pre>
+<p>図示すると以下のようになる。</p>
+<div class="sourceCode" id="cb428"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb428-1"><a href="11_female_out_network.html#cb428-1" tabindex="-1"></a>att_out_sri <span class="ot">&lt;-</span> <span class="fu">met.eigen</span>(out_sri_mat,</span>
+<span id="cb428-2"><a href="11_female_out_network.html#cb428-2" tabindex="-1"></a>                         <span class="at">df =</span> rank,</span>
+<span id="cb428-3"><a href="11_female_out_network.html#cb428-3" tabindex="-1"></a>                         <span class="at">dfid =</span> <span class="dv">1</span>)</span>
+<span id="cb428-4"><a href="11_female_out_network.html#cb428-4" tabindex="-1"></a></span>
+<span id="cb428-5"><a href="11_female_out_network.html#cb428-5" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb428-6"><a href="11_female_out_network.html#cb428-6" tabindex="-1"></a>out_sri_mat <span class="sc">%&gt;%</span> </span>
+<span id="cb428-7"><a href="11_female_out_network.html#cb428-7" tabindex="-1"></a>  <span class="fu">as_tbl_graph</span>(<span class="at">directed =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb428-8"><a href="11_female_out_network.html#cb428-8" tabindex="-1"></a>  <span class="do">## 個体の属性を結合  </span></span>
+<span id="cb428-9"><a href="11_female_out_network.html#cb428-9" tabindex="-1"></a>  <span class="fu">left_join</span>(att_out_sri,</span>
+<span id="cb428-10"><a href="11_female_out_network.html#cb428-10" tabindex="-1"></a>            <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;name&quot;</span> <span class="ot">=</span> <span class="st">&quot;femaleID&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb428-11"><a href="11_female_out_network.html#cb428-11" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">member =</span> <span class="fu">as.factor</span>(cluster_sri_out<span class="sc">$</span>membership)) <span class="sc">%&gt;%</span> </span>
+<span id="cb428-12"><a href="11_female_out_network.html#cb428-12" tabindex="-1"></a>  <span class="fu">ggraph</span>(<span class="at">layout =</span> <span class="st">&quot;nicely&quot;</span>)<span class="sc">+</span></span>
+<span id="cb428-13"><a href="11_female_out_network.html#cb428-13" tabindex="-1"></a>  <span class="fu">geom_edge_link</span>(<span class="at">start_cap =</span> <span class="fu">circle</span>(<span class="fl">0.2</span>,<span class="st">&quot;cm&quot;</span>),</span>
+<span id="cb428-14"><a href="11_female_out_network.html#cb428-14" tabindex="-1"></a>                 <span class="at">end_cap =</span> <span class="fu">circle</span>(<span class="fl">0.2</span>,<span class="st">&quot;cm&quot;</span>),</span>
+<span id="cb428-15"><a href="11_female_out_network.html#cb428-15" tabindex="-1"></a>                 <span class="at">color =</span> <span class="st">&quot;grey55&quot;</span>,</span>
+<span id="cb428-16"><a href="11_female_out_network.html#cb428-16" tabindex="-1"></a>                 <span class="fu">aes</span>(<span class="at">width =</span> weight),</span>
+<span id="cb428-17"><a href="11_female_out_network.html#cb428-17" tabindex="-1"></a>                 <span class="at">alpha =</span> <span class="fl">0.6</span>)<span class="sc">+</span></span>
+<span id="cb428-18"><a href="11_female_out_network.html#cb428-18" tabindex="-1"></a>  <span class="fu">geom_node_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> member,</span>
+<span id="cb428-19"><a href="11_female_out_network.html#cb428-19" tabindex="-1"></a>                      <span class="at">size =</span> eigen),</span>
+<span id="cb428-20"><a href="11_female_out_network.html#cb428-20" tabindex="-1"></a>                  <span class="at">shape =</span> <span class="dv">19</span>)<span class="sc">+</span></span>
+<span id="cb428-21"><a href="11_female_out_network.html#cb428-21" tabindex="-1"></a>  <span class="fu">scale_edge_width</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="fl">0.2</span>,<span class="fl">1.5</span>))<span class="sc">+</span></span>
+<span id="cb428-22"><a href="11_female_out_network.html#cb428-22" tabindex="-1"></a>  <span class="fu">geom_node_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> name), <span class="at">color =</span> <span class="st">&quot;white&quot;</span>,</span>
+<span id="cb428-23"><a href="11_female_out_network.html#cb428-23" tabindex="-1"></a>                 <span class="at">size =</span> <span class="fl">2.5</span>)<span class="sc">+</span></span>
+<span id="cb428-24"><a href="11_female_out_network.html#cb428-24" tabindex="-1"></a>  <span class="co"># geom_mark_hull(aes(x=x,y=y,group = member),</span></span>
+<span id="cb428-25"><a href="11_female_out_network.html#cb428-25" tabindex="-1"></a>  <span class="co">#                concavity = 10)+</span></span>
+<span id="cb428-26"><a href="11_female_out_network.html#cb428-26" tabindex="-1"></a>  <span class="fu">scale_size</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">5</span>,<span class="dv">9</span>))<span class="sc">+</span></span>
+<span id="cb428-27"><a href="11_female_out_network.html#cb428-27" tabindex="-1"></a>  <span class="fu">theme_graph</span>()<span class="sc">+</span></span>
+<span id="cb428-28"><a href="11_female_out_network.html#cb428-28" tabindex="-1"></a>  <span class="fu">scale_color_nejm</span>()<span class="sc">+</span></span>
+<span id="cb428-29"><a href="11_female_out_network.html#cb428-29" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">color =</span> <span class="st">&quot;cluster id&quot;</span>) <span class="sc">+</span></span>
+<span id="cb428-30"><a href="11_female_out_network.html#cb428-30" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">size =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span></span>
+<span id="cb428-31"><a href="11_female_out_network.html#cb428-31" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="fl">0.9</span>)<span class="sc">+</span></span>
+<span id="cb428-32"><a href="11_female_out_network.html#cb428-32" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">expand =</span> <span class="fu">c</span>(<span class="fl">0.1</span>,<span class="fl">0.1</span>))<span class="sc">+</span></span>
+<span id="cb428-33"><a href="11_female_out_network.html#cb428-33" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">expand =</span> <span class="fu">c</span>(<span class="fl">0.12</span>,<span class="fl">0.11</span>)) <span class="ot">-&gt;</span> p_out_sri_mat</span>
+<span id="cb428-34"><a href="11_female_out_network.html#cb428-34" tabindex="-1"></a></span>
+<span id="cb428-35"><a href="11_female_out_network.html#cb428-35" tabindex="-1"></a>p_out_sri_mat</span></code></pre></div>
+<p><img src="Fission-fusion-dynamics-in-B1-troop_files/figure-html/unnamed-chunk-253-1.png" width="672" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb429"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb429-1"><a href="11_female_out_network.html#cb429-1" tabindex="-1"></a><span class="co"># ggsave(&quot;figures/p_out_sri_mat.png&quot;,p_out_sri_mat,</span></span>
+<span id="cb429-2"><a href="11_female_out_network.html#cb429-2" tabindex="-1"></a><span class="co">#         width = 140, height = 100, dpi = 600, units = &quot;mm&quot;)</span></span></code></pre></div>
+
+</div>
+</div>
+</div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references csl-bib-body hanging-indent" line-spacing="2">
+<div id="ref-Dekker2007" class="csl-entry">
+Dekker, D., Krackhardt, D., &amp; Snijders, T. A. B. (2007). Sensitivity of <span>MRQAP</span> tests to collinearity and autocorrelation conditions. <em>Psychometrika</em>, <em>72</em>(4), 563–581.
+</div>
+<div id="ref-Weiss2023" class="csl-entry">
+Weiss, M., &amp; Hart, J. (2023). <em>Aninet: Statistical models for animal social networks</em>.
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="10_female_out_analysis.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="12_female_in_analysis.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
