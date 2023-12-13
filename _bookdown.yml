@@ -1,0 +1,24 @@
+book_filename: "Fission-fusion dynamics in B1 troop"  
+rmd_files:                    
+  - index.Rmd
+  - 01_library.Rmd  
+  - 02_Basicdata.Rmd  
+  - 03_CSI_female.Rmd  
+  - 04_CSI_TY.Rmd  
+  - 05_definition_group.Rmd  
+  - 06_decide_duration.Rmd  
+  - 07_male_presence.Rmd  
+  - 08_female_presence.Rmd  
+  - 09_female_presence_statespace.Rmd  
+  - 10_female_out_analysis.Rmd  
+  - 11_female_out_network.Rmd  
+  - 12_female_in_analysis.Rmd  
+  - 13_male_presence_aggression.Rmd  
+  - 14_female_presence_aggression.Rmd  
+  - 15_aggression_injury.Rmd  
+  - sessioninfo.Rmd
+output_dir: "docs"  
+language:
+  label:
+    fig: "図"
+    tab: "表"

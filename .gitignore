@@ -1,0 +1,9 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+_bookdown_files
+model/m_female_ss*.rds  
+model/m_female_sp_ss.rds   
+model/m_female_in_m.rds  
+model/m_female_in_m_bf21.rds  
