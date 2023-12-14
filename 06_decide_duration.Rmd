@@ -927,16 +927,12 @@ mod_dcr3_all <- brm(confirmed ~ study_period + poly(time, 3, raw = FALSE) + rank
 ```{r, fig.height = 4}
 # dharma_dcr2_all <- dh_check_brms(mod_dcr2_all, quantreg = TRUE)
 # saveRDS(dharma_dcr2_all, "model/dharma_dcr2_all.rds")
-# dharma_dcr2_all <- readRDS("model/dharma_dcr2_all.rds")
-# plot(dharma_dcr2_all, quantreg = TRUE)
 ```
 
 3次の項まで含めた場合も同様。   
 ```{r, fig.height = 4}
 # dharma_dcr3_all <- dh_check_brms(mod_dcr3_all, quantreg = TRUE)
 # saveRDS(dharma_dcr3_all, "model/dharma_dcr3_all.rds")
-# dharma_dcr3_all <- readRDS("model/dharma_dcr3_all.rds")
-# plot(dharma_dcr3_all, quantreg = TRUE)
 ```
 
 bayesplotパッケージ[@Gabry2022]の`pp_check`関数で、事後分布からの予測分布と実測値の分布を比較しても大きな乖離はない。   
@@ -945,17 +941,11 @@ bayesplotパッケージ[@Gabry2022]の`pp_check`関数で、事後分布から�
 #   theme_bw()+
 #   theme(aspect.ratio = 1)+
 #   guides(color = "none")
-#
-# ggsave("figures/ppcheck_dcr2_all.png", ppcheck_dcr2_all,
-#        dpi = 600, width = 120, height = 100, units = "mm")
-
+# 
 # ppcheck_dcr3_all <- pp_check(mod_dcr3_all, ndraws = 100)+
 #   theme_bw()+
 #   theme(aspect.ratio = 1)
-
-# ggsave("figures/ppcheck_dcr2_all.png", ppcheck_dcr2_all,
-#        dpi = 600, width = 120, height = 100, units = "mm")
-
+# 
 # ppcheck_dcr2 + ppcheck_dcr3
 ```
 <br/>  
@@ -1023,6 +1013,8 @@ fit_dcr2_all %>%
                  repeat.tick.labels = TRUE)+
   labs(title = "二次の項まで")  -> p_dcr2_all
 
+p_dcr2_all
+
 ## 3次までの項  
 # fit_dcr3_all <- fitted(mod_dcr3_all,
 #            newdata = nd_all,
@@ -1055,9 +1047,7 @@ fit_dcr3_all %>%
                  repeat.tick.labels = TRUE)+
   labs(title = "三次の項まで")  -> p_dcr3_all
 
-p_dcr_all <- p_dcr2_all + p_dcr3_all
-
-p_dcr_all
+p_dcr3_all
 
 # ggsave("figures/p_dcr2_all.png",
 #        p_dcr2_all, width = 260, height = 120, units = "mm",
@@ -1117,6 +1107,8 @@ fit_dcr2_all_b %>%
   labs(title = "二次の項まで") +
   guides(linetype = guide_legend(override.aes = list(linewidth = 0.6))) -> p_dcr2_all_cum
 
+p_dcr2_all_cum
+
 fit_dcr3_all_b %>%
   mutate(rank_scaled = as.factor(rank_scaled)) %>%
   ggplot(aes(x = time, y = mean))+
@@ -1143,9 +1135,7 @@ fit_dcr3_all_b %>%
   labs(title = "三次の項まで") +
   guides(linetype = guide_legend(override.aes = list(linewidth = 0.6))) -> p_dcr3_all_cum
 
-p_dcr_all_cum <-  p_dcr2_all_cum + p_dcr3_all_cum
-
-p_dcr_all_cum
+p_dcr3_all_cum
 
 # ggsave("figures/p_dcr2_all_cum.png", p_dcr2_all_cum, dpi = 600,
 #         width = 260, height = 120, units = "mm")

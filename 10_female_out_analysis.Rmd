@@ -207,6 +207,18 @@ no_ntm_m21 <- male_21m %>%
 sum_ntm <- bind_rows(no_ntm_m19, no_ntm_m20, no_ntm_m21)
 ```
 
+### 発情メス数の算出  
+```{r}
+sum_est <- female_pre_long %>% 
+  left_join(female_all %>% select(date, femaleID, rs2),
+            by = c("date", "femaleID")) %>% 
+  ## 群れ本体で確認されたメスのみ  
+  filter(presence == "1") %>% 
+  group_by(date, groupID) %>% 
+  summarise(no_est = sum(rs2)) %>% 
+  ungroup()
+```
+
 ### 全データの結合   
 最後に、全データを結合する。  
 ```{r}
@@ -221,6 +233,9 @@ female_out %>%
               select(date, rate_agg_6yo) %>% 
               mutate(date = date + 1) %>% 
               rename(rate_agg_6yo_pre = rate_agg_6yo), by = c("date")) %>% 
+  left_join(sum_est %>% 
+              select(date, no_est),
+            by = c("date_pre" = "date")) %>% 
   left_join(agg_rate_all %>% 
               select(date, rate_agg_all) %>% 
               mutate(date = date + 1) %>% 
@@ -283,13 +298,13 @@ female_out_summary %>%
   scale_fill_manual(values = c("orange2", "green4"))+
   labs(x = "", y = "Frequency of leaving troop (times/10 days)") +
   theme(aspect.ratio = 1,
-        axis.title.y = element_text(family = "Arial",
+        axis.title.y = element_text(family = "Times New Roman",
                                     size = 12),
         axis.title.x = element_text(family = "Yu Gothic",
                                     size = 15),
-        axis.text.x = element_text(family = "Arial",
+        axis.text.x = element_text(family = "Times New Roman",
                                    size = 12),
-        axis.text.y = element_text(family = "Arial")) -> p_female_out_rate
+        axis.text.y = element_text(family = "Times New Roman")) -> p_female_out_rate
   
 p_female_out_rate
 
@@ -321,6 +336,7 @@ female_out_an <- female_out_final %>%
          age_std = standardize(age),
          kin_std = standardize(max_kin),
          ntm_std = standardize(no_ntm),
+         est_std = standardize(no_est),
          prop_std = standardize(prop_female)) %>% 
   ## 2021年はIT_outを全て0とする 
   replace_na(list(IT_out = 0, IT_pre = 0)) %>% 
@@ -363,7 +379,7 @@ $$
 m_female_out_an <-  brm(data = female_out_an %>% 
                                mutate(date = as.factor(date)),
                         female_out ~ rate_agg_all_std + TY_out*CSI_TY_std +
-                         IT_out*CSI_IT_std + ntm_std + prop_std +
+                         IT_out*CSI_IT_std + ntm_std + est_std + prop_std +
                          infant_pre + age_std + rank_std + kin_01 +
                          study_period + (1|femaleID) + (1|date),
                 family = "bernoulli",
@@ -384,13 +400,14 @@ female_out_an %>%
          age_std = standardize(age),
          kin_std = standardize(max_kin),
          ntm_std = standardize(no_ntm),
+         est_std = standardize(no_est),
          prop_std = standardize(prop_female),
          rate_agg_all_std = standardize(rate_agg_all_pre)) %>%
   mutate(date = as.factor(date)) -> female_out_an_no21
 
 m_female_out_an_no21 <-  brm(data = female_out_an_no21,
                        female_out ~ rate_agg_all_std + TY_out*CSI_TY_std +
-                         IT_out*CSI_IT_std + ntm_std + prop_std +
+                         IT_out*CSI_IT_std + ntm_std + est_std + prop_std +
                          infant_pre + age_std + rank_std + kin_01 +
                          study_period + (1|femaleID) + (1|date),
                 family = "bernoulli",
@@ -455,7 +472,6 @@ data.frame(Rhat = brms::rhat(m_female_out_an_no21)) %>%
                  color = "black")+
   theme_bw()+
   theme(aspect.ratio = 1)
-
 ```
 <br/>  
 
@@ -501,7 +517,7 @@ acf_female_out_an %>%
   geom_text(aes(x = 4, y = 0.8,
                 label = p),
             size = 3.5,
-            family = "Arial")+
+            family = "Times New Roman")+
   theme_bw()+
   theme(aspect.ratio = 1)+
   facet_rep_wrap(~femaleID,
@@ -549,7 +565,7 @@ acf_female_out_an_no21 %>%
   geom_text(aes(x = 4, y = 0.8,
                 label = p),
             size = 3.5,
-            family = "Arial")+
+            family = "Times New Roman")+
   theme_bw()+
   theme(aspect.ratio = 1)+
   facet_rep_wrap(~femaleID,
@@ -618,10 +634,10 @@ model_parameters(m_female_out_an) %>%
                                   "b_Intercept","b_TY_out",
                                   "b_CSI_TY_std","b_TY_out:CSI_TY_std",
                                   "b_IT_out","b_CSI_IT_std","b_IT_out:CSI_IT_std",
-                                  "b_rate_agg_all_std", "b_ntm_std",
-                                  "b_kin_01", 
+                                  "b_kin_01",
+                                  "b_rate_agg_all_std", "b_ntm_std", "b_est_std",
+                                   "b_prop_std",
                                   "b_rank_std", "b_age_std", "b_infant_pre",
-                                  "b_prop_std",
                                   "b_study_periodm20","b_study_periodm21")) %>% 
   arrange(Parameter) %>% 
   mutate(Parameter = str_replace_all(Parameter, c("b_Intercept"="切片",
@@ -634,6 +650,7 @@ model_parameters(m_female_out_an) %>%
                                      "b_age_std" = "年齢",
                                      "b_prop_std" = "前日確認したメスの割合",
                                      "b_ntm_std" = "前日の群れ外オス数",
+                                     "b_est_std" = "前日の発情メス数",
                                      "b_kin_01" = "血縁のメスが群れを離れたか\n(vs 否)",   
                                      "^b_rate_agg_all_std$" = "前日のオスからの攻撃頻度",
                                      "b_CSI_TY_std" = "TYとの親密度(CSI)",
@@ -645,10 +662,10 @@ model_parameters(m_female_out_an) %>%
   flextable() %>% 
   colformat_double(digits=2) %>% 
   set_table_properties(layout="autofit",width = 0.9) %>% 
-  font(part = "header", fontname = "Segoe UI") %>% 
-  font(part = "body", j=2:5, fontname = "Segoe UI") %>% 
+  font(part = "header", fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
-  bold(j=c(1,2,3),i = c(4,10, 13),bold = TRUE) %>% 
+  bold(j=c(1,2,3),i = c(4,8, 15),bold = TRUE) %>% 
   theme_zebra() %>% 
   align(j=2:5,part = "all",align = "center") -> table_female_out_an
 
@@ -658,6 +675,12 @@ table_female_out_an
 #               res = 600)
 ```
 <br/>  
+
+推定されたランダム効果の標準偏差は以下の通り。  
+```{r}
+random_parameters(m_female_out_an)
+```
+
 
 続いて、2021年のデータを除いたモデルについて確認する。少しの違いはあるが、ITがかかわる変数については変化がない。  
 ```{r, echo = FALSE}
@@ -671,10 +694,10 @@ model_parameters(m_female_out_an_no21) %>%
                                   "b_Intercept","b_TY_out",
                                   "b_CSI_TY_std","b_TY_out:CSI_TY_std",
                                   "b_IT_out","b_CSI_IT_std","b_IT_out:CSI_IT_std",
-                                  "b_rate_agg_all_std", "b_ntm_std",
-                                  "b_kin_01", 
+                                  "b_kin_01",
+                                  "b_rate_agg_all_std", "b_ntm_std", "b_est_std",
+                                   "b_prop_std",
                                   "b_rank_std", "b_age_std", "b_infant_pre",
-                                  "b_prop_std",
                                   "b_study_periodm20")) %>% 
   arrange(Parameter) %>% 
   mutate(Parameter = str_replace_all(Parameter, c("b_Intercept"="切片",
@@ -686,6 +709,7 @@ model_parameters(m_female_out_an_no21) %>%
                                      "b_rank_std" = "順位",
                                      "b_age_std" = "年齢",
                                      "b_prop_std" = "前日確認したメスの割合",
+                                     "b_est_std" = "前日の発情メス数",
                                      "b_ntm_std" = "前日の群れ外オス数",
                                      "b_kin_01" = "血縁のメスが群れを離れたか\n(vs 否)",   
                                      "^b_rate_agg_all_std$" = "前日のオスからの攻撃頻度",
@@ -698,10 +722,10 @@ model_parameters(m_female_out_an_no21) %>%
   flextable() %>% 
   colformat_double(digits=2) %>% 
   set_table_properties(layout="autofit",width = 0.9) %>% 
-  font(part = "header", fontname = "Segoe UI") %>% 
-  font(part = "body", j=2:5, fontname = "Segoe UI") %>% 
+  font(part = "header", fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
-  bold(j=c(1,2,3),i = c(4, 8, 10),bold = TRUE) %>% 
+  bold(j=c(1,2,3),i = c(4, 8, 10, 11),bold = TRUE) %>% 
   theme_zebra() %>% 
   align(j=2:5,part = "all",align = "center") -> table_female_out_an_no21
 
@@ -711,6 +735,11 @@ table_female_out_an_no21
 #               res = 600)
 ```
 <br/>  
+
+推定されたランダム効果の標準偏差は以下の通り。  
+```{r}
+random_parameters(m_female_out_an_no21)
+```
 
 ###### 交互作用項の検討  
 さらに交互作用項のある変数について検討を行う。  
@@ -809,11 +838,11 @@ cont_female_out_an_TYcsi %>%
   theme(aspect.ratio = 1) +
   labs(y = "Log odds ratio", x = expression(paste("CSI with ",italic("TY")))) +
   scale_x_continuous(breaks = seq(0,3.5,0.5))+
-  theme(axis.title.y = element_text(family = "Arial"),
-        axis.title.x = element_text(family = "Arial",
+  theme(axis.title.y = element_text(family = "Times New Roman"),
+        axis.title.x = element_text(family = "Times New Roman",
                                     size = 15),
-        axis.text.x = element_text(family = "Arial"),
-        axis.text.y = element_text(family = "Arial"),
+        axis.text.x = element_text(family = "Times New Roman"),
+        axis.text.y = element_text(family = "Times New Roman"),
         aspect.ratio = 1) -> p_female_out_an_TYcsi
 
 p_female_out_an_TYcsi
@@ -858,11 +887,11 @@ cont_female_out_an_ITcsi %>%
   labs(y = "Log odds ratio", x = expression(paste("CSI with ",italic("IT")))) +
   scale_x_continuous(breaks = seq(0,6,1))+
   scale_y_continuous(breaks = seq(-6,4,2)) +
-  theme(axis.title.y = element_text(family = "Arial"),
-        axis.title.x = element_text(family = "Arial",
+  theme(axis.title.y = element_text(family = "Times New Roman"),
+        axis.title.x = element_text(family = "Times New Roman",
                                     size = 15),
-        axis.text.x = element_text(family = "Arial"),
-        axis.text.y = element_text(family = "Arial"),
+        axis.text.x = element_text(family = "Times New Roman"),
+        axis.text.y = element_text(family = "Times New Roman"),
         aspect.ratio = 1) -> p_female_out_an_ITcsi
 
 p_female_out_an_ITcsi
@@ -879,7 +908,7 @@ p_female_out_an_ITcsi
 #                                                at = "CSI_IT_std",
 #                                                length = 100,
 #                                                transform = "none")
-
+# 
 # saveRDS(cont_female_out_an_no21_ITcsi, "model/cont_female_out_an_no21_ITcsi.rds")
 cont_female_out_an_no21_ITcsi <- readRDS("model/cont_female_out_an_no21_ITcsi.rds")
 
@@ -905,11 +934,11 @@ cont_female_out_an_no21_ITcsi %>%
   labs(y = "Log odds ratio", x = expression(paste("CSI with ",italic("IT")))) +
   scale_x_continuous(breaks = seq(0,6,1))+
   scale_y_continuous(breaks = seq(-6,4,2)) +
-  theme(axis.title.y = element_text(family = "Arial"),
-        axis.title.x = element_text(family = "Arial",
+  theme(axis.title.y = element_text(family = "Times New Roman"),
+        axis.title.x = element_text(family = "Times New Roman",
                                     size = 15),
-        axis.text.x = element_text(family = "Arial"),
-        axis.text.y = element_text(family = "Arial"),
+        axis.text.x = element_text(family = "Times New Roman"),
+        axis.text.y = element_text(family = "Times New Roman"),
         aspect.ratio = 1) -> p_female_out_an_no21_ITcsi
 
 p_female_out_an_no21_ITcsi
@@ -920,7 +949,7 @@ p_female_out_an_no21_ITcsi
 <br/>  
 
 ###### メス同士の血縁度との関連  
-最後に、血縁のメスが群れを離れたか否かとメスが離れる確率についての結果を図示する。血縁のメスが群れを離れるほど、同じ日に群れを離れる確率が高くなることが分かる。  
+最後に、血縁のメスが群れを離れたか否かとメスが離れる確率についての結果を図示する。血縁のメスが群れを離れるほど、同じ日に群れを離れる確率が高くなることが分かる。なお、少なくとも分母(= 機会)が3回以上のデータのみを用いている。   
 
 ```{r, fig.height = 4}
 emm_female_out_an_kin <- estimate_means(m_female_out_an,
@@ -930,27 +959,29 @@ emm_female_out_an_kin <- estimate_means(m_female_out_an,
 female_out_an %>% 
   mutate(kin_01 = as.factor(kin_01)) %>% 
   group_by(kin_01, femaleID) %>% 
-  summarise(prop = mean(female_out)) %>% 
+  summarise(prop = mean(female_out),
+            n = n()) %>% 
+  filter(n >= 3) %>% 
   ungroup() %>% 
   ggplot(aes(x = kin_01, y = prop))+
   geom_count(alpha = 0.5)+
   geom_line(aes(group = femaleID))+
   scale_size(range = c(2,8))+
   theme_bw(base_size = 13)+
-  labs(x = "If kin females left the group",
+  labs(x = "Did kin females left the group?",
        y = "Probability of female leaving main group",
        color = "Study period",
        fill = "Study period")+
   coord_cartesian(xlim = c(1.2,1.7),
                   ylim = c(0,1))+
   scale_x_discrete(labels = c("No", "Yes")) +
-  theme(axis.title.y = element_text(family = "YArial",
+  theme(axis.title.y = element_text(family = "Times New Roman",
                                     size = 12),
-        axis.title.x = element_text(family = "Arial", size =12),
-        axis.text = element_text(family = "Arial",
+        axis.title.x = element_text(family = "Times New Roman", size =12),
+        axis.text = element_text(family = "Times New Roman",
                                  size = 12),
-        legend.title = element_text(family = "Arial"),
-        legend.text = element_text(family = "Arial"),
+        legend.title = element_text(family = "Times New Roman"),
+        legend.text = element_text(family = "Times New Roman"),
         aspect.ratio = 0.9) +
   geom_signif(xmin = 1, xmax = 2,
               y_position = 0.95, annotation = "***",
@@ -1022,11 +1053,11 @@ $$
 m_female_out_an_TYstate <-  brm(data = female_out_an_b %>% 
                                   mutate(date = as.factor(date)),
                          female_out ~ rate_agg_all_std + TY_state*CSI_TY_std +
-                         IT_state*CSI_IT_std + ntm_std +  prop_std +
+                         IT_state*CSI_IT_std + ntm_std + est_std + prop_std +
                          infant_pre + age_std + rank_std + kin_01 +
                           study_period + (1|femaleID) + (1|date),
                 family = "bernoulli",
-                prior = c(prior(student_t(4,0,10),class = Intercept),
+                prior = c(prior(student_t(4,0,15),class = Intercept),
                 prior(student_t(4,0,10), class = b),
                 prior(student_t(4,0,5), class = sd, lb = 0)),
   iter = 11000, warmup = 1000, seed = 223,
@@ -1043,6 +1074,7 @@ female_out_an_b %>%
          age_std = standardize(age),
          kin_std = standardize(max_kin),
          ntm_std = standardize(no_ntm),
+         est_std = standardize(no_est), 
          prop_std = standardize(prop_female),
          rate_agg_all_std = standardize(rate_agg_all_pre)) -> female_out_an_b_no21
 
@@ -1050,13 +1082,13 @@ female_out_an_b %>%
 m_female_out_an_TYstate_no21 <-  brm(data = female_out_an_b_no21 %>% 
                                        mutate(date = as.factor(date)),
                          female_out ~ rate_agg_all_std + TY_state + CSI_TY_std +
-                         IT_state*CSI_IT_std + ntm_std +  prop_std + 
+                         IT_state*CSI_IT_std + ntm_std +  est_std + prop_std + 
                          infant_pre + age_std + rank_std +  + kin_01 +
                           study_period + (1|femaleID) + (1|date),
                 family = "bernoulli",
-                prior = c(prior(student_t(4,0,20),class = Intercept),
+                prior = c(prior(student_t(4,0,15),class = Intercept),
                 prior(student_t(4,0,10), class = b),
-                prior(student_t(4,0,10), class = sd)),
+                prior(student_t(4,0,5), class = sd)),
   iter = 11000, warmup = 1000, seed = 223,
   control=list(adapt_delta = 0.999, max_treedepth = 15),
   backend = "cmdstanr",
@@ -1159,7 +1191,7 @@ acf_female_out_an_TYstate %>%
   geom_text(aes(x = 4, y = 0.8,
                 label = p),
             size = 3.5,
-            family = "Arial")+
+            family = "Times New Roman")+
   theme_bw()+
   theme(aspect.ratio = 1)+
   facet_rep_wrap(~femaleID,
@@ -1167,7 +1199,7 @@ acf_female_out_an_TYstate %>%
 ```
 <br/>  
 
-2021年のデータを除いたモデルでは、AkaとHotのみで自己相関が有意になった。    
+2021年のデータを除いたモデルでは、Hotのみで自己相関が有意になった。    
 ```{r, fig.dim = c(10,10)}
 res_female_out_an_TYstate_no21 <- female_out_an_b_no21 %>% 
   mutate(resid = dh_female_out_an_TYstate_no21$scaledResiduals) %>% 
@@ -1207,7 +1239,7 @@ acf_female_out_an_TYstate_no21 %>%
   geom_text(aes(x = 4, y = 0.8,
                 label = p),
             size = 3.5,
-            family = "Arial")+
+            family = "Times New Roman")+
   theme_bw()+
   theme(aspect.ratio = 1)+
   facet_rep_wrap(~femaleID,
@@ -1232,10 +1264,10 @@ model_parameters(m_female_out_an_TYstate) %>%
                                   "b_CSI_IT_std",
                                   "b_IT_stateIT_absent:CSI_IT_std",
                                   "b_IT_stateIT_out:CSI_IT_std",
+                                  "b_kin_01",
                                   "b_rate_agg_all_std", "b_ntm_std",
-                                  "b_kin_01", 
+                                  "b_est_std", "b_prop_std",
                                   "b_rank_std", "b_age_std", "b_infant_pre",
-                                  "b_prop_std",
                                   "b_study_periodm20","b_study_periodm21")) %>% 
   arrange(Parameter) %>% 
   mutate(Parameter = str_replace_all(Parameter, c("b_Intercept"="切片",
@@ -1248,6 +1280,7 @@ model_parameters(m_female_out_an_TYstate) %>%
                                      "b_infant_pre" = "アカンボウの有無 \n (vs 無)",
                                      "b_rank_std" = "順位",
                                      "b_age_std" = "年齢",
+                                     "b_est_std" = "前日の発情メス数", 
                                      "b_prop_std" = "前日確認したメスの割合",
                                      "b_ntm_std" = "前日の群れ外オス数",
                                      "b_kin_01" = "血縁のメスが群れを離れたか\n(vs 否)",   
@@ -1267,10 +1300,10 @@ model_parameters(m_female_out_an_TYstate) %>%
   colformat_double(digits=2) %>% 
   set_table_properties(layout="autofit",width = 1) %>% 
   autofit(add_w = 0.2) %>% 
-  font(part = "header", fontname = "Segoe UI") %>% 
-  font(part = "body", j=2:5, fontname = "Segoe UI") %>% 
+  font(part = "header", fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
-  bold(j=c(1,2,3),i = c(2,3,6,7,14),bold = TRUE) %>% 
+  bold(j=c(1,2,3),i = c(2,3,6,7,15),bold = TRUE) %>% 
   theme_zebra() %>% 
   align(j=2:5,part = "all",align = "center") -> table_female_out_an_TYstate
 
@@ -1282,6 +1315,11 @@ table_female_out_an_TYstate
 ```
 <br/>  
 
+ランダム効果の標準偏差は以下の通り。  
+```{r}
+random_parameters(m_female_out_an_TYstate)
+```
+
 続いて、2021年を除いたモデルの結果を確認する。結果はほとんど変わらず。    
 ```{r, echo = FALSE}
 model_parameters(m_female_out_an_TYstate_no21) %>% 
@@ -1292,14 +1330,16 @@ model_parameters(m_female_out_an_TYstate_no21) %>%
   select(-CI_low, -CI_high) %>% 
   mutate(Parameter = fct_relevel(Parameter, "b_Intercept","b_TY_stateTY_absent",
                                   "b_TY_stateTY_out","b_CSI_TY_std",
+                                  "b_TY_stateTY_absent:CSI_TY_std",
+                                  "b_TY_stateTY_out:CSI_TY_std",
                                   "b_IT_stateIT_absent","b_IT_stateIT_out",
                                   "b_CSI_IT_std",
                                   "b_IT_stateIT_absent:CSI_IT_std",
                                   "b_IT_stateIT_out:CSI_IT_std",
+                                  "b_kin_01",
                                   "b_rate_agg_all_std", "b_ntm_std",
-                                  "b_kin_01", 
+                                  "b_est_std", "b_prop_std",
                                   "b_rank_std", "b_age_std", "b_infant_pre",
-                                  "b_prop_std",
                                   "b_study_periodm20")) %>% 
   arrange(Parameter) %>% 
   mutate(Parameter = str_replace_all(Parameter, c("b_Intercept"="切片",
@@ -1312,6 +1352,7 @@ model_parameters(m_female_out_an_TYstate_no21) %>%
                                      "b_infant_pre" = "アカンボウの有無 \n (vs 無)",
                                      "b_rank_std" = "順位",
                                      "b_age_std" = "年齢",
+                                     "b_est_std" = "前日の発情メス数", 
                                      "b_prop_std" = "前日確認したメスの割合",
                                      "b_ntm_std" = "前日の群れ外オス数",
                                      "b_kin_01" = "血縁のメスが群れを離れたか\n(vs 否)",   
@@ -1331,10 +1372,10 @@ model_parameters(m_female_out_an_TYstate_no21) %>%
   colformat_double(digits=2) %>% 
   set_table_properties(layout="autofit",width = 1) %>% 
   autofit(add_w = 0.2) %>% 
-  font(part = "header", fontname = "Segoe UI") %>% 
-  font(part = "body", j=2:5, fontname = "Segoe UI") %>% 
+  font(part = "header", fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
-  bold(j=c(1,2,3),i = c(2,3,5,12),bold = TRUE) %>% 
+  bold(j=c(1,2,3),i = c(2,3,5,11, 12, 13),bold = TRUE) %>% 
   theme_zebra() %>% 
   align(j=2:5,part = "all",align = "center") -> table_female_out_an_TYstate_no21
 
@@ -1345,6 +1386,11 @@ table_female_out_an_TYstate_no21
 #               res = 600)
 ```
 <br/>  
+
+ランダム効果の標準偏差は以下の通り。  
+```{r}
+random_parameters(m_female_out_an_TYstate_no21)
+```
 
 ###### 交互作用項の推定  
 さらに交互作用項のある変数について検討を行う。  
@@ -1537,12 +1583,12 @@ cont_female_out_an_TYstate_b %>%
   theme(aspect.ratio = 1) +
   labs(y = "Log odds ratio", x = expression(paste("CSI with ",italic("TY")))) +
   scale_x_continuous(breaks = seq(0,3.5,0.5))+
-  theme(axis.title.y = element_text(family = "Arial"),
-        axis.title.x = element_text(family = "Arial",
+  theme(axis.title.y = element_text(family = "Times New Roman"),
+        axis.title.x = element_text(family = "Times New Roman",
                                     size = 15),
-        axis.text.x = element_text(family = "Arial",
+        axis.text.x = element_text(family = "Times New Roman",
                                    size = 12),
-        axis.text.y = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Times New Roman"),
         aspect.ratio = 1,
         strip.background = element_blank(),
         strip.text = element_text(hjust = 0))+
@@ -1556,7 +1602,7 @@ p_female_out_an_TYstate_csi
 # ggsave("figures/p_female_out_an_TYstate_csi.png",
 #        p_female_out_an_TYstate_csi, dpi = 1000, units = "mm",
 #          width = 280, height = 100)
-
+# 
 # ggsave("figures/p_female_out_an_TYstate_csi_noarrow.png",
 #        p_female_out_an_TYstate_csi, dpi = 1000, units = "mm",
 #          width = 280, height = 100)
@@ -1615,12 +1661,12 @@ cont_female_out_an_ITstate_b %>%
   theme(aspect.ratio = 1) +
   labs(y = "Log odds ratio", x = expression(paste("CSI with ",italic("IT")))) +
   scale_x_continuous(breaks = seq(0,7,1))+
-  theme(axis.title.y = element_text(family = "Arial"),
-        axis.title.x = element_text(family = "Arial",
+  theme(axis.title.y = element_text(family = "Times New Roman"),
+        axis.title.x = element_text(family = "Times New Roman",
                                     size = 15),
-        axis.text.x = element_text(family = "Arial",
+        axis.text.x = element_text(family = "Times New Roman",
                                    size = 12),
-        axis.text.y = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Times New Roman"),
         aspect.ratio = 1,
         strip.background = element_blank(),
         strip.text = element_text(hjust = 0))+
@@ -1648,7 +1694,7 @@ p_female_out_an_ITstate_csi
 #   contrast = "IT_state = c('IT_out','IT_absent','IT_stay')",
 #   at = "CSI_IT_std",
 #   length = 70)
-
+# 
 # saveRDS(cont_female_out_an_ITstate_no21_b, "model/cont_female_out_an_ITstate_no21_b.rds")
 
 cont_female_out_an_ITstate_no21_b <- readRDS("model/cont_female_out_an_ITstate_no21_b.rds")
@@ -1691,12 +1737,12 @@ cont_female_out_an_ITstate_no21_b %>%
   theme(aspect.ratio = 1) +
   labs(y = "Log odds ratio", x = expression(paste("CSI with ",italic("IT")))) +
   scale_x_continuous(breaks = seq(0,7,1))+
-  theme(axis.title.y = element_text(family = "Arial"),
-        axis.title.x = element_text(family = "Arial",
+  theme(axis.title.y = element_text(family = "Times New Roman"),
+        axis.title.x = element_text(family = "Times New Roman",
                                     size = 15),
-        axis.text.x = element_text(family = "Arial",
+        axis.text.x = element_text(family = "Times New Roman",
                                    size = 12),
-        axis.text.y = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Times New Roman"),
         aspect.ratio = 1,
         strip.background = element_blank(),
         strip.text = element_text(hjust = 0))+
@@ -1710,7 +1756,7 @@ p_female_out_an_no21_ITstate_csi
 # ggsave("figures/p_female_out_an_no21_ITstate_csi.png",
 #        p_female_out_an_no21_ITstate_csi, dpi = 1000, units = "mm",
 #          width = 280, height = 100)
-# 
+
 # ggsave("figures/p_female_out_an_no21_ITstate_csi_noarrow.png",
 #        p_female_out_an_no21_ITstate_csi, dpi = 1000, units = "mm",
 #          width = 280, height = 100)
@@ -1743,11 +1789,11 @@ female_out_an_c <- female_out_an_b %>%
 
 モデルは以下のように実行する。  
 ```{r}
-## オスの攻撃との交互作用なし
+## 全期間  
 m_female_out_an_TY4cat <-  brm(data = female_out_an_c %>% 
                                  mutate(date = as.factor(date)),
                          female_out ~ rate_agg_all_std + TY_state4*CSI_TY_std +
-                         IT_state4*CSI_IT_std + ntm_std +  prop_std +
+                         IT_state4*CSI_IT_std + ntm_std +  prop_std +  est_std +
                          infant_pre + age_std + rank_std + kin_01 +
                           study_period + (1|femaleID) + (1|date),
                 family = "bernoulli",
@@ -1775,7 +1821,7 @@ female_out_an_c %>%
 m_female_out_an_TY4cat_no21 <-  brm(data = female_out_an_c_no21 %>% 
                                        mutate(date = as.factor(date)),
                          female_out ~ rate_agg_all_std + TY_state4 + CSI_TY_std +
-                         IT_state4*CSI_IT_std + ntm_std +  prop_std +
+                         IT_state4*CSI_IT_std + ntm_std +  prop_std + est_std + 
                          infant_pre + age_std + rank_std + kin_01 +
                           study_period + (1|femaleID) + (1|date),
                 family = "bernoulli",
@@ -1886,7 +1932,7 @@ acf_female_out_an_TY4cat %>%
   geom_text(aes(x = 4, y = 0.8,
                 label = p),
             size = 3.5,
-            family = "Arial")+
+            family = "Times New Roman")+
   theme_bw()+
   theme(aspect.ratio = 1)+
   facet_rep_wrap(~femaleID,
@@ -1894,7 +1940,7 @@ acf_female_out_an_TY4cat %>%
 ```
 <br/>  
 
-2021年を除くモデルについては、有意な自己相関はAkaとHotのみで見られた。      
+2021年を除くモデルについては、有意な自己相関はHotのみで見られた。      
 ```{r, fig.dim = c(10,10)}
 res_female_out_an_TY4cat_no21 <- female_out_an_c_no21 %>% 
   mutate(resid = dh_female_out_an_TY4cat_no21$scaledResiduals) %>% 
@@ -1935,7 +1981,7 @@ acf_female_out_an_TY4cat_no21 %>%
   geom_text(aes(x = 4, y = 0.8,
                 label = p),
             size = 3.5,
-            family = "Arial")+
+            family = "Times New Roman")+
   theme_bw()+
   theme(aspect.ratio = 1)+
   facet_rep_wrap(~femaleID,
@@ -1964,10 +2010,10 @@ model_parameters(m_female_out_an_TY4cat) %>%
                                   "b_IT_state4IT_absent:CSI_IT_std",
                                   "b_IT_state4IT_return:CSI_IT_std",
                                   "b_IT_state4IT_out:CSI_IT_std",
-                                  "b_rate_agg_all_std", "b_ntm_std",
-                                  "b_kin_01", 
-                                  "b_rank_std", "b_age_std", "b_infant_pre",
+                                  "b_kin_01",
+                                  "b_rate_agg_all_std", "b_ntm_std", "b_est_std",
                                   "b_prop_std",
+                                  "b_rank_std", "b_age_std", "b_infant_pre",
                                   "b_study_periodm20","b_study_periodm21")) %>% 
   arrange(Parameter) %>% 
   mutate(Parameter = str_replace_all(Parameter, c("b_Intercept"="切片",
@@ -1994,6 +2040,7 @@ model_parameters(m_female_out_an_TY4cat) %>%
                                      "b_infant_pre" = "アカンボウの有無 \n (vs 無)",
                                      "b_rank_std" = "順位",
                                      "b_age_std" = "年齢",
+                                     "b_est_std" = "前日の発情メス数", 
                                      "b_prop_std" = "前日確認したメスの割合",
                                      "b_ntm_std" = "前日の群れ外オス数",
                                      "b_kin_01" = "血縁のメスが群れを離れたか\n(vs 否)",   
@@ -2005,18 +2052,18 @@ model_parameters(m_female_out_an_TY4cat) %>%
   colformat_double(digits=2) %>% 
   set_table_properties(layout="autofit",width = 1) %>% 
   autofit(add_w = 0.2) %>% 
-  font(part = "header", fontname = "Segoe UI") %>% 
-  font(part = "body", j=2:5, fontname = "Segoe UI") %>% 
+  font(part = "header", fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
-  bold(j=c(1,2,3),i = c(2,4,8, 9, 18),bold = TRUE) %>% 
+  bold(j=c(1,2,3),i = c(2,4,8, 9, 16),bold = TRUE) %>% 
   theme_zebra() %>% 
   align(j=2:5,part = "all",align = "center") -> table_female_out_an_TY4cat
 
 table_female_out_an_TY4cat
 
-save_as_image(table_female_out_an_TY4cat,
-              "tables/table_female_out_an_TY4cat.tiff",
-              res = 600)
+# save_as_image(table_female_out_an_TY4cat,
+#               "tables/table_female_out_an_TY4cat.tiff",
+#               res = 600)
 ```
 <br/>  
 
@@ -2037,10 +2084,10 @@ model_parameters(m_female_out_an_TY4cat_no21) %>%
                                   "b_IT_state4IT_absent:CSI_IT_std",
                                   "b_IT_state4IT_return:CSI_IT_std",
                                   "b_IT_state4IT_out:CSI_IT_std",
-                                  "b_rate_agg_all_std", "b_ntm_std",
-                                  "b_kin_01", 
-                                  "b_rank_std", "b_age_std", "b_infant_pre",
+                                  "b_kin_01",
+                                  "b_rate_agg_all_std", "b_ntm_std", "b_est_std",
                                   "b_prop_std",
+                                  "b_rank_std", "b_age_std", "b_infant_pre",
                                   "b_study_periodm20")) %>% 
   arrange(Parameter) %>% 
   mutate(Parameter = str_replace_all(Parameter, c("b_Intercept"="切片",
@@ -2068,6 +2115,7 @@ model_parameters(m_female_out_an_TY4cat_no21) %>%
                                      "b_age_std" = "年齢",
                                      "b_prop_std" = "前日確認したメスの割合",
                                      "b_ntm_std" = "前日の群れ外オス数",
+                                     "b_est_std" = "前日の発情メス数", 
                                      "b_kin_01" = "血縁のメスが群れを離れたか\n(vs 否)",   
                                      "^b_rate_agg_all_std$" = "前日のオスからの攻撃頻度",
                                      "b_CSI_TY_std" = "TYとの親密度(CSI)",
@@ -2077,10 +2125,10 @@ model_parameters(m_female_out_an_TY4cat_no21) %>%
   colformat_double(digits=2) %>% 
   set_table_properties(layout="autofit",width = 1) %>% 
   autofit(add_w = 0.2) %>% 
-  font(part = "header", fontname = "Segoe UI") %>% 
-  font(part = "body", j=2:5, fontname = "Segoe UI") %>% 
+  font(part = "header", fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
-  bold(j=c(1,2,3),i = c(2,4,6, 7, 13, 15),bold = TRUE) %>% 
+  bold(j=c(1,2,3),i = c(2,4,6, 7, 13, 16),bold = TRUE) %>% 
   theme_zebra() %>% 
   align(j=2:5,part = "all",align = "center") -> table_female_out_an_TY4cat_no21
 
@@ -2160,12 +2208,12 @@ cont_female_out_an_TY4cat %>%
   theme(aspect.ratio = 1) +
   labs(y = "Log odds ratio", x = expression(paste("CSI with ",italic("TY")))) +
   scale_x_continuous(breaks = seq(0,3.5,0.5))+
-  theme(axis.title.y = element_text(family = "Arial"),
-        axis.title.x = element_text(family = "Arial",
+  theme(axis.title.y = element_text(family = "Times New Roman"),
+        axis.title.x = element_text(family = "Times New Roman",
                                     size = 15),
-        axis.text.x = element_text(family = "Arial",
+        axis.text.x = element_text(family = "Times New Roman",
                                    size = 12),
-        axis.text.y = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Times New Roman"),
         aspect.ratio = 1,
         strip.background = element_blank(),
         strip.text = element_text(hjust = 0))+
@@ -2246,12 +2294,12 @@ cont_female_out_an_IT4cat %>%
   theme(aspect.ratio = 1) +
   labs(y = "Log odds ratio", x = expression(paste("CSI with ",italic("IT")))) +
   scale_x_continuous(breaks = seq(0,7,1))+
-  theme(axis.title.y = element_text(family = "Arial"),
-        axis.title.x = element_text(family = "Arial",
+  theme(axis.title.y = element_text(family = "Times New Roman"),
+        axis.title.x = element_text(family = "Times New Roman",
                                     size = 15),
-        axis.text.x = element_text(family = "Arial",
+        axis.text.x = element_text(family = "Times New Roman",
                                    size = 12),
-        axis.text.y = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Times New Roman"),
         aspect.ratio = 1,
         strip.background = element_blank(),
         strip.text = element_text(hjust = 0))+
@@ -2330,12 +2378,12 @@ cont_female_out_an_IT4cat_no21 %>%
   theme(aspect.ratio = 1) +
   labs(y = "Log odds ratio", x = expression(paste("CSI with ",italic("IT")))) +
   scale_x_continuous(breaks = seq(0,7,1))+
-  theme(axis.title.y = element_text(family = "Arial"),
-        axis.title.x = element_text(family = "Arial",
+  theme(axis.title.y = element_text(family = "Times New Roman"),
+        axis.title.x = element_text(family = "Times New Roman",
                                     size = 15),
-        axis.text.x = element_text(family = "Arial",
+        axis.text.x = element_text(family = "Times New Roman",
                                    size = 12),
-        axis.text.y = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Times New Roman"),
         aspect.ratio = 1,
         strip.background = element_blank(),
         strip.text = element_text(hjust = 0))+
@@ -2374,6 +2422,7 @@ female_out_es <- female_out_final %>%
          age_std = standardize(age),
          kin_std = standardize(max_kin),
          ntm_std = standardize(no_ntm),
+         est_std = standardize(no_est), 
          prop_std = standardize(prop_female)) %>% 
   mutate(date = as.factor(date)) %>% 
   ## 2021年はIT_outを全て0とする 
@@ -2387,11 +2436,11 @@ female_out_es <- female_out_final %>%
 ```{r} 
 m_female_out_es <-  brm(data = female_out_es,
                         female_out ~ rate_agg_all_std + TY_out*CSI_TY_std + prop_std + 
-                         IT_out*CSI_IT_std  + age_std + rank_std + kin_01 + ntm_std + 
+                         IT_out*CSI_IT_std  + age_std + rank_std + kin_01 + ntm_std + est_std +
                           study_period + (1|femaleID) + (1|date),
                 family = "bernoulli",
                 prior = c(prior(student_t(4,0,20),class = Intercept),
-                prior(student_t(4,0,10), class = b),
+                prior(student_t(4,0,50), class = b),
                 prior(student_t(4,0,10), class = sd)),
   iter = 11000, warmup = 1000, seed = 223,
   control=list(adapt_delta = 0.999, max_treedepth = 15),
@@ -2408,17 +2457,18 @@ female_out_es %>%
          kin_std = standardize(max_kin),
          ntm_std = standardize(no_ntm),
          prop_std = standardize(prop_female),
+         est_std = standardize(no_est), 
          rate_agg_all_std = standardize(rate_agg_all_pre),
          ntm_std = standardize(no_ntm)) %>%
   mutate(date = as.factor(date)) -> female_out_es_no21
 
 m_female_out_es_bf21 <-  brm(data = female_out_es_no21,
                         female_out ~ rate_agg_all_std + TY_out*CSI_TY_std + prop_std +
-                         IT_out*CSI_IT_std  + age_std + rank_std + kin_01 + ntm_std +
+                         IT_out*CSI_IT_std  + age_std + rank_std + kin_01 + ntm_std + est_std +
                           study_period + (1|femaleID) + (1|date),
                 family = "bernoulli",
-                prior = c(prior(student_t(4,0,40),class = Intercept),
-                prior(student_t(4,0,10), class = b),
+                prior = c(prior(student_t(4,0,30),class = Intercept),
+                prior(student_t(4,0,15), class = b),
                 prior(student_t(4,0,10), class = sd)),
   iter = 11000, warmup = 1000, seed = 124,
   control=list(adapt_delta = 0.999, max_treedepth = 15),
@@ -2524,7 +2574,7 @@ acf_female_out_es %>%
   geom_text(aes(x = 4, y = 0.8,
                 label = p),
             size = 3.5,
-            family = "Arial")+
+            family = "Times New Roman")+
   theme_bw()+
   theme(aspect.ratio = 1)+
   facet_rep_wrap(~femaleID,
@@ -2572,7 +2622,7 @@ acf_female_out_es_bf21 %>%
   geom_text(aes(x = 4, y = 0.8,
                 label = p),
             size = 3.5,
-            family = "Arial")+
+            family = "Times New Roman")+
   theme_bw()+
   theme(aspect.ratio = 1)+
   facet_rep_wrap(~femaleID,
@@ -2595,7 +2645,7 @@ model_parameters(m_female_out_es) %>%
                                   "b_Intercept","b_TY_out",
                                   "b_CSI_TY_std","b_TY_out:CSI_TY_std",
                                   "b_IT_out","b_CSI_IT_std","b_IT_out:CSI_IT_std",
-                                  "b_rate_agg_all_std", "b_ntm_std",
+                                  "b_rate_agg_all_std", "b_ntm_std", "b_est_std", 
                                   "b_kin_01", 
                                   "b_rank_std", "b_age_std", "b_prop_std",
                                   "b_study_periodm20","b_study_periodm21")) %>% 
@@ -2609,6 +2659,7 @@ model_parameters(m_female_out_es) %>%
                                      "b_ntm_std" = "前日の群れ外オス数",
                                      "b_rank_std" = "順位",
                                      "b_age_std" = "年齢",
+                                     "b_est_std" = "前日の発情メス数", 
                                      "b_kin_01" = "血縁のメスが群れを離れたか", 
                                      "^b_rate_agg_all_std$" = "前日のオスからの攻撃頻度",
                                      "b_prop_std" = "前日に確認されたメスの割合", 
@@ -2621,8 +2672,8 @@ model_parameters(m_female_out_es) %>%
   flextable() %>% 
   colformat_double(digits=2) %>% 
   set_table_properties(layout="autofit",width = 0.9) %>% 
-  font(part = "header", fontname = "Segoe UI") %>% 
-  font(part = "body", j=2:5, fontname = "Segoe UI") %>% 
+  font(part = "header", fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
   theme_zebra() %>% 
   align(j=2:5,part = "all",align = "center") -> table_female_out_es
@@ -2646,7 +2697,7 @@ model_parameters(m_female_out_es_bf21) %>%
                                   "b_Intercept","b_TY_out",
                                   "b_CSI_TY_std","b_TY_out:CSI_TY_std",
                                   "b_IT_out","b_CSI_IT_std","b_IT_out:CSI_IT_std",
-                                  "b_rate_agg_all_std", "b_ntm_std",
+                                  "b_rate_agg_all_std", "b_ntm_std", "b_est_std", 
                                   "b_kin_01", 
                                   "b_rank_std", "b_age_std", "b_prop_std",
                                   "b_study_periodm20")) %>% 
@@ -2660,6 +2711,7 @@ model_parameters(m_female_out_es_bf21) %>%
                                      "b_ntm_std" = "前日の群れ外オス数",
                                      "b_rank_std" = "順位",
                                      "b_age_std" = "年齢",
+                                     "b_est_std" = "前日の発情メス数", 
                                      "b_kin_01" = "血縁のメスが群れを離れたか", 
                                      "^b_rate_agg_all_std$" = "前日のオスからの攻撃頻度",
                                      "b_CSI_TY_std" = "TYとの親密度(CSI)",
@@ -2672,8 +2724,8 @@ model_parameters(m_female_out_es_bf21) %>%
   flextable() %>% 
   colformat_double(digits=2) %>% 
   set_table_properties(layout="autofit",width = 0.9) %>% 
-  font(part = "header", fontname = "Segoe UI") %>% 
-  font(part = "body", j=2:5, fontname = "Segoe UI") %>% 
+  font(part = "header", fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
   theme_zebra() %>% 
   align(j=2:5,part = "all",align = "center") -> table_female_out_es_bf21
@@ -2781,11 +2833,11 @@ cont_female_out_es_TYcsi %>%
   theme(aspect.ratio = 1) +
   labs(y = "Log odds ratio", x = expression(paste("CSI with ",italic("TY")))) +
   scale_x_continuous(breaks = seq(0,3.5,0.5))+
-  theme(axis.title.y = element_text(family = "Arial"),
-        axis.title.x = element_text(family = "Arial",
+  theme(axis.title.y = element_text(family = "Times New Roman"),
+        axis.title.x = element_text(family = "Times New Roman",
                                     size = 15),
-        axis.text.x = element_text(family = "Arial"),
-        axis.text.y = element_text(family = "Arial"),
+        axis.text.x = element_text(family = "Times New Roman"),
+        axis.text.y = element_text(family = "Times New Roman"),
         aspect.ratio = 1) -> p_female_out_es_TYcsi
 
 p_female_out_es_TYcsi
@@ -2830,11 +2882,11 @@ cont_female_out_es_ITcsi %>%
   labs(y = "Log odds ratio", x = expression(paste("CSI with ",italic("IT")))) +
   scale_x_continuous(breaks = seq(0,6,1))+
   scale_y_continuous(breaks = seq(-130,30,10)) +
-  theme(axis.title.y = element_text(family = "Arial"),
-        axis.title.x = element_text(family = "Arial",
+  theme(axis.title.y = element_text(family = "Times New Roman"),
+        axis.title.x = element_text(family = "Times New Roman",
                                     size = 15),
-        axis.text.x = element_text(family = "Arial"),
-        axis.text.y = element_text(family = "Arial"),
+        axis.text.x = element_text(family = "Times New Roman"),
+        axis.text.y = element_text(family = "Times New Roman"),
         aspect.ratio = 1) -> p_female_out_es_ITcsi
 
 p_female_out_es_ITcsi
@@ -2878,11 +2930,11 @@ cont_female_out_es_ITcsi_bf21 %>%
   labs(y = "Log odds ratio", x = expression(paste("CSI with ",italic("IT")))) +
   scale_x_continuous(breaks = seq(0,6,1))+
   scale_y_continuous(breaks = seq(-130,30,10)) +
-  theme(axis.title.y = element_text(family = "Arial"),
-        axis.title.x = element_text(family = "Arial",
+  theme(axis.title.y = element_text(family = "Times New Roman"),
+        axis.title.x = element_text(family = "Times New Roman",
                                     size = 15),
-        axis.text.x = element_text(family = "Arial"),
-        axis.text.y = element_text(family = "Arial"),
+        axis.text.x = element_text(family = "Times New Roman"),
+        axis.text.y = element_text(family = "Times New Roman"),
         aspect.ratio = 1) -> p_female_out_es_ITcsi_bf21
 
 p_female_out_es_ITcsi_bf21
@@ -2914,7 +2966,7 @@ female_out_es_b <- female_out_es %>%
 m_female_out_es_TYstate <-  brm(data = female_out_es_b %>% 
                                   mutate(date = as.factor(date)),
                          female_out ~ rate_agg_all_std + TY_state*CSI_TY_std +
-                         IT_state + CSI_IT_std + ntm_std + prop_std + 
+                         IT_state + CSI_IT_std + ntm_std + prop_std + est_std + 
                          age_std + rank_std + kin_01 +
                           study_period + (1|femaleID) + (1|date),
                 family = "bernoulli",
@@ -2935,13 +2987,14 @@ female_out_es_b %>%
          age_std = standardize(age),
          kin_std = standardize(max_kin),
          ntm_std = standardize(no_ntm),
+         est_std = standardize(no_est), 
          prop_std = standardize(prop_female),
          rate_agg_all_std = standardize(rate_agg_all_pre)) -> female_out_es_b_no21
 
 m_female_out_es_TYstate_bf21 <-  brm(data = female_out_es_b_no21 %>% 
                                        mutate(date = as.factor(date)),
                          female_out ~ rate_agg_all_std + TY_state*CSI_TY_std +
-                         IT_state*CSI_IT_std + ntm_std + prop_std + 
+                         IT_state*CSI_IT_std + ntm_std + prop_std + est_std + 
                          age_std + rank_std + kin_01 +
                           study_period + (1|femaleID) + (1|date),
                 family = "bernoulli",
@@ -3053,7 +3106,7 @@ acf_female_out_es_TYstate %>%
   geom_text(aes(x = 4, y = 0.8,
                 label = p),
             size = 3.5,
-            family = "Arial")+
+            family = "Times New Roman")+
   theme_bw()+
   theme(aspect.ratio = 1)+
   facet_rep_wrap(~femaleID,
@@ -3101,7 +3154,7 @@ acf_female_out_es_TYstate_bf21 %>%
   geom_text(aes(x = 4, y = 0.8,
                 label = p),
             size = 3.5,
-            family = "Arial")+
+            family = "Times New Roman")+
   theme_bw()+
   theme(aspect.ratio = 1)+
   facet_rep_wrap(~femaleID,
@@ -3126,7 +3179,7 @@ model_parameters(m_female_out_es_TYstate) %>%
                                   "b_TY_stateTY_out:CSI_TY_std",
                                   "b_IT_stateIT_absent","b_IT_stateIT_out",
                                   "b_CSI_IT_std",
-                                  "b_rate_agg_all_std", "b_ntm_std",
+                                  "b_rate_agg_all_std", "b_ntm_std","b_est_std", 
                                   "b_kin_01", 
                                   "b_rank_std", "b_age_std", 
                                   "b_prop_std",
@@ -3142,6 +3195,7 @@ model_parameters(m_female_out_es_TYstate) %>%
                                      "b_rank_std" = "順位",
                                      "b_ntm_std" = "前日の群れ外オス数",
                                      "b_age_std" = "年齢",
+                                     "b_est_std" = "前日の発情メス数", 
                                      "b_prop_std"= "前日確認したメスの割合", 
                                      "b_infant_pre" = "赤ん坊の有無(vs 無)",
                                      "b_kin_01" = "血縁のメスが群れを離れたか", 
@@ -3157,8 +3211,8 @@ model_parameters(m_female_out_es_TYstate) %>%
   colformat_double(digits=2) %>% 
   set_table_properties(layout="autofit",width = 1) %>% 
   autofit(add_w = 0.2) %>% 
-  font(part = "header", fontname = "Segoe UI") %>% 
-  font(part = "body", j=2:5, fontname = "Segoe UI") %>% 
+  font(part = "header", fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
   theme_zebra() %>% 
   align(j=2:5,part = "all",align = "center") -> table_female_out_es_TYstate
@@ -3188,6 +3242,7 @@ model_parameters(m_female_out_es_TYstate_bf21) %>%
                                   "b_IT_stateIT_absent:CSI_IT_std",
                                   "b_IT_stateIT_out:CSI_IT_std",
                                   "b_rate_agg_all_std", "b_ntm_std",
+                                 "b_est_std", 
                                   "b_kin_01", 
                                   "b_rank_std", "b_age_std", 
                                   "b_prop_std",
@@ -3203,6 +3258,7 @@ model_parameters(m_female_out_es_TYstate_bf21) %>%
                                      "b_infant_pre" = "アカンボウの有無 \n (vs 無)",
                                      "b_rank_std" = "順位",
                                      "b_age_std" = "年齢",
+                                     "b_est_std" = "前日の発情メス数", 
                                      "b_prop_std" = "前日確認したメスの割合",
                                      "b_ntm_std" = "前日の群れ外オス数",
                                      "b_kin_01" = "血縁のメスが群れを離れたか\n(vs 否)",   
@@ -3222,8 +3278,8 @@ model_parameters(m_female_out_es_TYstate_bf21) %>%
   colformat_double(digits=2) %>% 
   set_table_properties(layout="autofit",width = 1) %>% 
   autofit(add_w = 0.2) %>% 
-  font(part = "header", fontname = "Segoe UI") %>% 
-  font(part = "body", j=2:5, fontname = "Segoe UI") %>% 
+  font(part = "header", fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
   bold(j=c(1,2,3),i = c(10),bold = TRUE) %>% 
   theme_zebra() %>% 
@@ -3336,12 +3392,12 @@ cont_female_out_es_TYstate_b %>%
   theme(aspect.ratio = 1) +
   labs(y = "Log odds ratio", x = expression(paste("CSI with ",italic("TY")))) +
   scale_x_continuous(breaks = seq(0,3.5,0.5))+
-  theme(axis.title.y = element_text(family = "Arial"),
-        axis.title.x = element_text(family = "Arial",
+  theme(axis.title.y = element_text(family = "Times New Roman"),
+        axis.title.x = element_text(family = "Times New Roman",
                                     size = 15),
-        axis.text.x = element_text(family = "Arial",
+        axis.text.x = element_text(family = "Times New Roman",
                                    size = 12),
-        axis.text.y = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Times New Roman"),
         aspect.ratio = 1,
         strip.background = element_blank(),
         strip.text = element_text(hjust = 0))+
@@ -3412,12 +3468,12 @@ cont_female_out_es_ITstate_b %>%
   theme(aspect.ratio = 1) +
   labs(y = "Log odds ratio", x = expression(paste("CSI with ",italic("IT")))) +
   scale_x_continuous(breaks = seq(0,7,1))+
-  theme(axis.title.y = element_text(family = "Arial"),
-        axis.title.x = element_text(family = "Arial",
+  theme(axis.title.y = element_text(family = "Times New Roman"),
+        axis.title.x = element_text(family = "Times New Roman",
                                     size = 15),
-        axis.text.x = element_text(family = "Arial",
+        axis.text.x = element_text(family = "Times New Roman",
                                    size = 12),
-        axis.text.y = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Times New Roman"),
         aspect.ratio = 1,
         strip.background = element_blank(),
         strip.text = element_text(hjust = 0))+
