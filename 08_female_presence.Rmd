@@ -343,7 +343,7 @@ $$
 $$
 
 ```{r}
-m_female_presence <- get_prip(data = prop_female_presence %>% mutate(N = 1:n()),
+m_female_presence <- brm(data = prop_female_presence %>% mutate(N = 1:n()),
                          n|trials(sum) ~ study_period + (1|femaleID),
                          family = "beta_binomial",
                          prior = c(prior(student_t(4,0,10),class = Intercept),

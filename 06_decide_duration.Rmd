@@ -1324,7 +1324,7 @@ model_parameters(mod_dcr3_all_pre) %>%
 ##### 結果の図示   
 結果の図示すると以下のようになる。まずは、経過時間によるハザード率(= その時間まで見つからなかった各メスの発見確率)を図示すると以下のようになる。  
 
-```{r, fig.height = 5}
+```{r, fig.height = 6}
 nd_all_pre <- tidyr::crossing(time = seq(0,750,by = 1),
                rank_scaled = c(0,0.5,1),
                age_std = mean(female_time_dcr_all_pre$age_std),
@@ -1365,6 +1365,8 @@ fit_dcr2_all_pre %>%
                  repeat.tick.labels = TRUE)+
   labs(title = "二次の項まで")  -> p_dcr2_all_pre
 
+p_dcr2_all_pre
+
 # 3次までの項
 # fit_dcr3_all_pre <- fitted(mod_dcr3_all_pre,
 #            newdata = nd_all_pre,
@@ -1397,24 +1399,14 @@ fit_dcr3_all_pre %>%
                  repeat.tick.labels = TRUE)+
   labs(title = "三次の項まで")  -> p_dcr3_all_pre
 
-p_dcr_all_pre <- p_dcr2_all_pre + p_dcr3_all_pre
-
-p_dcr_all_pre
+p_dcr3_all_pre
 
 # ggsave("figures/p_dcr2_all_pre.png",
-<<<<<<< HEAD
-#        p_dcr2_all_pre, width = 260, height = 120, units = "mm",
-#        dpi = 600)
-# 
-# ggsave("figures/p_dcr3_all_pre.png",
-#        p_dcr3_all_pre, width = 260, height = 120, units = "mm",
-=======
 #        p_dcr2_all_pre, width = 220, height = 120, units = "mm",
 #        dpi = 600)
 # 
 # ggsave("figures/p_dcr3_all_pre.png",
 #        p_dcr3_all_pre, width = 220, height = 120, units = "mm",
->>>>>>> a72d98704112aaa02e1d2d936ffc5d36eae01840
 #        dpi = 600)
 ```
 <br/>  
@@ -1463,6 +1455,8 @@ fit_dcr2_all_pre_b %>%
   labs(title = "二次の項まで") +
   guides(linetype = guide_legend(override.aes = list(linewidth = 0.6))) -> p_dcr2_all_pre_cum
 
+p_dcr2_all_pre_cum
+
 fit_dcr3_all_pre_b %>%
   mutate(rank_scaled = as.factor(rank_scaled)) %>%
   ggplot(aes(x = time, y = mean))+
@@ -1489,21 +1483,13 @@ fit_dcr3_all_pre_b %>%
   labs(title = "三次の項まで") +
   guides(linetype = guide_legend(override.aes = list(linewidth = 0.6))) -> p_dcr3_all_pre_cum
 
-p_dcr_all_pre_cum <-  p_dcr2_all_pre_cum + p_dcr3_all_pre_cum
+p_dcr3_all_pre_cum
 
-p_dcr_all_pre_cum
 
-# ggsave("figures/p_dcr2_all_pre_cum.png", p_dcr2_all_pre_cum, dpi = 600,
-<<<<<<< HEAD
-#         width = 260, height = 120, units = "mm")
-# 
 # ggsave("figures/p_dcr3_all_pre_cum.png", p_dcr3_all_pre_cum, dpi = 600,
-#          width = 260, height = 120, units = "mm")
-=======
 #         width = 220, height = 360, units = "mm")
 # 
 # ggsave("figures/p_dcr3_all_pre_cum.png", p_dcr3_all_pre_cum, dpi = 600,
 #          width = 220, height = 150, units = "mm")
->>>>>>> a72d98704112aaa02e1d2d936ffc5d36eae01840
 ```
 

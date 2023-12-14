@@ -49,7 +49,7 @@ no_female_over0.5 %>%
             by = c("date", "groupID")) %>% 
   mutate(WithTY = ifelse(TY == 1 & presence == 1,1,0),
          WithIT = ifelse(IT == 1 & presence == 1,1,0)) %>% 
-  filter(presence == 1) -> a
+  filter(presence == 1) %>% 
   group_by(study_period, femaleID) %>% 
   summarise(prop_TY = mean(WithTY),
             prop_IT = mean(WithIT)) %>% 

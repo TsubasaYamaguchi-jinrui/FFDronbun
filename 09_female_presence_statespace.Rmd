@@ -172,8 +172,6 @@ list_female_ss2 <- list(len_obs = nrow(nadrop_no_female2),
 
 # m_female_ss2$save_object("model/m_female_ss2.rds")
 
-m_female_ss2 <- readRDS("model/m_female_ss2.rds")  
-
 ## ランダム効果あり  
 # stan_female_ss2_ri <- cmdstan_model("stanfile/m_female_ss_bb_ri.stan")
 # 
@@ -515,7 +513,7 @@ p_female_ss2_ri_TY_nm
 <br/>  
 
 *TY*の有無で確認メス割合を比較したものを図示したのが以下である。　　
-```{r. fig.height = 4}
+```{r}
 draw_ss2_ri_p <- as_draws_df(draws_female_ss2_ri, .nchains = 4) %>% 
   select(contains("p[")) %>% 
   pivot_longer(everything(),
@@ -582,7 +580,7 @@ nadrop_no_female2 %>%
 ```
 
 2021年以前のデータとMCMCサンプルを用いて*IT*についても同様の作図をする。  
-```{r, fig.height = 4}
+```{r}
 draw_ss2_ri_p %>% 
   filter(!(study_period %in% c("nm22","m21"))) %>% 
   group_by(IT) %>% 
@@ -996,7 +994,7 @@ list_female_ss_nm <- list(len_obs = nrow(nadrop_no_female_nm),
 
 それでは、以下のようにcmdstanr[@Gabry2023]でモデルを回す。  
 ```{r}
-ランダム効果あり
+# ランダム効果あり
 # stan_female_ss2_nm <- cmdstan_model("stanfile/m_female_ss_bb_ri2.stan")
 # 
 # m_female_ss2_nm <- stan_female_ss2_nm$sample(
@@ -2361,7 +2359,7 @@ list_female_ss_trend <- list(len_obs = nrow(nadrop_no_female_trend),
 それでは、以下のようにcmdstanr[@Gabry2023]でモデルを回す。  
 ```{r}
 # ベータ二項分布モデル
-# stan_female_ss_trend <- cmdstan_model("stanfile/m_female_ss_trend_bb.stan")
+# stan_female_ss_trend <- cmdstan_model("stanfile/m_female_ss_trend_bb_ri.stan")
 # 
 # m_female_ss_trend <- stan_female_ss_trend$sample(
 #   data = list_female_ss_trend,
