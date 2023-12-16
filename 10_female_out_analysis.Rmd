@@ -267,6 +267,13 @@ female_out %>%
   mutate(rank_scaled = rank/max_rank) -> female_out_final
 ```
 
+データは以下の通り。  
+```{r}
+datatable(female_out_final %>% mutate(across(where(is.numeric), ~round(.,2))),
+          options = list(scrollX = 50))
+```
+
+
 ## 基本的な情報  
 交尾期/非交尾期または、発情/非発情で群れを離れる頻度(回/10日)を図示すると以下のようになる。非交尾期 < 交尾期・非発情 < 交尾期・発情の順に高くなる。非交尾期にはほとんどないようだ。    
 ```{r}
@@ -341,6 +348,13 @@ female_out_an <- female_out_final %>%
   ## 2021年はIT_outを全て0とする 
   replace_na(list(IT_out = 0, IT_pre = 0)) %>% 
   mutate(date = as_date(date))
+```
+
+変数の組み合わせごとのデータ数は以下の通り。  
+```{r}
+female_out_an %>% 
+  group_by(TY_out, IT_out) %>% 
+  summarise(N = n())
 ```
 
 #### モデリング1    
@@ -445,7 +459,7 @@ pp_check(m_female_out_an_no21, ndraws = 100)+
 ```  
 <br/>  
 
-多重共線性のチェックもお個あったが、VIFに問題はない。  
+多重共線性のチェックも行ったが、VIFに問題はない。  
 ```{r}
 ## 全期間  
 check_collinearity(m_female_out_an)
@@ -624,12 +638,14 @@ all_test_acf_an_no21
 ###### 推定された係数  
 まずは、全期間のデータを用いたモデルについてみる。太字になっている変数は95%確信区間が0をまたいでおらず、有意な影響があるといえる。  
 ```{r, echo = FALSE}
-model_parameters(m_female_out_an) %>% 
+model_parameters(m_female_out_an, dispersion = TRUE, ci = 0.95) %>% 
   data.frame() %>% 
-  select(1,2,4,5,7,8) %>% 
+  select(1,2,3,5,6, 7,8,9) %>% 
   mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
-  select(c(1,2,7), everything()) %>% 
+  select(c(1,2,3, 9), everything()) %>% 
   select(-CI_low, -CI_high) %>% 
+  mutate(pd = str_c(sprintf("%.2f",pd*100),"%")) %>% 
+  rename(PD = pd) %>% 
   mutate(Parameter = fct_relevel(Parameter,
                                   "b_Intercept","b_TY_out",
                                   "b_CSI_TY_std","b_TY_out:CSI_TY_std",
@@ -663,11 +679,11 @@ model_parameters(m_female_out_an) %>%
   colformat_double(digits=2) %>% 
   set_table_properties(layout="autofit",width = 0.9) %>% 
   font(part = "header", fontname = "Times New Roman") %>% 
-  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:7, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
-  bold(j=c(1,2,3),i = c(4,8, 15),bold = TRUE) %>% 
+  bold(j=c(1,2,3,4,5),i = c(4,8, 15),bold = TRUE) %>% 
   theme_zebra() %>% 
-  align(j=2:5,part = "all",align = "center") -> table_female_out_an
+  align(j=2:7,part = "all",align = "center") -> table_female_out_an
 
 table_female_out_an
 
@@ -684,12 +700,14 @@ random_parameters(m_female_out_an)
 
 続いて、2021年のデータを除いたモデルについて確認する。少しの違いはあるが、ITがかかわる変数については変化がない。  
 ```{r, echo = FALSE}
-model_parameters(m_female_out_an_no21) %>% 
+model_parameters(m_female_out_an_no21, dispersion = TRUE, ci = 0.95) %>% 
   data.frame() %>% 
-  select(1,2,4,5,7,8) %>% 
+  select(1,2,3,5,6, 7,8,9) %>% 
   mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
-  select(c(1,2,7), everything()) %>% 
+  select(c(1,2,3, 9), everything()) %>% 
   select(-CI_low, -CI_high) %>% 
+  mutate(pd = str_c(sprintf("%.2f",pd*100),"%")) %>% 
+  rename(PD = pd) %>% 
   mutate(Parameter = fct_relevel(Parameter,
                                   "b_Intercept","b_TY_out",
                                   "b_CSI_TY_std","b_TY_out:CSI_TY_std",
@@ -723,11 +741,11 @@ model_parameters(m_female_out_an_no21) %>%
   colformat_double(digits=2) %>% 
   set_table_properties(layout="autofit",width = 0.9) %>% 
   font(part = "header", fontname = "Times New Roman") %>% 
-  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:7, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
-  bold(j=c(1,2,3),i = c(4, 8, 10, 11),bold = TRUE) %>% 
+  bold(j=1:5,i = c(4, 8, 10, 11),bold = TRUE) %>% 
   theme_zebra() %>% 
-  align(j=2:5,part = "all",align = "center") -> table_female_out_an_no21
+  align(j=2:7,part = "all",align = "center") -> table_female_out_an_no21
 
 table_female_out_an_no21
 
@@ -1000,12 +1018,18 @@ p_female_out_an_TYcsi + p_female_out_an_ITcsi +  p_female_out_an_kin + plot_layo
 ```
 
 #### モデリング2    
+##### データの加工  
 先ほどのモデルでは*TY*と*IT*が群れを離れたか否かにだけ注目したが、*TY*と*IT*が群れを離れなかったときには、大きく分けて2つのパターンがある。  
 
 1. 前日にそもそも群れにいなかった(`TY_absent`)    
 2. 前日に群れにいて、翌日も群れで確認された(`TY_stay`)    
 
-ここでは、これらの2つも区別したモデルを考える。モデルでは*TY*と*IT*が群れを離れた(`TY/IT_out`)、`TY/IT_absent`、`TY/IT_stay`の3つの水準を持つ変数`TY/IT_state`を作成し、先ほどのモデルの`TY_out`の代わりに入れる。  
+ここでは、これらの2つも区別したモデルを考える。モデルでは*TY*と*IT*が群れを離れた(`TY/IT_out`)、`TY/IT_absent`、`TY/IT_stay`の3つの水準を持つ変数`TY/IT_state`を作成し、先ほどのモデルの`TY_out`の代わりに入れる(図\@ref(fig:TYITstate))。  
+
+```{r TYITstate, out.width = "40%", fig.align = "center", echo = FALSE, fig.cap = "3つに分けたオスの動向"}  
+knitr::include_graphics("image/TYITstate.png")
+```
+<br/>  
 
 以下のように変数を作成する。  
 ```{r}
@@ -1020,6 +1044,21 @@ female_out_an_b <- female_out_an %>%
   mutate(IT_state = fct_relevel(IT_state, "IT_stay", "IT_absent"))
 ```
 
+変数の組み合わせごとのデータ数は以下の通り。十分にデータ数がありそう。    
+```{r}
+female_out_an_b %>% 
+  group_by(TY_state, IT_state) %>% 
+  summarise(N = n())
+```
+<br/>   
+
+それぞれ*TY*と*IT*については以下の通り。  
+```{r}
+table(female_out_an_b$TY_state)
+table(female_out_an_b$IT_state)
+```
+
+##### モデリング   
 モデル式と説明変数の説明は以下の通り。なお、$i, j, k$はそれぞれデータ番号、日付番号、メスIDの番号を表す。なお、連続変数は全て標準化している。      
 
 - $TY\_state(TY\_stay, TY\_absent, TY\_out)/IT\_state(IT\_stay, IT\_absent, IT\_out))$: TY/ITの動向   
@@ -1250,12 +1289,14 @@ acf_female_out_an_TYstate_no21 %>%
 ###### 推定された係数  
 結果は以下の通り。まずは全期間を含むデータについて確認する。  
 ```{r, echo = FALSE}
-model_parameters(m_female_out_an_TYstate) %>% 
+model_parameters(m_female_out_an_TYstate, dispersion = TRUE, ci = 0.95) %>% 
   data.frame() %>% 
-  select(1,2,4,5,7,8) %>% 
-  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>%
-  select(c(1,2,7), everything()) %>% 
+  select(1,2,3,5,6, 7,8,9) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
+  select(c(1,2,3, 9), everything()) %>% 
   select(-CI_low, -CI_high) %>% 
+  mutate(pd = str_c(sprintf("%.2f",pd*100),"%")) %>% 
+  rename(PD = pd) %>% 
   mutate(Parameter = fct_relevel(Parameter, "b_Intercept","b_TY_stateTY_absent",
                                   "b_TY_stateTY_out","b_CSI_TY_std",
                                   "b_TY_stateTY_absent:CSI_TY_std",
@@ -1301,11 +1342,11 @@ model_parameters(m_female_out_an_TYstate) %>%
   set_table_properties(layout="autofit",width = 1) %>% 
   autofit(add_w = 0.2) %>% 
   font(part = "header", fontname = "Times New Roman") %>% 
-  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:7, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
-  bold(j=c(1,2,3),i = c(2,3,6,7,15),bold = TRUE) %>% 
+  bold(j= 1:5,i = c(2,3,6,7,12),bold = TRUE) %>% 
   theme_zebra() %>% 
-  align(j=2:5,part = "all",align = "center") -> table_female_out_an_TYstate
+  align(j=2:7,part = "all",align = "center") -> table_female_out_an_TYstate
 
 table_female_out_an_TYstate
 
@@ -1322,16 +1363,16 @@ random_parameters(m_female_out_an_TYstate)
 
 続いて、2021年を除いたモデルの結果を確認する。結果はほとんど変わらず。    
 ```{r, echo = FALSE}
-model_parameters(m_female_out_an_TYstate_no21) %>% 
+model_parameters(m_female_out_an_TYstate_no21, dispersion = TRUE, ci = 0.95) %>% 
   data.frame() %>% 
-  select(1,2,4,5,7,8) %>% 
-  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>%
-  select(c(1,2,7), everything()) %>% 
+  select(1,2,3,5,6, 7,8,9) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
+  select(c(1,2,3, 9), everything()) %>% 
   select(-CI_low, -CI_high) %>% 
+  mutate(pd = str_c(sprintf("%.2f",pd*100),"%")) %>% 
+  rename(PD = pd) %>% 
   mutate(Parameter = fct_relevel(Parameter, "b_Intercept","b_TY_stateTY_absent",
                                   "b_TY_stateTY_out","b_CSI_TY_std",
-                                  "b_TY_stateTY_absent:CSI_TY_std",
-                                  "b_TY_stateTY_out:CSI_TY_std",
                                   "b_IT_stateIT_absent","b_IT_stateIT_out",
                                   "b_CSI_IT_std",
                                   "b_IT_stateIT_absent:CSI_IT_std",
@@ -1373,11 +1414,11 @@ model_parameters(m_female_out_an_TYstate_no21) %>%
   set_table_properties(layout="autofit",width = 1) %>% 
   autofit(add_w = 0.2) %>% 
   font(part = "header", fontname = "Times New Roman") %>% 
-  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:7, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
-  bold(j=c(1,2,3),i = c(2,3,5,11, 12, 13),bold = TRUE) %>% 
+  bold(j=c(1,2,3,4,5),i = c(2,3,5,10, 12, 13),bold = TRUE) %>% 
   theme_zebra() %>% 
-  align(j=2:5,part = "all",align = "center") -> table_female_out_an_TYstate_no21
+  align(j=2:7,part = "all",align = "center") -> table_female_out_an_TYstate_no21
 
 table_female_out_an_TYstate_no21
 
@@ -1764,6 +1805,7 @@ p_female_out_an_no21_ITstate_csi
 <br/>  
 
 #### モデリング3 {#s10-2-1-3}     
+##### データの加工  
 先ほどのモデルでは*TY*と*IT*が*TY*と*IT*が前日群れにいなかったとき、翌日に彼らが戻ったか否かにかかわらず`absent`に分類していた。以下では、これを更に2つに分類する。  
 
 1. 前日に群れにおらず、翌日もいない(`TY_absent`)     
@@ -1787,6 +1829,21 @@ female_out_an_c <- female_out_an_b %>%
   mutate(IT_state4 = fct_relevel(IT_state4, "IT_stay", "IT_absent","IT_return")) 
 ```
 
+変数の組み合わせごとのデータ数は以下の通り。十分にデータ数がありそう。    
+```{r}
+female_out_an_c %>% 
+  group_by(TY_state4, IT_state4) %>% 
+  summarise(N = n())
+```
+<br/>   
+
+それぞれ*TY*と*IT*については以下の通り。  
+```{r}
+table(female_out_an_c$TY_state4)
+table(female_out_an_c$IT_state4)
+```
+
+##### モデリング  
 モデルは以下のように実行する。  
 ```{r}
 ## 全期間  
@@ -1859,7 +1916,7 @@ pp_check(m_female_out_an_TY4cat_no21, ndraws = 100)+
 ```  
 <br/>  
 
-多重共線性のチェックもお個あったが、VIFに大きな問題はない。  
+多重共線性のチェックも行ったが、VIFに大きな問題はない。  
 ```{r}
 ## 全期間を含む  
 check_collinearity(m_female_out_an_TY4cat)
@@ -1992,12 +2049,14 @@ acf_female_out_an_TY4cat_no21 %>%
 ###### 推定された係数  
 結果は以下の通り。まずは全期間を含むデータについて確認する。  
 ```{r, echo = FALSE}
-model_parameters(m_female_out_an_TY4cat) %>% 
+model_parameters(m_female_out_an_TY4cat, dispersion = TRUE, ci = 0.95) %>% 
   data.frame() %>% 
-  select(1,2,4,5,7,8) %>% 
-  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>%
-  select(c(1,2,7), everything()) %>% 
+  select(1,2,3,5,6, 7,8,9) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
+  select(c(1,2,3, 9), everything()) %>% 
   select(-CI_low, -CI_high) %>% 
+  mutate(pd = str_c(sprintf("%.2f",pd*100),"%")) %>% 
+  rename(PD = pd) %>% 
   mutate(Parameter = fct_relevel(Parameter, "b_Intercept","b_TY_state4TY_absent",
                                   "b_TY_state4TY_return","b_TY_state4TY_out",
                                   "b_CSI_TY_std",
@@ -2053,11 +2112,11 @@ model_parameters(m_female_out_an_TY4cat) %>%
   set_table_properties(layout="autofit",width = 1) %>% 
   autofit(add_w = 0.2) %>% 
   font(part = "header", fontname = "Times New Roman") %>% 
-  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:7, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
-  bold(j=c(1,2,3),i = c(2,4,8, 9, 16),bold = TRUE) %>% 
+  bold(j=c(1,2,3,4,5),i = c(2,4,8, 9, 16),bold = TRUE) %>% 
   theme_zebra() %>% 
-  align(j=2:5,part = "all",align = "center") -> table_female_out_an_TY4cat
+  align(j=2:7,part = "all",align = "center") -> table_female_out_an_TY4cat
 
 table_female_out_an_TY4cat
 
@@ -2067,14 +2126,21 @@ table_female_out_an_TY4cat
 ```
 <br/>  
 
+ランダム効果に関するパラメータは以下の通り。  
+```{r}
+random_parameters(m_female_out_an_TY4cat)
+```
+
 続いて、2021年を除いたモデルの結果を確認する。ITに関する推定結果にわずかな違いがあるよう。ITが群れに戻った時にもメスが群れを離れる確率が有意に増加するよう。      
 ```{r, echo = FALSE}
-model_parameters(m_female_out_an_TY4cat_no21) %>% 
+model_parameters(m_female_out_an_TY4cat_no21, dispersion = TRUE, ci = 0.95) %>% 
   data.frame() %>% 
-  select(1,2,4,5,7,8) %>% 
-  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>%
-  select(c(1,2,7), everything()) %>% 
+  select(1,2,3,5,6, 7,8,9) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
+  select(c(1,2,3, 9), everything()) %>% 
   select(-CI_low, -CI_high) %>% 
+  mutate(pd = str_c(sprintf("%.2f",pd*100),"%")) %>% 
+  rename(PD = pd) %>% 
   mutate(Parameter = fct_relevel(Parameter, "b_Intercept","b_TY_state4TY_absent",
                                   "b_TY_state4TY_return","b_TY_state4TY_out",
                                   "b_CSI_TY_std",
@@ -2126,19 +2192,24 @@ model_parameters(m_female_out_an_TY4cat_no21) %>%
   set_table_properties(layout="autofit",width = 1) %>% 
   autofit(add_w = 0.2) %>% 
   font(part = "header", fontname = "Times New Roman") %>% 
-  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:7, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
-  bold(j=c(1,2,3),i = c(2,4,6, 7, 13, 16),bold = TRUE) %>% 
+  bold(j=c(1,2,3,4,5),i = c(2,4,6, 7, 13, 16),bold = TRUE) %>% 
   theme_zebra() %>% 
-  align(j=2:5,part = "all",align = "center") -> table_female_out_an_TY4cat_no21
+  align(j=2:7,part = "all",align = "center") -> table_female_out_an_TY4cat_no21
 
 table_female_out_an_TY4cat_no21
 
-save_as_image(table_female_out_an_TY4cat_no21,
-              "tables/table_female_out_an_TY4cat_no21.tiff",
-              res = 600)
+# save_as_image(table_female_out_an_TY4cat_no21,
+#               "tables/table_female_out_an_TY4cat_no21.tiff",
+#               res = 600)
 ```
 <br/>  
+
+ランダム効果に関するパラメータは以下の通り。  
+```{r}
+random_parameters(m_female_out_an_TY4cat_no21)
+```
 
 ##### 結果の図示  
 ###### TYの動向・ CSIとメスが群れを出る確率の関連  
@@ -2242,7 +2313,7 @@ p_female_out_an_TY4cat_csi
 #                                                 contrast = "IT_state4",
 #                                                 at = "CSI_IT_std",
 #                                                 length = 50)
-
+# 
 # saveRDS(cont_female_out_an_IT4cat, "model/cont_female_out_an_IT4cat.rds")
 
 cont_female_out_an_IT4cat <- readRDS("model/cont_female_out_an_IT4cat.rds")
@@ -2408,6 +2479,7 @@ p_female_out_an_IT4cat_csi_no21
 続いて、発情メスについて分析を行う。  
 
 #### データの加工  
+以下のように変数を作成する。  
 ```{r}
 female_out_es <- female_out_final %>% 
   filter(!str_detect(study_period, "nm")) %>% 
@@ -2429,18 +2501,25 @@ female_out_es <- female_out_final %>%
   replace_na(list(IT_out = 0, IT_pre = 0))
 ```
 
+変数の組み合わせごとのデータ数は以下の通り。*IT*が群れを離れたというデータが全部で4個しかない。  
+```{r}
+female_out_es %>% 
+  group_by(TY_out, IT_out) %>% 
+  summarise(N = n())
+```
+
 #### モデリング1    
 モデル式は非発情メスと同様である。  
 
-モデルは以下のように実行する。  
+モデルは以下のように実行する。*IT*の出入りとCSIの交互作用は、*IT*が出たというデータ数が非常に少ないので変数に入れない。     
 ```{r} 
 m_female_out_es <-  brm(data = female_out_es,
                         female_out ~ rate_agg_all_std + TY_out*CSI_TY_std + prop_std + 
-                         IT_out*CSI_IT_std  + age_std + rank_std + kin_01 + ntm_std + est_std +
+                         IT_out + CSI_IT_std  + age_std + rank_std + kin_01 + ntm_std + est_std +
                           study_period + (1|femaleID) + (1|date),
                 family = "bernoulli",
                 prior = c(prior(student_t(4,0,20),class = Intercept),
-                prior(student_t(4,0,50), class = b),
+                prior(student_t(4,0,15), class = b),
                 prior(student_t(4,0,10), class = sd)),
   iter = 11000, warmup = 1000, seed = 223,
   control=list(adapt_delta = 0.999, max_treedepth = 15),
@@ -2464,13 +2543,13 @@ female_out_es %>%
 
 m_female_out_es_bf21 <-  brm(data = female_out_es_no21,
                         female_out ~ rate_agg_all_std + TY_out*CSI_TY_std + prop_std +
-                         IT_out*CSI_IT_std  + age_std + rank_std + kin_01 + ntm_std + est_std +
+                         IT_out + CSI_IT_std  + age_std + rank_std + kin_01 + ntm_std + est_std +
                           study_period + (1|femaleID) + (1|date),
                 family = "bernoulli",
-                prior = c(prior(student_t(4,0,30),class = Intercept),
+                prior = c(prior(student_t(4,0,50),class = Intercept),
                 prior(student_t(4,0,15), class = b),
                 prior(student_t(4,0,10), class = sd)),
-  iter = 11000, warmup = 1000, seed = 124,
+  iter = 11000, warmup = 1000, seed = 120,
   control=list(adapt_delta = 0.999, max_treedepth = 15),
   backend = "cmdstanr",
   file = "model/m_female_out_es_bf21")
@@ -2501,7 +2580,7 @@ pp_check(m_female_out_es_bf21, ndraws = 100)+
 ```  
 <br/>  
 
-多重共線性のチェックもお個あったが、VIFに問題はない。  
+多重共線性のチェックも行ったが、VIFに問題はない。  
 ```{r}
 ## 全期間  
 check_collinearity(m_female_out_es)
@@ -2533,8 +2612,7 @@ data.frame(Rhat = brms::rhat(m_female_out_es_bf21)) %>%
 
 最後に残差の時系列相関のチェックを行う。  
 
-
-まず全期間のデータを調べた。残差の自己相関をプロットすると、明確なパターンは見られなかった。また、Ljung-Box検定で3時点前(発情時のデータは少ないため、4時点以降だとデータがない個体が多い)までの残差との自己相関を検定したところ、有意な自己相関を示した個体はKit,Meiのみだった。    
+まず全期間のデータを調べた。残差の自己相関をプロットすると、明確なパターンは見られなかった。また、Ljung-Box検定で3時点前(発情時のデータは少ないため、4時点以降だとデータがない個体が多い)までの残差との自己相関を検定したところ、有意な自己相関を示した個体はKit, Meiのみだった。    
 ```{r, fig.dim = c(10,10)}
 res_female_out_es <- female_out_es %>% 
   mutate(resid = dh_female_out_es$scaledResiduals) %>% 
@@ -2582,7 +2660,7 @@ acf_female_out_es %>%
 ```
 <br/>  
 
-2021年を除いたモデルについても見てみる。有意な自己相関を示した個体はMif,Malだけだった。   
+2021年を除いたモデルについても見てみる。有意な自己相関を示した個体はTamだけだった。   
 ```{r, fig.dim = c(10,10)}
 res_female_out_es_bf21 <- female_out_es_no21 %>% 
   mutate(resid = dh_female_out_es_bf21$scaledResiduals) %>% 
@@ -2630,21 +2708,23 @@ acf_female_out_es_bf21 %>%
 ```
 <br/>  
 
-
 ##### 結果の確認  
 ###### 推定された係数  
 結果は以下の通り。有意な変数は一つもなかった。  
 ```{r, echo = FALSE}
-model_parameters(m_female_out_es) %>% 
+model_parameters(m_female_out_es, dispersion = TRUE,
+                 ci = 0.95) %>% 
   data.frame() %>% 
-  select(1,2,4,5,7,8) %>% 
+  select(1,2,3,5,6, 7,8,9) %>% 
   mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
-  select(c(1,2,7), everything()) %>% 
+  select(c(1,2,3, 9), everything()) %>% 
   select(-CI_low, -CI_high) %>% 
+  mutate(pd = str_c(sprintf("%.2f",pd*100),"%")) %>% 
+  rename(PD = pd) %>% 
   mutate(Parameter = fct_relevel(Parameter,
                                   "b_Intercept","b_TY_out",
                                   "b_CSI_TY_std","b_TY_out:CSI_TY_std",
-                                  "b_IT_out","b_CSI_IT_std","b_IT_out:CSI_IT_std",
+                                  "b_IT_out","b_CSI_IT_std",
                                   "b_rate_agg_all_std", "b_ntm_std", "b_est_std", 
                                   "b_kin_01", 
                                   "b_rank_std", "b_age_std", "b_prop_std",
@@ -2673,10 +2753,10 @@ model_parameters(m_female_out_es) %>%
   colformat_double(digits=2) %>% 
   set_table_properties(layout="autofit",width = 0.9) %>% 
   font(part = "header", fontname = "Times New Roman") %>% 
-  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:7, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
   theme_zebra() %>% 
-  align(j=2:5,part = "all",align = "center") -> table_female_out_es
+  align(j=2:7,part = "all",align = "center") -> table_female_out_es
 
 table_female_out_es
  
@@ -2685,18 +2765,26 @@ table_female_out_es
 ```
 <br/>  
 
+ランダム効果に関するパラメータは以下の通り。  
+```{r}
+random_parameters(m_female_out_es)
+```
+
 2021年を除いたモデルでも同様。ただし、かなりデータの推定幅が大きいようだ。  
 ```{r, echo = FALSE}
-model_parameters(m_female_out_es_bf21) %>% 
+model_parameters(m_female_out_es_bf21, dispersion = TRUE,
+                 ci = 0.95) %>% 
   data.frame() %>% 
-  select(1,2,4,5,7,8) %>% 
+  select(1,2,3,5,6, 7,8,9) %>% 
   mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
-  select(c(1,2,7), everything()) %>% 
+  select(c(1,2,3, 9), everything()) %>% 
   select(-CI_low, -CI_high) %>% 
+  mutate(pd = str_c(sprintf("%.2f",pd*100),"%")) %>% 
+  rename(PD = pd) %>% 
   mutate(Parameter = fct_relevel(Parameter,
                                   "b_Intercept","b_TY_out",
                                   "b_CSI_TY_std","b_TY_out:CSI_TY_std",
-                                  "b_IT_out","b_CSI_IT_std","b_IT_out:CSI_IT_std",
+                                  "b_IT_out","b_CSI_IT_std",
                                   "b_rate_agg_all_std", "b_ntm_std", "b_est_std", 
                                   "b_kin_01", 
                                   "b_rank_std", "b_age_std", "b_prop_std",
@@ -2725,10 +2813,10 @@ model_parameters(m_female_out_es_bf21) %>%
   colformat_double(digits=2) %>% 
   set_table_properties(layout="autofit",width = 0.9) %>% 
   font(part = "header", fontname = "Times New Roman") %>% 
-  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:7, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
   theme_zebra() %>% 
-  align(j=2:5,part = "all",align = "center") -> table_female_out_es_bf21
+  align(j=2:7,part = "all",align = "center") -> table_female_out_es_bf21
 
 table_female_out_es_bf21
 
@@ -2736,6 +2824,12 @@ table_female_out_es_bf21
 #               res = 600)
 ```
 <br/>  
+
+ランダム効果に関するパラメータは以下の通り。推定された標準偏差がかなり大きい。    
+```{r}
+random_parameters(m_female_out_es_bf21)
+```
+
 
 ###### 交互作用項の検討  
 **全期間を含むモデル**  
@@ -2847,105 +2941,8 @@ p_female_out_es_TYcsi
 ```
 <br/>  
 
-###### ITの群れへの出入り、CSIとの関連  
-続いて、*IT*とのCSIに応じてオッズ比(*IT*と同じ日に群れを離れるオッズ/そうでない日に離れるオッズ)の対数をとったものがどのように変わるかを図示する。こちらはCSIが大きいメスは逆にITが群れを離れた日にメスが群れを離れる確率の方が低くなることが示唆された。ただし、これはおそらく2021年交尾期の`IT_out`が全て0になっていることによると思われる?      
-
-```{r, fig.height = 4}
-# cont_female_out_es_ITcsi <- estimate_contrasts(m_female_out_es,
-#                                                contrast = "IT_out = c(1,0)",
-#                                                at = "CSI_IT_std",
-#                                                length = 50,
-#                                                transform = "none")
-# 
-# saveRDS(cont_female_out_es_ITcsi, "model/cont_female_out_es_ITcsi.rds")
-cont_female_out_es_ITcsi <- readRDS("model/cont_female_out_es_ITcsi.rds")
-
-cont_female_out_es_ITcsi %>% 
-  data.frame() %>% 
-  rename(CSI_IT = CSI_IT_std) %>% 
-  mutate(CSI_IT = sd(female_out_es$CSI_IT)*CSI_IT + mean(female_out_es$CSI_IT)) %>% 
-  ggplot(aes(x = CSI_IT, y = Difference))+
-  geom_segment(data = CSI_IT,
-             aes(xend = CSI_IT, y=-10, yend = 0),
-             color = "firebrick3",
-             alpha = 0.8, size = 0.6,
-             arrow = arrow(length = unit(11, "points"))) +
-  geom_line()+
-  geom_ribbon(aes(ymin = CI_low, ymax = CI_high),
-              alpha = 0.1)+
-  geom_hline(aes(yintercept = 0),
-             linetype = "dashed",
-             color = "grey30",
-             linewidth = 1)+
-  theme_bw(base_size = 18)+
-  theme(aspect.ratio = 1) +
-  labs(y = "Log odds ratio", x = expression(paste("CSI with ",italic("IT")))) +
-  scale_x_continuous(breaks = seq(0,6,1))+
-  scale_y_continuous(breaks = seq(-130,30,10)) +
-  theme(axis.title.y = element_text(family = "Times New Roman"),
-        axis.title.x = element_text(family = "Times New Roman",
-                                    size = 15),
-        axis.text.x = element_text(family = "Times New Roman"),
-        axis.text.y = element_text(family = "Times New Roman"),
-        aspect.ratio = 1) -> p_female_out_es_ITcsi
-
-p_female_out_es_ITcsi
-
-# ggsave("figures/p_female_out_es_ITcsi.png",p_female_out_es_ITcsi, dpi = 600, units = "mm",
-#         width = 100, height = 100)
-```
-<br/>  
-
-2021年を除いたモデルについても図示する。やはり2021を除くとそのような傾向は見られない。    
-```{r, fig.height = 4}
-# cont_female_out_es_ITcsi_bf21 <- estimate_contrasts(m_female_out_es_bf21,
-#                                                contrast = "IT_out = c(1,0)",
-#                                                at = "CSI_IT_std",
-#                                                length = 50,
-#                                                transform = "none")
-# 
-# saveRDS(cont_female_out_es_ITcsi_bf21, "model/cont_female_out_es_ITcsi_bf21.rds")
-cont_female_out_es_ITcsi_bf21 <- readRDS("model/cont_female_out_es_ITcsi_bf21.rds")
-
-
-cont_female_out_es_ITcsi_bf21 %>% 
-  data.frame() %>% 
-  rename(CSI_IT = CSI_IT_std) %>% 
-  mutate(CSI_IT = sd(female_out_es_no21$CSI_IT)*CSI_IT + mean(female_out_es_no21$CSI_IT)) %>% 
-  ggplot(aes(x = CSI_IT, y = Difference))+
-  geom_segment(data = CSI_IT,
-             aes(xend = CSI_IT, y=-10, yend = 0),
-             color = "firebrick3",
-             alpha = 0.8, size = 0.6,
-             arrow = arrow(length = unit(11, "points"))) +
-  geom_line()+
-  geom_ribbon(aes(ymin = CI_low, ymax = CI_high),
-              alpha = 0.1)+
-  geom_hline(aes(yintercept = 0),
-             linetype = "dashed",
-             color = "grey30",
-             linewidth = 1)+
-  theme_bw(base_size = 18)+
-  theme(aspect.ratio = 1) +
-  labs(y = "Log odds ratio", x = expression(paste("CSI with ",italic("IT")))) +
-  scale_x_continuous(breaks = seq(0,6,1))+
-  scale_y_continuous(breaks = seq(-130,30,10)) +
-  theme(axis.title.y = element_text(family = "Times New Roman"),
-        axis.title.x = element_text(family = "Times New Roman",
-                                    size = 15),
-        axis.text.x = element_text(family = "Times New Roman"),
-        axis.text.y = element_text(family = "Times New Roman"),
-        aspect.ratio = 1) -> p_female_out_es_ITcsi_bf21
-
-p_female_out_es_ITcsi_bf21
-
-# ggsave("figures/p_female_out_es_ITcsi_bf21.png",p_female_out_es_ITcsi_bf21, dpi = 600, units = "mm",
-#         width = 100, height = 100)
-```
-<br/>  
-
-
 #### モデリング2  
+##### データの加工  
 モデル式は非発情メスと同様。以下のように変数を作成する。  
 ```{r}
 female_out_es_b <- female_out_es %>% 
@@ -2959,10 +2956,25 @@ female_out_es_b <- female_out_es %>%
   mutate(IT_state = fct_relevel(IT_state, "IT_stay", "IT_absent"))
 ```
 
+変数の組み合わせごとのデータ数は以下の通り。やはり*IT*が群れを離れるデータが少なすぎる。  
+```{r}
+female_out_es_b %>% 
+  group_by(TY_state, IT_state) %>% 
+  summarise(N = n())
+```
+<br/>   
+
+それぞれ*TY*と*IT*については以下の通り。  
+```{r}
+table(female_out_es_b$TY_state)
+table(female_out_es_b$IT_state)
+```
+
+##### モデリング  
 モデルは以下のように実行する。  
 ```{r}
 ## オスの攻撃との交互作用なし
-### IT_stateちCSI_IT_stdの交互作用はVIFが高いため除外  
+### IT_stateとCSI_IT_stdの交互作用はVIFが高いため除外  
 m_female_out_es_TYstate <-  brm(data = female_out_es_b %>% 
                                   mutate(date = as.factor(date)),
                          female_out ~ rate_agg_all_std + TY_state*CSI_TY_std +
@@ -2970,7 +2982,7 @@ m_female_out_es_TYstate <-  brm(data = female_out_es_b %>%
                          age_std + rank_std + kin_01 +
                           study_period + (1|femaleID) + (1|date),
                 family = "bernoulli",
-                prior = c(prior(student_t(4,0,10),class = Intercept),
+                prior = c(prior(student_t(4,0,15),class = Intercept),
                           prior(student_t(4,0,10),class = b),
                 prior(student_t(4,0,5), class = sd)),
   iter = 11000, warmup = 1000, seed = 223,
@@ -3166,12 +3178,15 @@ acf_female_out_es_TYstate_bf21 %>%
 ###### 推定された係数  
 結果は以下の通り。
 ```{r, echo = FALSE}
-model_parameters(m_female_out_es_TYstate) %>% 
+model_parameters(m_female_out_es_TYstate,
+                 dispersion = TRUE, ci = 0.95) %>% 
   data.frame() %>% 
-  select(1,2,4,5,7,8) %>% 
-  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>%
-  select(c(1,2,7), everything()) %>% 
+  select(1,2,3,5,6, 7,8,9) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
+  select(c(1,2,3, 9), everything()) %>% 
   select(-CI_low, -CI_high) %>% 
+  mutate(pd = str_c(sprintf("%.2f",pd*100),"%")) %>% 
+  rename(PD = pd) %>% 
   mutate(Parameter = fct_relevel(Parameter,
                                   "b_Intercept","b_TY_stateTY_absent",
                                   "b_TY_stateTY_out","b_CSI_TY_std",
@@ -3212,10 +3227,11 @@ model_parameters(m_female_out_es_TYstate) %>%
   set_table_properties(layout="autofit",width = 1) %>% 
   autofit(add_w = 0.2) %>% 
   font(part = "header", fontname = "Times New Roman") %>% 
-  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:7, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
+  bold(j=c(1,2,3,4,5),i = c(12),bold = TRUE) %>% 
   theme_zebra() %>% 
-  align(j=2:5,part = "all",align = "center") -> table_female_out_es_TYstate
+  align(j=2:7,part = "all",align = "center") -> table_female_out_es_TYstate
 
 table_female_out_es_TYstate
 
@@ -3227,12 +3243,15 @@ table_female_out_es_TYstate
 
 2021を除いたモデルの結果は以下の通り。明らかに推定の幅が大きすぎる。以後、このモデルの結果は用いないものとする。    
 ```{r, echo = FALSE}
-model_parameters(m_female_out_es_TYstate_bf21) %>% 
+model_parameters(m_female_out_es_TYstate_bf21,
+                 dispersion = TRUE, ci = 0.95) %>% 
   data.frame() %>% 
-  select(1,2,4,5,7,8) %>% 
-  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>%
-  select(c(1,2,7), everything()) %>% 
+  select(1,2,3,5,6, 7,8,9) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
+  select(c(1,2,3, 9), everything()) %>% 
   select(-CI_low, -CI_high) %>% 
+  mutate(pd = str_c(sprintf("%.2f",pd*100),"%")) %>% 
+  rename(PD = pd) %>% 
   mutate(Parameter = fct_relevel(Parameter, "b_Intercept","b_TY_stateTY_absent",
                                   "b_TY_stateTY_out","b_CSI_TY_std",
                                   "b_TY_stateTY_absent:CSI_TY_std",
@@ -3279,11 +3298,11 @@ model_parameters(m_female_out_es_TYstate_bf21) %>%
   set_table_properties(layout="autofit",width = 1) %>% 
   autofit(add_w = 0.2) %>% 
   font(part = "header", fontname = "Times New Roman") %>% 
-  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:7, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
-  bold(j=c(1,2,3),i = c(10),bold = TRUE) %>% 
+  bold(j=c(1,2,3,4,5),i = c(10),bold = TRUE) %>% 
   theme_zebra() %>% 
-  align(j=2:5,part = "all",align = "center") -> table_female_out_es_TYstate_bf21
+  align(j=2:7,part = "all",align = "center") -> table_female_out_es_TYstate_bf21
 
 table_female_out_es_TYstate_bf21
 
@@ -3292,6 +3311,13 @@ table_female_out_es_TYstate_bf21
 #               res = 600)
 ```
 <br/>  
+
+###### 多重比較  
+*IT*の動向については3水準あるので、事後検定として多重比較を行う。いずれも差は有意でない。    
+```{r}
+estimate_contrasts(m_female_out_es_TYstate,
+                   contrast = "IT_state")
+```
 
 ###### 交互作用項の推定  
 さらに交互作用項のある変数について検討を行う。以下は、*TY*/*IT*とのCSIの値によって、`TY/IT_state`の各水準のときにおいてメスが群れを離れる確率がどのように違うかを調べたものである。`Difference`はログオッズの差を表している。  
