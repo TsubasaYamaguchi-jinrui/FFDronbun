@@ -127,7 +127,27 @@ sri_qap <- readRDS("model/sri_qap.rds")
 #### 結果の確認  
 結果は以下の通り。いずれも有意な関連は見られなかった。
 ```{r}
-sri_qap
+data.frame(Parameter = c("Intercept", sri_qap$pred_names),
+           coef = sri_qap$coefficients,
+           Z = sri_qap$z,
+           pvalue = sri_qap$p) %>% 
+  mutate(Parameter = str_replace_all(Parameter,
+                                     c("CSI_female_std" = "CSI",
+                                       "kin_mat_std" = "血縁度",
+                                       "rank_mat_std" = "順位差"))) %>% 
+  rename("Coefficients" = 2,
+         "P value" = 4) %>% 
+  flextable() %>% 
+  colformat_double(digits=2) %>% 
+  set_table_properties(layout="autofit",width = 0.9) %>% 
+  font(part = "header", fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:4, fontname = "Times New Roman") %>% 
+  font(part = "body", j=1, fontname = "Yu Gothic") %>% 
+  theme_zebra() %>% 
+  align(j=2:4,part = "all",align = "center") -> table_sri_qap
+
+# save_as_image(table_sri_qap, "tables/table_sri_qap.tiff",
+#               res = 600)
 ```
 
 #### ネットワークの確認   

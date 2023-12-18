@@ -161,6 +161,13 @@ datatable(female_in_final %>% mutate(across(where(is.numeric),~round(.,2))),
           options = list(scrollX = 50))
 ```
 
+## 基本データの確認  
+*TY*と*IT*はどのくらい同じ日に戻っていたかを確認する。  
+```{r}
+
+```
+
+
 ## 分析  
 以下では、交尾期と非交尾期に分けて分析を行う。分析に含まれるのは、6歳以上でかつTY、ITとのCSIが算出できる個体(= 2019年時点で6歳以上の個体)である。
 

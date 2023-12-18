@@ -23,7 +23,7 @@
 <meta name="author" content="Tsubasa Yamaguchi" />
 
 
-<meta name="date" content="2023-12-18" />
+<meta name="date" content="2023-12-19" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -54,6 +54,8 @@
 <link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
 <link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
 <script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<link href="libs/tabwid-1.1.3/tabwid.css" rel="stylesheet" />
+<script src="libs/tabwid-1.1.3/tabwid.js"></script>
 <script src="libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
 <link href="libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
 <script src="libs/datatables-binding-0.30/datatables.js"></script>
@@ -62,8 +64,6 @@
 <script src="libs/dt-core-1.13.4/js/jquery.dataTables.min.js"></script>
 <link href="libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet" />
 <script src="libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
-<link href="libs/tabwid-1.1.3/tabwid.css" rel="stylesheet" />
-<script src="libs/tabwid-1.1.3/tabwid.js"></script>
 
 
 <style type="text/css">
@@ -268,6 +268,7 @@ div.csl-indent {
 <li class="chapter" data-level="3.3.5.3" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#csiの算出-11"><i class="fa fa-check"></i><b>3.3.5.3</b> CSIの算出</a></li>
 </ul></li>
 </ul></li>
+<li class="chapter" data-level="3.4" data-path="04_CSI_TY.html"><a href="04_CSI_TY.html#算出に使用したメスの個体追跡データの概要"><i class="fa fa-check"></i><b>3.4</b> 算出に使用したメスの個体追跡データの概要</a></li>
 </ul></li>
 <li class="chapter" data-level="4" data-path="05_definition_group.html"><a href="05_definition_group.html"><i class="fa fa-check"></i><b>4</b> 群れの離合集散動態をどのように分析すべきか</a>
 <ul>
@@ -341,32 +342,37 @@ div.csl-indent {
 <li class="chapter" data-level="7.2.3.3" data-path="08_female_presence.html"><a href="08_female_presence.html#結果の確認-4"><i class="fa fa-check"></i><b>7.2.3.3</b> 結果の確認</a></li>
 <li class="chapter" data-level="7.2.3.4" data-path="08_female_presence.html"><a href="08_female_presence.html#結果の図示-4"><i class="fa fa-check"></i><b>7.2.3.4</b> 結果の図示</a></li>
 </ul></li>
+<li class="chapter" data-level="7.2.4" data-path="08_female_presence.html"><a href="08_female_presence.html#メスの属性との関連"><i class="fa fa-check"></i><b>7.2.4</b> メスの属性との関連</a>
+<ul>
+<li class="chapter" data-level="7.2.4.1" data-path="08_female_presence.html"><a href="08_female_presence.html#データの加工-7"><i class="fa fa-check"></i><b>7.2.4.1</b> データの加工</a></li>
+<li class="chapter" data-level="7.2.4.2" data-path="08_female_presence.html"><a href="08_female_presence.html#モデリング-8"><i class="fa fa-check"></i><b>7.2.4.2</b> モデリング</a></li>
+</ul></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="8" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html"><i class="fa fa-check"></i><b>8</b> 各観察日の確認メス割合に関する時系列分析</a>
 <ul>
-<li class="chapter" data-level="8.1" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#データの加工-7"><i class="fa fa-check"></i><b>8.1</b> データの加工</a></li>
+<li class="chapter" data-level="8.1" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#データの加工-8"><i class="fa fa-check"></i><b>8.1</b> データの加工</a></li>
 <li class="chapter" data-level="8.2" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#ローカルレベルモデル"><i class="fa fa-check"></i><b>8.2</b> ローカルレベルモデル</a>
 <ul>
 <li class="chapter" data-level="8.2.1" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#全期間のデータ"><i class="fa fa-check"></i><b>8.2.1</b> 全期間のデータ</a>
 <ul>
-<li class="chapter" data-level="8.2.1.1" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#モデリング-8"><i class="fa fa-check"></i><b>8.2.1.1</b> モデリング</a></li>
+<li class="chapter" data-level="8.2.1.1" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#モデリング-9"><i class="fa fa-check"></i><b>8.2.1.1</b> モデリング</a></li>
 </ul></li>
 <li class="chapter" data-level="8.2.2" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#交尾期のみ"><i class="fa fa-check"></i><b>8.2.2</b> 交尾期のみ</a>
 <ul>
-<li class="chapter" data-level="8.2.2.1" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#データの加工-8"><i class="fa fa-check"></i><b>8.2.2.1</b> データの加工</a></li>
-<li class="chapter" data-level="8.2.2.2" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#モデリング-9"><i class="fa fa-check"></i><b>8.2.2.2</b> モデリング</a></li>
+<li class="chapter" data-level="8.2.2.1" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#データの加工-9"><i class="fa fa-check"></i><b>8.2.2.1</b> データの加工</a></li>
+<li class="chapter" data-level="8.2.2.2" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#モデリング-10"><i class="fa fa-check"></i><b>8.2.2.2</b> モデリング</a></li>
 </ul></li>
 <li class="chapter" data-level="8.2.3" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#非交尾期のみ"><i class="fa fa-check"></i><b>8.2.3</b> 非交尾期のみ</a>
 <ul>
-<li class="chapter" data-level="8.2.3.1" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#データの加工-9"><i class="fa fa-check"></i><b>8.2.3.1</b> データの加工</a></li>
-<li class="chapter" data-level="8.2.3.2" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#モデリング-10"><i class="fa fa-check"></i><b>8.2.3.2</b> モデリング</a></li>
+<li class="chapter" data-level="8.2.3.1" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#データの加工-10"><i class="fa fa-check"></i><b>8.2.3.1</b> データの加工</a></li>
+<li class="chapter" data-level="8.2.3.2" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#モデリング-11"><i class="fa fa-check"></i><b>8.2.3.2</b> モデリング</a></li>
 </ul></li>
 <li class="chapter" data-level="8.2.4" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#非交尾期までのデータ"><i class="fa fa-check"></i><b>8.2.4</b> 2021非交尾期までのデータ</a>
 <ul>
 <li class="chapter" data-level="8.2.4.1" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#全期間"><i class="fa fa-check"></i><b>8.2.4.1</b> 全期間</a></li>
-<li class="chapter" data-level="8.2.4.2" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#交尾期"><i class="fa fa-check"></i><b>8.2.4.2</b> 交尾期</a></li>
-<li class="chapter" data-level="8.2.4.3" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#非交尾期"><i class="fa fa-check"></i><b>8.2.4.3</b> 非交尾期</a></li>
+<li class="chapter" data-level="8.2.4.2" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#交尾期-1"><i class="fa fa-check"></i><b>8.2.4.2</b> 交尾期</a></li>
+<li class="chapter" data-level="8.2.4.3" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#非交尾期-1"><i class="fa fa-check"></i><b>8.2.4.3</b> 非交尾期</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="8.3" data-path="09_female_presence_statespace.html"><a href="09_female_presence_statespace.html#平滑化トレンドモデル"><i class="fa fa-check"></i><b>8.3</b> 平滑化トレンドモデル</a>
@@ -382,7 +388,7 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="9" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html"><i class="fa fa-check"></i><b>9</b> メスが群れを離れるメカニズム</a>
 <ul>
-<li class="chapter" data-level="9.1" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#データの加工-13"><i class="fa fa-check"></i><b>9.1</b> データの加工</a>
+<li class="chapter" data-level="9.1" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#データの加工-14"><i class="fa fa-check"></i><b>9.1</b> データの加工</a>
 <ul>
 <li class="chapter" data-level="9.1.1" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#オスが群れを離れた日の特定"><i class="fa fa-check"></i><b>9.1.1</b> オスが群れを離れた日の特定</a></li>
 <li class="chapter" data-level="9.1.2" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#メスが群れを離れた日の同定"><i class="fa fa-check"></i><b>9.1.2</b> メスが群れを離れた日の同定</a></li>
@@ -392,25 +398,29 @@ div.csl-indent {
 <li class="chapter" data-level="9.1.6" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#発情メス数の算出"><i class="fa fa-check"></i><b>9.1.6</b> 発情メス数の算出</a></li>
 <li class="chapter" data-level="9.1.7" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#全データの結合"><i class="fa fa-check"></i><b>9.1.7</b> 全データの結合</a></li>
 </ul></li>
-<li class="chapter" data-level="9.2" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#基本的な情報"><i class="fa fa-check"></i><b>9.2</b> 基本的な情報</a></li>
+<li class="chapter" data-level="9.2" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#基本的な情報"><i class="fa fa-check"></i><b>9.2</b> 基本的な情報</a>
+<ul>
+<li class="chapter" data-level="9.2.1" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#メスが群れを離れる頻度"><i class="fa fa-check"></i><b>9.2.1</b> メスが群れを離れる頻度</a></li>
+<li class="chapter" data-level="9.2.2" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#オスが群れを離れる"><i class="fa fa-check"></i><b>9.2.2</b> オスが群れを離れる</a></li>
+</ul></li>
 <li class="chapter" data-level="9.3" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#分析モデリング"><i class="fa fa-check"></i><b>9.3</b> 分析(モデリング)</a>
 <ul>
 <li class="chapter" data-level="9.3.1" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#交尾期非発情メス"><i class="fa fa-check"></i><b>9.3.1</b> 交尾期(非発情メス)</a>
 <ul>
-<li class="chapter" data-level="9.3.1.1" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#データの加工-14"><i class="fa fa-check"></i><b>9.3.1.1</b> データの加工</a></li>
+<li class="chapter" data-level="9.3.1.1" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#データの加工-15"><i class="fa fa-check"></i><b>9.3.1.1</b> データの加工</a></li>
 <li class="chapter" data-level="9.3.1.2" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#モデリング1"><i class="fa fa-check"></i><b>9.3.1.2</b> モデリング1</a></li>
 <li class="chapter" data-level="9.3.1.3" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#モデリング2"><i class="fa fa-check"></i><b>9.3.1.3</b> モデリング2</a></li>
 <li class="chapter" data-level="9.3.1.4" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#s10-2-1-3"><i class="fa fa-check"></i><b>9.3.1.4</b> モデリング3</a></li>
 </ul></li>
 <li class="chapter" data-level="9.3.2" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#交尾期発情メス"><i class="fa fa-check"></i><b>9.3.2</b> 交尾期(発情メス)</a>
 <ul>
-<li class="chapter" data-level="9.3.2.1" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#データの加工-17"><i class="fa fa-check"></i><b>9.3.2.1</b> データの加工</a></li>
+<li class="chapter" data-level="9.3.2.1" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#データの加工-18"><i class="fa fa-check"></i><b>9.3.2.1</b> データの加工</a></li>
 <li class="chapter" data-level="9.3.2.2" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#モデリング1-1"><i class="fa fa-check"></i><b>9.3.2.2</b> モデリング1</a></li>
 <li class="chapter" data-level="9.3.2.3" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#モデリング2-1"><i class="fa fa-check"></i><b>9.3.2.3</b> モデリング2</a></li>
 </ul></li>
-<li class="chapter" data-level="9.3.3" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#非交尾期-1"><i class="fa fa-check"></i><b>9.3.3</b> 非交尾期</a>
+<li class="chapter" data-level="9.3.3" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#非交尾期-2"><i class="fa fa-check"></i><b>9.3.3</b> 非交尾期</a>
 <ul>
-<li class="chapter" data-level="9.3.3.1" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#データの加工-19"><i class="fa fa-check"></i><b>9.3.3.1</b> データの加工</a></li>
+<li class="chapter" data-level="9.3.3.1" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#データの加工-20"><i class="fa fa-check"></i><b>9.3.3.1</b> データの加工</a></li>
 </ul></li>
 </ul></li>
 </ul></li>
@@ -418,21 +428,21 @@ div.csl-indent {
 <ul>
 <li class="chapter" data-level="10.1" data-path="11_female_out_network.html"><a href="11_female_out_network.html#メス間の社会関係と同じ日に群れ本体にいた割合sriの関連"><i class="fa fa-check"></i><b>10.1</b> メス間の社会関係と同じ日に群れ本体にいた割合(SRI)の関連</a>
 <ul>
-<li class="chapter" data-level="10.1.1" data-path="11_female_out_network.html"><a href="11_female_out_network.html#データの加工-20"><i class="fa fa-check"></i><b>10.1.1</b> データの加工</a></li>
+<li class="chapter" data-level="10.1.1" data-path="11_female_out_network.html"><a href="11_female_out_network.html#データの加工-21"><i class="fa fa-check"></i><b>10.1.1</b> データの加工</a></li>
 <li class="chapter" data-level="10.1.2" data-path="11_female_out_network.html"><a href="11_female_out_network.html#glmqap検定"><i class="fa fa-check"></i><b>10.1.2</b> GLMQAP検定</a>
 <ul>
-<li class="chapter" data-level="10.1.2.1" data-path="11_female_out_network.html"><a href="11_female_out_network.html#モデリング-17"><i class="fa fa-check"></i><b>10.1.2.1</b> モデリング</a></li>
-<li class="chapter" data-level="10.1.2.2" data-path="11_female_out_network.html"><a href="11_female_out_network.html#結果の確認-15"><i class="fa fa-check"></i><b>10.1.2.2</b> 結果の確認</a></li>
+<li class="chapter" data-level="10.1.2.1" data-path="11_female_out_network.html"><a href="11_female_out_network.html#モデリング-18"><i class="fa fa-check"></i><b>10.1.2.1</b> モデリング</a></li>
+<li class="chapter" data-level="10.1.2.2" data-path="11_female_out_network.html"><a href="11_female_out_network.html#結果の確認-17"><i class="fa fa-check"></i><b>10.1.2.2</b> 結果の確認</a></li>
 <li class="chapter" data-level="10.1.2.3" data-path="11_female_out_network.html"><a href="11_female_out_network.html#ネットワークの確認"><i class="fa fa-check"></i><b>10.1.2.3</b> ネットワークの確認</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="10.2" data-path="11_female_out_network.html"><a href="11_female_out_network.html#メス間の社会関係と同じ日に群れを離れた割合の関連"><i class="fa fa-check"></i><b>10.2</b> メス間の社会関係と同じ日に群れを離れた割合の関連</a>
 <ul>
-<li class="chapter" data-level="10.2.1" data-path="11_female_out_network.html"><a href="11_female_out_network.html#データの加工-21"><i class="fa fa-check"></i><b>10.2.1</b> データの加工</a></li>
+<li class="chapter" data-level="10.2.1" data-path="11_female_out_network.html"><a href="11_female_out_network.html#データの加工-22"><i class="fa fa-check"></i><b>10.2.1</b> データの加工</a></li>
 <li class="chapter" data-level="10.2.2" data-path="11_female_out_network.html"><a href="11_female_out_network.html#glmqap検定-1"><i class="fa fa-check"></i><b>10.2.2</b> GLMQAP検定</a>
 <ul>
-<li class="chapter" data-level="10.2.2.1" data-path="11_female_out_network.html"><a href="11_female_out_network.html#モデリング-18"><i class="fa fa-check"></i><b>10.2.2.1</b> モデリング</a></li>
-<li class="chapter" data-level="10.2.2.2" data-path="11_female_out_network.html"><a href="11_female_out_network.html#結果の確認-16"><i class="fa fa-check"></i><b>10.2.2.2</b> 結果の確認</a></li>
+<li class="chapter" data-level="10.2.2.1" data-path="11_female_out_network.html"><a href="11_female_out_network.html#モデリング-19"><i class="fa fa-check"></i><b>10.2.2.1</b> モデリング</a></li>
+<li class="chapter" data-level="10.2.2.2" data-path="11_female_out_network.html"><a href="11_female_out_network.html#結果の確認-18"><i class="fa fa-check"></i><b>10.2.2.2</b> 結果の確認</a></li>
 </ul></li>
 <li class="chapter" data-level="10.2.3" data-path="11_female_out_network.html"><a href="11_female_out_network.html#sriマトリックスに関する分析"><i class="fa fa-check"></i><b>10.2.3</b> SRIマトリックスに関する分析</a>
 <ul>
@@ -442,7 +452,7 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="11" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html"><i class="fa fa-check"></i><b>11</b> メスが群れに戻るときのメカニズム</a>
 <ul>
-<li class="chapter" data-level="11.1" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#データの加工-22"><i class="fa fa-check"></i><b>11.1</b> データの加工</a>
+<li class="chapter" data-level="11.1" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#データの加工-23"><i class="fa fa-check"></i><b>11.1</b> データの加工</a>
 <ul>
 <li class="chapter" data-level="11.1.1" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#オスの出入り情報"><i class="fa fa-check"></i><b>11.1.1</b> オスの出入り情報</a></li>
 <li class="chapter" data-level="11.1.2" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#メスが群れに戻った日の同定"><i class="fa fa-check"></i><b>11.1.2</b> メスが群れに戻った日の同定</a></li>
@@ -450,20 +460,21 @@ div.csl-indent {
 <li class="chapter" data-level="11.1.4" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#当日の確認メス割合発情メス数"><i class="fa fa-check"></i><b>11.1.4</b> 当日の確認メス割合、発情メス数</a></li>
 <li class="chapter" data-level="11.1.5" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#全データの結合-1"><i class="fa fa-check"></i><b>11.1.5</b> 全データの結合</a></li>
 </ul></li>
-<li class="chapter" data-level="11.2" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#分析"><i class="fa fa-check"></i><b>11.2</b> 分析</a>
+<li class="chapter" data-level="11.2" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#基本データの確認"><i class="fa fa-check"></i><b>11.2</b> 基本データの確認</a></li>
+<li class="chapter" data-level="11.3" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#分析"><i class="fa fa-check"></i><b>11.3</b> 分析</a>
 <ul>
-<li class="chapter" data-level="11.2.1" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#交尾期-1"><i class="fa fa-check"></i><b>11.2.1</b> 交尾期</a>
+<li class="chapter" data-level="11.3.1" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#交尾期-2"><i class="fa fa-check"></i><b>11.3.1</b> 交尾期</a>
 <ul>
-<li class="chapter" data-level="11.2.1.1" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#データの加工-23"><i class="fa fa-check"></i><b>11.2.1.1</b> データの加工</a></li>
-<li class="chapter" data-level="11.2.1.2" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#モデリング1-2"><i class="fa fa-check"></i><b>11.2.1.2</b> モデリング1</a></li>
-<li class="chapter" data-level="11.2.1.3" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#モデリング2-2"><i class="fa fa-check"></i><b>11.2.1.3</b> モデリング2</a></li>
-<li class="chapter" data-level="11.2.1.4" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#モデリング3"><i class="fa fa-check"></i><b>11.2.1.4</b> モデリング3</a></li>
+<li class="chapter" data-level="11.3.1.1" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#データの加工-24"><i class="fa fa-check"></i><b>11.3.1.1</b> データの加工</a></li>
+<li class="chapter" data-level="11.3.1.2" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#モデリング1-2"><i class="fa fa-check"></i><b>11.3.1.2</b> モデリング1</a></li>
+<li class="chapter" data-level="11.3.1.3" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#モデリング2-2"><i class="fa fa-check"></i><b>11.3.1.3</b> モデリング2</a></li>
+<li class="chapter" data-level="11.3.1.4" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#モデリング3"><i class="fa fa-check"></i><b>11.3.1.4</b> モデリング3</a></li>
 </ul></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="12" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html"><i class="fa fa-check"></i><b>12</b> TY、ITの有無とオスからの被攻撃頻度</a>
 <ul>
-<li class="chapter" data-level="12.1" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html#データの加工-26"><i class="fa fa-check"></i><b>12.1</b> データの加工</a>
+<li class="chapter" data-level="12.1" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html#データの加工-27"><i class="fa fa-check"></i><b>12.1</b> データの加工</a>
 <ul>
 <li class="chapter" data-level="12.1.1" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html#各観察日の被攻撃頻度"><i class="fa fa-check"></i><b>12.1.1</b> 各観察日の被攻撃頻度</a></li>
 <li class="chapter" data-level="12.1.2" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html#tyとitの確認状況"><i class="fa fa-check"></i><b>12.1.2</b> TYとITの確認状況</a></li>
@@ -487,24 +498,24 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="13" data-path="14_female_presence_aggression.html"><a href="14_female_presence_aggression.html"><i class="fa fa-check"></i><b>13</b> 群れ本体で確認された日数割合と被攻撃頻度</a>
 <ul>
-<li class="chapter" data-level="13.1" data-path="14_female_presence_aggression.html"><a href="14_female_presence_aggression.html#データの加工-31"><i class="fa fa-check"></i><b>13.1</b> データの加工</a></li>
+<li class="chapter" data-level="13.1" data-path="14_female_presence_aggression.html"><a href="14_female_presence_aggression.html#データの加工-32"><i class="fa fa-check"></i><b>13.1</b> データの加工</a></li>
 <li class="chapter" data-level="13.2" data-path="14_female_presence_aggression.html"><a href="14_female_presence_aggression.html#モデリング1-3"><i class="fa fa-check"></i><b>13.2</b> モデリング1</a>
 <ul>
 <li class="chapter" data-level="13.2.1" data-path="14_female_presence_aggression.html"><a href="14_female_presence_aggression.html#モデルの実行"><i class="fa fa-check"></i><b>13.2.1</b> モデルの実行</a></li>
-<li class="chapter" data-level="13.2.2" data-path="14_female_presence_aggression.html"><a href="14_female_presence_aggression.html#モデルチェック-10"><i class="fa fa-check"></i><b>13.2.2</b> モデルチェック</a></li>
-<li class="chapter" data-level="13.2.3" data-path="14_female_presence_aggression.html"><a href="14_female_presence_aggression.html#結果の確認-24"><i class="fa fa-check"></i><b>13.2.3</b> 結果の確認</a></li>
+<li class="chapter" data-level="13.2.2" data-path="14_female_presence_aggression.html"><a href="14_female_presence_aggression.html#モデルチェック-12"><i class="fa fa-check"></i><b>13.2.2</b> モデルチェック</a></li>
+<li class="chapter" data-level="13.2.3" data-path="14_female_presence_aggression.html"><a href="14_female_presence_aggression.html#結果の確認-26"><i class="fa fa-check"></i><b>13.2.3</b> 結果の確認</a></li>
 <li class="chapter" data-level="13.2.4" data-path="14_female_presence_aggression.html"><a href="14_female_presence_aggression.html#結果の図示-23"><i class="fa fa-check"></i><b>13.2.4</b> 結果の図示</a></li>
 </ul></li>
 <li class="chapter" data-level="13.3" data-path="14_female_presence_aggression.html"><a href="14_female_presence_aggression.html#モデリング2-3"><i class="fa fa-check"></i><b>13.3</b> モデリング2</a></li>
 </ul></li>
 <li class="chapter" data-level="14" data-path="15_aggression_injury.html"><a href="15_aggression_injury.html"><i class="fa fa-check"></i><b>14</b> オスの攻撃と怪我の関連</a>
 <ul>
-<li class="chapter" data-level="14.1" data-path="15_aggression_injury.html"><a href="15_aggression_injury.html#データの加工-32"><i class="fa fa-check"></i><b>14.1</b> データの加工</a></li>
+<li class="chapter" data-level="14.1" data-path="15_aggression_injury.html"><a href="15_aggression_injury.html#データの加工-33"><i class="fa fa-check"></i><b>14.1</b> データの加工</a></li>
 <li class="chapter" data-level="14.2" data-path="15_aggression_injury.html"><a href="15_aggression_injury.html#分析-2"><i class="fa fa-check"></i><b>14.2</b> 分析</a>
 <ul>
-<li class="chapter" data-level="14.2.1" data-path="15_aggression_injury.html"><a href="15_aggression_injury.html#モデリング-25"><i class="fa fa-check"></i><b>14.2.1</b> モデリング</a></li>
-<li class="chapter" data-level="14.2.2" data-path="15_aggression_injury.html"><a href="15_aggression_injury.html#モデルチェック-11"><i class="fa fa-check"></i><b>14.2.2</b> モデルチェック</a></li>
-<li class="chapter" data-level="14.2.3" data-path="15_aggression_injury.html"><a href="15_aggression_injury.html#結果の確認-25"><i class="fa fa-check"></i><b>14.2.3</b> 結果の確認</a></li>
+<li class="chapter" data-level="14.2.1" data-path="15_aggression_injury.html"><a href="15_aggression_injury.html#モデリング-26"><i class="fa fa-check"></i><b>14.2.1</b> モデリング</a></li>
+<li class="chapter" data-level="14.2.2" data-path="15_aggression_injury.html"><a href="15_aggression_injury.html#モデルチェック-13"><i class="fa fa-check"></i><b>14.2.2</b> モデルチェック</a></li>
+<li class="chapter" data-level="14.2.3" data-path="15_aggression_injury.html"><a href="15_aggression_injury.html#結果の確認-27"><i class="fa fa-check"></i><b>14.2.3</b> 結果の確認</a></li>
 <li class="chapter" data-level="14.2.4" data-path="15_aggression_injury.html"><a href="15_aggression_injury.html#結果の図示-24"><i class="fa fa-check"></i><b>14.2.4</b> 結果の図示</a></li>
 </ul></li>
 </ul></li>
@@ -663,7 +674,7 @@ CSI_{i} = \frac{\left(\frac{G_{i}}{\overline{G}} +\frac{P_{i}}{\overline{P}}\rig
 <span id="cb13-10"><a href="03_CSI_female.html#cb13-10" tabindex="-1"></a>                       <span class="at">midpoint =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
 <span id="cb13-11"><a href="03_CSI_female.html#cb13-11" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
 <span id="cb13-12"><a href="03_CSI_female.html#cb13-12" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;&quot;</span>, <span class="at">y =</span> <span class="st">&quot;&quot;</span>)</span></code></pre></div>
-<p><img src="Fission-fusion-dynamics-in-B1-troop_files/figure-html/unnamed-chunk-466-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="Fission-fusion-dynamics-in-B1-troop_files/figure-html/unnamed-chunk-485-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="csiの算出2018交尾期2019交尾期" class="section level2 hasAnchor" number="2.4">
@@ -768,7 +779,7 @@ CSI_{i} = \frac{\left(\frac{G_{i}}{\overline{G}} +\frac{P_{i}}{\overline{P}}\rig
 <span id="cb24-10"><a href="03_CSI_female.html#cb24-10" tabindex="-1"></a>                       <span class="at">midpoint =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
 <span id="cb24-11"><a href="03_CSI_female.html#cb24-11" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
 <span id="cb24-12"><a href="03_CSI_female.html#cb24-12" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;&quot;</span>, <span class="at">y =</span> <span class="st">&quot;&quot;</span>)</span></code></pre></div>
-<p><img src="Fission-fusion-dynamics-in-B1-troop_files/figure-html/unnamed-chunk-477-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="Fission-fusion-dynamics-in-B1-troop_files/figure-html/unnamed-chunk-496-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="csiの算出tam生存前まで" class="section level2 hasAnchor" number="2.5">
@@ -875,7 +886,7 @@ CSI_{i} = \frac{\left(\frac{G_{i}}{\overline{G}} +\frac{P_{i}}{\overline{P}}\rig
 <span id="cb35-10"><a href="03_CSI_female.html#cb35-10" tabindex="-1"></a>                       <span class="at">midpoint =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
 <span id="cb35-11"><a href="03_CSI_female.html#cb35-11" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
 <span id="cb35-12"><a href="03_CSI_female.html#cb35-12" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;&quot;</span>, <span class="at">y =</span> <span class="st">&quot;&quot;</span>)</span></code></pre></div>
-<p><img src="Fission-fusion-dynamics-in-B1-troop_files/figure-html/unnamed-chunk-488-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="Fission-fusion-dynamics-in-B1-troop_files/figure-html/unnamed-chunk-507-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="csiの算出調査期間ごと" class="section level2 hasAnchor" number="2.6">
@@ -1018,7 +1029,7 @@ CSI_{i} = \frac{\left(\frac{G_{i}}{\overline{G}} +\frac{P_{i}}{\overline{P}}\rig
 <span id="cb43-24"><a href="03_CSI_female.html#cb43-24" tabindex="-1"></a>                                   <span class="at">size =</span> <span class="dv">7</span>))<span class="sc">+</span></span>
 <span id="cb43-25"><a href="03_CSI_female.html#cb43-25" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;&quot;</span>, <span class="at">y =</span> <span class="st">&quot;&quot;</span>)<span class="sc">+</span></span>
 <span id="cb43-26"><a href="03_CSI_female.html#cb43-26" tabindex="-1"></a>  <span class="fu">facet_rep_wrap</span>(<span class="sc">~</span>study_period, <span class="at">repeat.tick.labels =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
-<p><img src="Fission-fusion-dynamics-in-B1-troop_files/figure-html/unnamed-chunk-496-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="Fission-fusion-dynamics-in-B1-troop_files/figure-html/unnamed-chunk-515-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>各調査期間のCSIマトリックス間の相関は以下の通り。</p>
 <div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="03_CSI_female.html#cb44-1" tabindex="-1"></a><span class="co"># r &lt;- matrix(ncol = 5, nrow = 5)</span></span>
 <span id="cb44-2"><a href="03_CSI_female.html#cb44-2" tabindex="-1"></a><span class="co"># </span></span>

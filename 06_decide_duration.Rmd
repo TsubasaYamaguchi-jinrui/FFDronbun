@@ -1106,7 +1106,9 @@ fit_dcr2_all_b %>%
   theme_bw(base_size = 16)+
   theme(aspect.ratio = 1,
         strip.background = element_blank(),
-        axis.title = element_text(family = "Times New Roman"),
+        axis.title.y = element_text(family = "Times New Roman",
+                                    size = 13),
+        axis.title.x = element_text(family = "Times New Roman"),
         axis.text = element_text(family = "Times New Roman"),
         strip.text = element_text(family = "Times New Roman",
                                   hjust = 0),
@@ -1154,7 +1156,7 @@ fit_dcr3_all_b %>%
 
 p_dcr3_all_cum
 
-# ggsave("figures/p_dcr2_all_cum.png", p_dcr2_all_cum, dpi = 600,
+# ggsave("figures/p_dcr2_all_cum.png", p_dcr2_all_cum, dpi = 900,
 #         width = 220, height = 120, units = "mm")
 # 
 # ggsave("figures/p_dcr3_all_cum.png", p_dcr3_all_cum, dpi = 600,

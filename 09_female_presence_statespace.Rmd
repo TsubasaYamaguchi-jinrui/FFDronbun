@@ -2507,7 +2507,6 @@ list_female_ss_trend_bf21nm <- list(len_obs = nrow(nadrop_no_female_trend_bf21nm
 # m_female_ss_trend_bf21nm <- readRDS("model/m_female_ss_trend_bf21nm.rds")  
 ```
 
-
 ## 2021年非交尾期までのデータを用いたモデル    
 2021年交尾期までのデータを用いることで、*IT*の確認状況も考慮したモデルを作成する。  
 

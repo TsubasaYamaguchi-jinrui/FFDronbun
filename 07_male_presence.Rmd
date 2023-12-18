@@ -3,8 +3,6 @@
 
 ## データの加工  
 まず、6歳以上のメスが50%以上確認できた集団(群れ本体)が240分以上追跡できた日のデータのみを抽出する。1日に2集団を観察し、移動などがあっていずれも50%以上のメスが確認された場合は、より大きい方の集団のデータを用いる。  
-
-まず条件を満たす集団の`groupID`を計算する。  
 ```{r}
 group_all %>% 
   ## オスの列を除外
@@ -28,7 +26,9 @@ group_all %>%
   ## 最大メス数のデータを結合  
   left_join(max_female) %>% 
   ## 確認メス割合が0.5以上を抽出
-  mutate(prop_female = no_female/max_female) %>% 
+  mutate(prop_female = no_female/max_female) -> prop_females_all
+  
+prop_females_all %>% 
   filter(prop_female >= 0.5) %>% 
   ## 2021年2月28日は"nm21_23"は用いない
   filter(groupID != "nm21_23") %>% 
@@ -37,6 +37,12 @@ group_all %>%
   mutate(study_period = fct_relevel(study_period, "m18","nm19","m19","nm20", 
                                     "m20","nm21","m21","nm22"))-> no_female_over0.5
 ```
+
+そのような日のデータは以下の通り。  
+```{r}
+datatable(no_female_over0.5)
+```
+<br/>  
 
 続いて、先ほどのデータにオスの確認状況のデータを結合し、調査期間ごとに確認日数割合を算出する。    
 ```{r}
