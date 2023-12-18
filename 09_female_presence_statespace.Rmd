@@ -311,6 +311,47 @@ post_pred_female_ss_ri_long2 %>%
 ```{r}
 post_summary_female_ss2_ri %>% 
   filter(str_detect(variable, "b") | str_detect(variable, "^s_")|str_detect(variable, "phi"))
+
+pd_female_ss2_ri <- p_direction(draws_female_ss2_ri[,2:11])
+
+post_summary_female_ss2_ri %>% 
+  filter(str_detect(variable, "b")) %>% 
+  select(1, 3,5,8,9,10, 12) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",`2.5%`),",",sprintf("%.2f",`97.5%`),"]")) %>% 
+  mutate(PD = str_c(round(pd_female_ss2_ri$pd*100,2),"%")) %>% 
+  select(c(1,2,3,8,9), everything()) %>% 
+  select(-6, -7) %>% 
+  rename("Parameter" = 1,
+         "Median" = 2,
+         "MAD" = 3,
+         "ESS" = 7) %>% 
+  mutate(Parameter = str_replace_all(Parameter, c(
+    "b\\[1\\]" = "TYの在否(vs 否)",
+    "b\\[2\\]" = "ITの在否(vs 否)",
+    "b\\[3\\]" = "2018年交尾期",
+    "b\\[4\\]" = "2019年交尾期",
+    "b\\[5\\]" = "2020年交尾期",
+    "b\\[6\\]" = "2021年交尾期",
+    "b\\[7\\]" = "2019年非交尾期",
+    "b\\[8\\]" = "2020年非交尾期",
+    "b\\[9\\]" = "2021年非交尾期",
+    "b\\[10\\]" = "2022年非交尾期"))) %>% 
+  rename("Explanatory variables"="Parameter") %>% 
+  flextable() %>% 
+  colformat_double(digits=2) %>% 
+  autofit(add_w = 0.2) %>% 
+  set_table_properties(layout="autofit",width = 1) %>% 
+  font(part = "header", fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:7, fontname = "Times New Roman") %>% 
+  font(part = "body", j=1, fontname = "Yu Gothic") %>% 
+  bold(j=c(1,2,3,4,5),i = c(1,2),bold = TRUE) %>% 
+  theme_zebra() %>% 
+  align(j=2:7,part = "all",align = "center") -> table_female_ss2_ri
+
+table_female_ss2_ri
+
+# save_as_image(table_female_ss2_ri, "tables/table_female_ss2_ri.tiff",
+#               res = 600)
 ```
 
 *TY*の有無をコントロールすると、調査期間間の効果の違いはない。つまり、調査期間間のメス確認割合の違いは*TY*の有無に大きく影響されていたことが分かった。  
@@ -425,13 +466,10 @@ fit_female_ss2_ri %>%
                                     family = "Times New Roman"),
         aspect.ratio = 0.5)+
   labs(y = "Proportion of comfirmed females",
-       x = "",
-       fill = expression(paste(italic("TY"),"/", italic("IT"),
-                         " confirmed")),
-       shape = expression(paste(italic("TY"),"/", italic("IT"),
-                         " confirmed")),
-       size = expression(paste(italic("TY"),"/", italic("IT"),
-                         " confirmed"))) +
+         x = "",
+         fill = expression("Confirmation of males"),
+         shape = expression("Confirmation of males"),
+         size = expression("Confirmation of males")) +
   guides(fill = guide_legend(override.aes = list(size = 5)))+
   facet_rep_wrap(~study_period,
                  repeat.tick.labels = TRUE,
@@ -470,6 +508,7 @@ fit_female_ss2_ri %>%
                                "Both absent")) + 
   scale_x_date(breaks = seq(as_date("2018-10-01"),as_date("2022-03-29"),by = "5 days"),
                labels = date_format("%m/%d"))+
+  scale_y_continuous(breaks = seq(0.2,1,0.2))+
   theme_bw(base_size = 18)+
   theme(axis.text.x = element_text(angle = 45,
                                    hjust =0.5,
@@ -488,12 +527,9 @@ fit_female_ss2_ri %>%
         aspect.ratio = 0.5)+
     labs(y = "Proportion of comfirmed females",
          x = "",
-         fill = expression(paste(italic("TY"),"/", italic("IT"),
-                         " confirmed")),
-         shape = expression(paste(italic("TY"),"/", italic("IT"),
-                         " confirmed")),
-         size = expression(paste(italic("TY"),"/", italic("IT"),
-                         " confirmed"))) +
+         fill = expression("Confirmation of males"),
+         shape = expression("Confirmation of males"),
+         size = expression("Confirmation of males")) +
     guides(fill = guide_legend(override.aes = list(size = 5)))+
     facet_rep_wrap(~study_period,
                  repeat.tick.labels = TRUE,
@@ -1416,6 +1452,45 @@ post_pred_female_ss_bf21nm_long %>%
 ```{r}
 post_summary_female_ss_bf21nm %>% 
   filter(str_detect(variable, "b") | str_detect(variable, "^s")|str_detect(variable, "phi") )
+
+pd_female_ss_ri_bf21 <- p_direction(draws_female_ss_bf21nm[,2:9])
+
+post_summary_female_ss_bf21nm %>% 
+  filter(str_detect(variable, "b")) %>% 
+  select(1, 3,5,8,9,10, 12) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",`2.5%`),",",sprintf("%.2f",`97.5%`),"]")) %>% 
+  mutate(PD = str_c(round(pd_female_ss_ri_bf21$pd*100,2),"%")) %>% 
+  select(c(1,2,3,8,9), everything()) %>% 
+  select(-6, -7) %>% 
+  rename("Parameter" = 1,
+         "Median" = 2,
+         "MAD" = 3,
+         "ESS" = 7) %>% 
+  mutate(Parameter = str_replace_all(Parameter, c(
+    "b\\[1\\]" = "TYの在否(vs 否)",
+    "b\\[2\\]" = "ITの在否(vs 否)",
+    "b\\[3\\]" = "2018年交尾期",
+    "b\\[4\\]" = "2019年交尾期",
+    "b\\[5\\]" = "2020年交尾期",
+    "b\\[6\\]" = "2019年非交尾期",
+    "b\\[7\\]" = "2020年非交尾期",
+    "b\\[8\\]" = "2021年非交尾期"))) %>% 
+  rename("Explanatory variables"="Parameter") %>% 
+  flextable() %>% 
+  colformat_double(digits=2) %>% 
+  autofit(add_w = 0.2) %>% 
+  set_table_properties(layout="autofit",width = 1) %>% 
+  font(part = "header", fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:7, fontname = "Times New Roman") %>% 
+  font(part = "body", j=1, fontname = "Yu Gothic") %>% 
+  bold(j=c(1,2,3,4,5),i = c(1,2),bold = TRUE) %>% 
+  theme_zebra() %>% 
+  align(j=2:7,part = "all",align = "center") -> table_female_ss_bf21nm
+
+table_female_ss_bf21nm
+
+# save_as_image(table_female_ss_bf21nm, "tables/table_female_ss_bf21nm.tiff",
+#               res = 600)
 ```
 
 *TY*の有無をコントロールすると、調査期間間の効果の違いはない。つまり、調査期間間のメス確認割合の違いは*TY*の有無に大きく影響されていたことが分かった。  
@@ -2438,24 +2513,23 @@ list_female_ss_trend_bf21nm <- list(len_obs = nrow(nadrop_no_female_trend_bf21nm
 
 ## DHARMaでのチェック  
 ```{r}
-# draws_female_ss_m_p <-  draws_female_ss2_m %>% 
-#   select(starts_with("p")) %>% 
-#   select(-phi) %>% 
-#   select(any_of(obs_no_m))
+# draws_female_ss_p <-  draws_female_ss2_ri %>%
+#   select(starts_with("p")) %>%
+#   select(-phi) %>%
+#   select(any_of(obs_no2))
 # 
-# 
-# draws_female_ss_m_p2 <-  draws_female_ss_m_p %>% 
-#   mutate(iter = 1:n()) %>% 
+# draws_female_ss_m_p2 <-  draws_female_ss_p %>%
+#   mutate(iter = 1:n()) %>%
 #   pivot_longer(cols = starts_with("p"),
-#                values_to = "p") %>% 
-#   mutate(max_female = rep(nadrop_no_female_m$max_female, times = 20000)) %>% 
-#   mutate(phi = rep(draws_female_ss2_m$phi, each = nrow(nadrop_no_female_m)))
-# 
-# pred_sim <- draws_female_ss_m_p2 %>% 
-#   mutate(pred = rbetabinom(nrow(.), size = max_female, prob = p, theta = phi)) %>% 
-#   select(iter, name, pred) %>% 
+#                values_to = "p") %>%
+#   mutate(max_female = rep(nadrop_no_female2$max_female, times = 20000)) %>%
+#   mutate(phi = rep(draws_female_ss2_ri$phi, each = nrow(nadrop_no_female2)))
+#  
+# pred_sim <- draws_female_ss_m_p2 %>%
+#   mutate(pred = rbetabinom(nrow(.), size = max_female, prob = p, theta = phi)) %>%
+#   select(iter, name, pred) %>%
 #   pivot_wider(names_from = name,
-#               values_from = pred) %>% 
+#               values_from = pred) %>%
 #   select(-iter)
 # 
 # model.check_m <- createDHARMa(

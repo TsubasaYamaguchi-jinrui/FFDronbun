@@ -268,16 +268,18 @@ female_time_anal_b %>%
   theme_bw(base_size = 16)+
   labs(y = "Cumulative number of \nconfirmed individuals")+
   theme(aspect.ratio = 1,
-        axis.title.y = element_text(family = "Arial"),
+        axis.title.y = element_text(family = "Times New Roman"),
         legend.position = "none") -> p_cumsum
 
 female_time_anal_b %>% 
   ggplot(aes(x= dur, y = prop))+
   geom_step(aes(color = study_period, group = date))+
   theme_bw(base_size = 16)+
-  labs(y = "Cumulative proportion of \nconfirmed individuals")+
+  labs(y = "Cumulative proportion of \nconfirmed individuals",
+       color = "Study period")+
   theme(aspect.ratio = 1,
-        axis.title.y = element_text(family = "Arial")) -> p_prop
+        axis.title = element_text(family = "Times New Roman"),
+        axis.text = element_text(family = "Times New Roman")) -> p_prop
 
 p_cumsum_allind <- p_cumsum + p_prop
 
@@ -414,8 +416,8 @@ female_dur_all %>%
 
 $$
 \begin{aligned}
-&confirmed_{ij} \sim Bernoulli(p_{ij}) \\
- log\biggl(\frac{p_{ij}}{1-p_{ij}}\biggl) &= \beta_0 + \beta_1  t_{ij} + \beta_2  t_{ij}^2  + \beta_3  t^3_{ij} +  \beta_4  nm19_{ij} + \beta_5  m19_{ij} + \beta_6  m20_{ij} + \\ & \beta_7  nm21_{ij} + \beta_8 m21_{ij} + \beta_9 nm22_{ij} + \beta_{10} rank\_std + \\& \beta_{11} age_std_{ij} + \gamma_i + \delta_j \\
+&confirmed_{ijt} \sim Bernoulli(p_{ijt}) \\
+ log\biggl(\frac{p_{ijt}}{1-p_{ijt}}\biggl) &= \beta_0 + \beta_1  t_{ijt} + \beta_2  t_{ijt}^2  + \beta_3  t^3_{ijt} +  \beta_4  nm19_{ijt} + \beta_5  m19_{ijt} + \beta_6  m20_{ijt} + \\ & \beta_7  nm21_{ijt} + \beta_8 m21_{ijt} + \beta_9 nm22_{ijt} + \beta_{10} rank\_std_{ijt} + \\& \beta_{11} age_std_{ij} + \gamma_i + \delta_j \\
 &\gamma_i \sim Normal(0, \sigma_{\gamma}) \\
 &\delta_j \sim Normal(0, \sigma_{\delta}) \\
 \end{aligned}
@@ -596,8 +598,8 @@ estimate_contrasts(mod_dcr, contrast = "study_period") %>%
 #   theme_bw(base_size = 15)+
 #   theme(aspect.ratio = 1,
 #         strip.background = element_blank(),
-#         axis.title = element_text("Arial"),
-#         axis.text = element_text("Arial"),
+#         axis.title = element_text("Times New Roman"),
+#         axis.text = element_text("Times New Roman"),
 #         strip.text = element_text(hjust = 0))+
 #   labs(x = "Time spent", y = "Probability of being confirmed") +
 #   facet_rep_wrap(~study_period,
@@ -616,8 +618,8 @@ estimate_contrasts(mod_dcr, contrast = "study_period") %>%
 #   theme_bw(base_size = 15)+
 #   theme(aspect.ratio = 1,
 #         strip.background = element_blank(),
-#         axis.title = element_text("Arial"),
-#         axis.text = element_text("Arial"),
+#         axis.title = element_text("Times New Roman"),
+#         axis.text = element_text("Times New Roman"),
 #         strip.text = element_text(hjust = 0))+
 #   labs(x = "Time spent", y = "Probability of being confirmed") +
 #   facet_rep_wrap(~study_period,
@@ -636,8 +638,8 @@ estimate_contrasts(mod_dcr, contrast = "study_period") %>%
 #   theme_bw(base_size = 15)+
 #   theme(aspect.ratio = 1,
 #         strip.background = element_blank(),
-#         axis.title = element_text("Arial"),
-#         axis.text = element_text("Arial"),
+#         axis.title = element_text("Times New Roman"),
+#         axis.text = element_text("Times New Roman"),
 #         strip.text = element_text(hjust = 0))+
 #   labs(x = "Time spent", y = "Probability of being confirmed") +
 #   facet_rep_wrap(~study_period,
@@ -696,8 +698,8 @@ knitr::include_graphics("figures/p_dcr.png")
 #   theme_bw(base_size = 16)+
 #   theme(aspect.ratio = 1,
 #         strip.background = element_blank(),
-#         axis.title = element_text("Arial"),
-#         axis.text = element_text("Arial"),
+#         axis.title = element_text("Times New Roman"),
+#         axis.text = element_text("Times New Roman"),
 #         strip.text = element_text(hjust = 0))+
 #   facet_rep_wrap(~study_period, repeat.tick.labels = TRUE)+
 #   scale_x_continuous(breaks = seq(0,700, 200))+
@@ -722,8 +724,8 @@ knitr::include_graphics("figures/p_dcr.png")
 #   theme_bw(base_size = 16)+
 #   theme(aspect.ratio = 1,
 #         strip.background = element_blank(),
-#         axis.title = element_text("Arial"),
-#         axis.text = element_text("Arial"),
+#         axis.title = element_text("Times New Roman"),
+#         axis.text = element_text("Times New Roman"),
 #         strip.text = element_text(hjust = 0))+
 #   facet_rep_wrap(~study_period, repeat.tick.labels = TRUE)+
 #   scale_x_continuous(breaks = seq(0,700, 200))+
@@ -748,8 +750,8 @@ knitr::include_graphics("figures/p_dcr.png")
 #   theme_bw(base_size = 16)+
 #   theme(aspect.ratio = 1,
 #         strip.background = element_blank(),
-#         axis.title = element_text("Arial"),
-#         axis.text = element_text("Arial"),
+#         axis.title = element_text("Times New Roman"),
+#         axis.text = element_text("Times New Roman"),
 #         strip.text = element_text(hjust = 0))+
 #   facet_rep_wrap(~study_period, repeat.tick.labels = TRUE)+
 #   scale_x_continuous(breaks = seq(0,700, 200))+
@@ -783,9 +785,11 @@ female_time_anal_all %>%
   ggplot(aes(x= dur, y = N))+
   geom_step(aes(color = study_period, group = date))+
   theme_bw(base_size = 16)+
-  labs(y = "Cumulative number of confirmed individuals")+
+  labs(y = "Cumulative number of \nconfirmed individuals",
+       x = "Time elapsed since the \ntroop was found")+
   theme(aspect.ratio = 1,
-        axis.title.y = element_text(family = "Arial"),
+        axis.title = element_text(family = "Times New Roman"),
+        axis.text = element_text(family = "Times New Roman"),
         legend.position = "none") -> p_cumsum_all
 
 female_time_anal_all %>% 
@@ -793,11 +797,19 @@ female_time_anal_all %>%
   ggplot(aes(x= dur, y = prop))+
   geom_step(aes(color = study_period, group = date))+
   theme_bw(base_size = 16)+
-  labs(y = "Cumulative proportion of confirmed individuals")+
+  labs(y = "Cumulative proportion of \nconfirmed individuals",
+       color = "Study period",
+       x = "Time elapsed since the \ntroop was found")+
   theme(aspect.ratio = 1,
-        axis.title.y = element_text(family = "Arial")) -> p_prop_all
+        axis.title = element_text(family = "Times New Roman"),
+        axis.text = element_text(family = "Times New Roman")) -> p_prop_all
 
-p_cumsum_all + p_prop_all
+p_cumsum_all_b <- p_cumsum_all + p_prop_all
+
+p_cumsum_all_b
+# 
+# ggsave("figures/p_cumsum_all_b.png", p_cumsum_all_b,
+#        width = 240, height = 120, dpi = 600, units = "mm")
 ```
 <br/>
 
@@ -1005,10 +1017,13 @@ fit_dcr2_all %>%
   theme_bw(base_size = 15)+
   theme(aspect.ratio = 1,
         strip.background = element_blank(),
-        axis.title = element_text("Arial"),
-        axis.text = element_text("Arial"),
+        axis.title = element_text("Times New Roman"),
+        axis.text = element_text("Times New Roman"),
         strip.text = element_text(hjust = 0))+
-  labs(x = "Time spent", y = "Probability of being confirmed") +
+  labs(x = "Time elapsed since the \ntroop was found", 
+       y = "Probability of being confirmed",
+       color = "Scaled rank", linetype = "Scaled rank",
+       fill = "Scaled rank") +
   facet_rep_wrap(~study_period,
                  repeat.tick.labels = TRUE)+
   labs(title = "二次の項まで")  -> p_dcr2_all
@@ -1039,8 +1054,8 @@ fit_dcr3_all %>%
   theme_bw(base_size = 15)+
   theme(aspect.ratio = 1,
         strip.background = element_blank(),
-        axis.title = element_text("Arial"),
-        axis.text = element_text("Arial"),
+        axis.title = element_text("Times New Roman"),
+        axis.text = element_text("Times New Roman"),
         strip.text = element_text(hjust = 0))+
   labs(x = "Time spent", y = "Probability of being confirmed") +
   facet_rep_wrap(~study_period,
@@ -1050,14 +1065,10 @@ fit_dcr3_all %>%
 p_dcr3_all
 
 # ggsave("figures/p_dcr2_all.png",
-#        p_dcr2_all, width = 260, height = 120, units = "mm",
+#        p_dcr2_all, width = 220, height = 120, units = "mm",
 #        dpi = 600)
 # 
 # ggsave("figures/p_dcr3_all.png",
-#        p_dcr3_all, width = 260, height = 120, units = "mm",
-#        dpi = 600)
-
-# ggsave("figures/p_dcr3_all.png", 
 #        p_dcr3_all, width = 220, height = 120, units = "mm",
 #        dpi = 600)
 ```
@@ -1095,15 +1106,19 @@ fit_dcr2_all_b %>%
   theme_bw(base_size = 16)+
   theme(aspect.ratio = 1,
         strip.background = element_blank(),
-        axis.title = element_text("Arial"),
-        axis.text = element_text("Arial"),
-        strip.text = element_text(hjust = 0))+
+        axis.title = element_text(family = "Times New Roman"),
+        axis.text = element_text(family = "Times New Roman"),
+        strip.text = element_text(family = "Times New Roman",
+                                  hjust = 0),
+        legend.title = element_text(family = "Times New Roman"),
+        legend.text = element_text(family = "Times New Roman"))+
   facet_rep_wrap(~study_period, repeat.tick.labels = TRUE)+
   scale_x_continuous(breaks = seq(0,700, 200))+
   scale_y_continuous(breaks = seq(0,1,0.2))+
-  labs(x = "Time spent", y = "Cumulative probability of being confirmed",
-       color = "scaled rank", fill = "scaled rank",
-       linetype = "scaled rank")+
+  labs(x = "Time elapsed since the troop was found", 
+       y = "Cumulative probability of being confirmed",
+       color = "Scaled rank", fill = "Scaled rank",
+       linetype = "Scaled rank")+
   labs(title = "二次の項まで") +
   guides(linetype = guide_legend(override.aes = list(linewidth = 0.6))) -> p_dcr2_all_cum
 
@@ -1123,25 +1138,27 @@ fit_dcr3_all_b %>%
   theme_bw(base_size = 16)+
   theme(aspect.ratio = 1,
         strip.background = element_blank(),
-        axis.title = element_text("Arial"),
-        axis.text = element_text("Arial"),
-        strip.text = element_text(hjust = 0))+
+        axis.title = element_text(family = "Times New Roman"),
+        axis.text = element_text(family = "Times New Roman"),
+        strip.text = element_text(family = "Times New Roman",
+                                  hjust = 0))+
   facet_rep_wrap(~study_period, repeat.tick.labels = TRUE)+
   scale_x_continuous(breaks = seq(0,700, 200))+
   scale_y_continuous(breaks = seq(0,1,0.2))+
-  labs(x = "Time spent", y = "Cumulative probability of being confirmed",
-       color = "scaled rank", fill = "scaled rank",
-       linetype = "scaled rank") +
+  labs(x = "Time elapsed since the troop was found", 
+       y = "Cumulative probability of being confirmed",
+       color = "Scaled rank", fill = "Scaled rank",
+       linetype = "Scaled rank") +
   labs(title = "三次の項まで") +
   guides(linetype = guide_legend(override.aes = list(linewidth = 0.6))) -> p_dcr3_all_cum
 
 p_dcr3_all_cum
 
 # ggsave("figures/p_dcr2_all_cum.png", p_dcr2_all_cum, dpi = 600,
-#         width = 260, height = 120, units = "mm")
+#         width = 220, height = 120, units = "mm")
 # 
 # ggsave("figures/p_dcr3_all_cum.png", p_dcr3_all_cum, dpi = 600,
-#          width = 260, height = 120, units = "mm")
+#          width = 220, height = 120, units = "mm")
 ```
 
 
@@ -1347,8 +1364,8 @@ fit_dcr2_all_pre %>%
   theme_bw(base_size = 15)+
   theme(aspect.ratio = 1,
         strip.background = element_blank(),
-        axis.title = element_text("Arial"),
-        axis.text = element_text("Arial"),
+        axis.title = element_text("Times New Roman"),
+        axis.text = element_text("Times New Roman"),
         strip.text = element_text(hjust = 0))+
   labs(x = "Time spent", y = "Probability of being confirmed") +
   facet_rep_wrap(~study_period,
@@ -1381,8 +1398,8 @@ fit_dcr3_all_pre %>%
   theme_bw(base_size = 15)+
   theme(aspect.ratio = 1,
         strip.background = element_blank(),
-        axis.title = element_text("Arial"),
-        axis.text = element_text("Arial"),
+        axis.title = element_text("Times New Roman"),
+        axis.text = element_text("Times New Roman"),
         strip.text = element_text(hjust = 0))+
   labs(x = "Time spent", y = "Probability of being confirmed") +
   facet_rep_wrap(~study_period,
@@ -1433,15 +1450,19 @@ fit_dcr2_all_pre_b %>%
   theme_bw(base_size = 16)+
   theme(aspect.ratio = 1,
         strip.background = element_blank(),
-        axis.title = element_text("Arial"),
-        axis.text = element_text("Arial"),
-        strip.text = element_text(hjust = 0))+
+        axis.title = element_text(family = "Times New Roman"),
+        axis.text = element_text(family = "Times New Roman"),
+        strip.text = element_text(family = "Times New Roman",
+                                  hjust = 0),
+        legend.title = element_text(family = "Times New Roman"),
+        legend.text = element_text(family = "Times New Roman"))+
   facet_rep_wrap(~study_period, repeat.tick.labels = TRUE)+
   scale_x_continuous(breaks = seq(0,700, 200))+
   scale_y_continuous(breaks = seq(0,1,0.2))+
-  labs(x = "Time spent", y = "Cumulative probability of being confirmed",
-       color = "scaled rank", fill = "scaled rank",
-       linetype = "scaled rank")+
+  labs(x = "Time elapsed since the troop was found", 
+       y = "Cumulative probability of being confirmed",
+       color = "Scaled rank", fill = "Scaled rank",
+       linetype = "Scaled rank")+
   labs(title = "二次の項まで") +
   guides(linetype = guide_legend(override.aes = list(linewidth = 0.6))) -> p_dcr2_all_pre_cum
 
@@ -1461,25 +1482,27 @@ fit_dcr3_all_pre_b %>%
   theme_bw(base_size = 16)+
   theme(aspect.ratio = 1,
         strip.background = element_blank(),
-        axis.title = element_text("Arial"),
-        axis.text = element_text("Arial"),
-        strip.text = element_text(hjust = 0))+
+        axis.title = element_text(family = "Times New Roman"),
+        axis.text = element_text(family = "Times New Roman"),
+        strip.text = element_text(family = "Times New Roman",
+                                  hjust = 0))+
   facet_rep_wrap(~study_period, repeat.tick.labels = TRUE)+
   scale_x_continuous(breaks = seq(0,700, 200))+
   scale_y_continuous(breaks = seq(0,1,0.2))+
-  labs(x = "Time spent", y = "Cumulative probability of being confirmed",
-       color = "scaled rank", fill = "scaled rank",
-       linetype = "scaled rank") +
+  labs(x = "Time elapsed since the troop was found", 
+       y = "Cumulative probability of being confirmed",
+       color = "Scaled rank", fill = "Scaled rank",
+       linetype = "Scaled rank")+
   labs(title = "三次の項まで") +
   guides(linetype = guide_legend(override.aes = list(linewidth = 0.6))) -> p_dcr3_all_pre_cum
 
 p_dcr3_all_pre_cum
 
 
-# ggsave("figures/p_dcr3_all_pre_cum.png", p_dcr3_all_pre_cum, dpi = 600,
-#         width = 220, height = 360, units = "mm")
+# ggsave("figures/p_dcr2_all_pre_cum.png", p_dcr2_all_pre_cum, dpi = 600,
+#         width = 220, height = 120, units = "mm")
 # 
 # ggsave("figures/p_dcr3_all_pre_cum.png", p_dcr3_all_pre_cum, dpi = 600,
-#          width = 220, height = 150, units = "mm")
+#          width = 220, height = 120, units = "mm")
 ```
 

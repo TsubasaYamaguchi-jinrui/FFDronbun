@@ -98,6 +98,10 @@ no_female_over0.5 %>%
   left_join(prop_TYIT,
             by = c("study_period","femaleID")) %>% 
   mutate(prop_focal = sum_focal/dur_sum) %>% 
+  left_join(CSI_TY %>% select(subject, CSI_TY), 
+            by = c("femaleID" = "subject")) %>% 
+  left_join(CSI_IT %>% select(subject, CSI_IT), 
+            by = c("femaleID" = "subject")) %>% 
   group_by(study_period) %>% 
   mutate(rank_scaled = rank/max(rank)) %>% 
   ungroup() %>% 
@@ -108,7 +112,9 @@ no_female_over0.5 %>%
          focal_std = standardize(prop_focal),
          prop_TY_std = standardize(prop_TY),
          prop_IT_std = standardize(prop_IT),
-         id = 1:n()) -> female_presence_agg
+         id = 1:n(),
+         CSI_TY_std = standardize(CSI_TY),
+         CSI_IT_std = standardize(CSI_IT)) -> female_presence_agg
 ```
 
 データは以下の通り。  
@@ -288,47 +294,75 @@ p_presence_agg
 ```
 
 ## モデリング2   
-追加の分析として、
+追加の分析として、そもそも群れで確認した日数割合が低いメスは、TYやITがいなかった日に群れを離れる傾向が強かったのかを検証する。
 
+実データをプロットしてみると、明確にそのような傾向はありそう。  
 ```{r}
 female_presence_agg %>% 
-  ggplot(aes(x = prop_presence, y = prop_TY))+
+  ggplot(aes(x = prop_presence, y = prop_TY_std))+
   geom_point()+
-  facet_rep_wrap(~study_period)
-```
+  theme_bw(base_size = 15)+
+  theme(aspect.ratio = 1)+
+  facet_rep_wrap(~study_period,
+                 repeat.tick.labels = TRUE)
 
-
-```{r, eval = FALSE}
-m_presence_TY <- brm(data = female_presence_agg,
-                      prop_TY_std ~ prop_std + study_period + age_std + rank_std +
-                        rs_std + (1|femaleID) + (1|id),
-                      family = "student",
-                      prior = c(prior(student_t(4,0,10),class = Intercept),
-                      prior(student_t(4,0,10), class = b),
-                      prior(student_t(4,0,5), class = sd)),
-                      iter = 11000, warmup = 1000, seed = 123,
-                      control=list(adapt_delta = 0.999, max_treedepth = 15),
-                      backend = "cmdstanr",
-                      file = "model/m_presence_TY")
-```
-
-```{r, eval = FALSE}
-female_presence_agg_bf21 <- female_presence_agg %>% 
+female_presence_agg %>% 
   filter(study_period != "m21") %>% 
-  mutate(rs_std = standardize(prop_rs),
-         prop_std = standardize(prop_presence),
-         age_std = standardize(age),
-         rank_std = standardize(rank_scaled))
-
-m_presence_IT <- brm(data = female_presence_agg_bf21,
-                      sum_IT|trials(N_IT) ~ prop_std*study_period + age_std + rank_std +
-                        rs_std + (1|femaleID),
-                      family = "beta_binomial",
-                      prior = c(prior(student_t(4,0,10),class = Intercept),
-                      prior(student_t(4,0,10), class = b),
-                      prior(student_t(4,0,5), class = sd)),
-                      iter = 11000, warmup = 1000, seed = 13,
-                      control=list(adapt_delta = 0.999, max_treedepth = 15),
-                      backend = "cmdstanr",
-                      file = "model/m_presence_IT")
+  ggplot(aes(x = prop_presence, y = prop_IT))+
+  geom_point()+
+  theme_bw(base_size = 15)+
+  theme(aspect.ratio = 1)+
+  facet_rep_wrap(~study_period,
+                 repeat.tick.labels = TRUE)
 ```
+
+それでは、モデリングを行う。モデル式は以下の通り。  
+$$
+\begin{aligned}
+&prop\_TY_{ij} \sim Beta(p_{ij}, \phi_{ij})\\
+&logit(p_{ij}) = \beta_0 + \beta_1prop\_std_{ij} + \beta_2age_std_{ij}
+& \epsilon_{t} \sim Normal(0,\sigma^2)\\
+& \beta_{1,2,3,4, 5,6,7,8,9} \sim Student\_t(0,4,10)\\
+&\sigma^2 \sim Student\_t(0,4,5)\\
+\end{aligned}
+$$
+
+```{r, eval = FALSE}
+# m_presence_TY <- brm(data = female_presence_agg,
+#                       bf(sum_TY|trials(N_TY) ~ prop_std + study_period  +
+#                            age_std + rank_std + rs_std  + (1|femaleID) ,
+#                          phi ~ prop_std + study_period + rank_std + age_std + rs_std),
+#                       family = "beta_binomial",
+#                       prior = c(prior(student_t(4,0,10),class = Intercept),
+#                       prior(student_t(4,0,10),class = Intercept, dpar =  phi),
+#                       prior(student_t(4,0,5), class = b),
+#                       prior(student_t(4,0,5), class = b, dpar = phi)),
+#                       prior(student_t(4,0,2.5), class = sd),
+#                       iter = 6000, warmup = 1000, seed = 123,
+#                       control=list(adapt_delta = 0.9999, max_treedepth = 20),
+#                       backend = "cmdstanr",
+#                       file = "model/m_presence_TY")
+```
+
+```{r, eval = FALSE}
+# female_presence_agg_bf21 <- female_presence_agg %>% 
+#   filter(study_period != "m21") %>% 
+#   mutate(rs_std = standardize(prop_rs),
+#          prop_std = standardize(prop_presence),
+#          age_std = standardize(age),
+#          rank_std = standardize(rank_scaled))
+# 
+# m_presence_IT <- brm(data = female_presence_agg_bf21,
+#                       sum_IT|trials(N_IT) ~ prop_std*study_period + age_std + rank_std +
+#                         rs_std + (1|femaleID),
+#                       family = "beta_binomial",
+#                       prior = c(prior(student_t(4,0,10),class = Intercept),
+#                       prior(student_t(4,0,10), class = b),
+#                       prior(student_t(4,0,5), class = sd)),
+#                       iter = 11000, warmup = 1000, seed = 123,
+#                       control=list(adapt_delta = 0.9999, max_treedepth = 15),
+#                       backend = "cmdstanr",
+#                       file = "model/m_presence_IT")
+```
+
+

@@ -434,7 +434,7 @@ model_parameters(m_female_in_m,
   font(part = "header", fontname = "Times New Roman") %>% 
   font(part = "body", j=2:7, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
-  bold(j=c(1,2,3,4,5),i = c(4,5, 10, 11, 13),bold = TRUE) %>% 
+  bold(j=c(1,2,3,4,5),i = c(4,5, 6, 10, 11, 13),bold = TRUE) %>% 
   theme_zebra() %>% 
   align(j=2:7,part = "all",align = "center") -> table_female_in_m
 
@@ -1092,11 +1092,11 @@ p_female_in_m_TYstate_TYcsi
 
 # ggsave("figures/p_female_in_m_TYstate_TYcsi.png",
 #        p_female_in_m_TYstate_TYcsi, dpi = 900, units = "mm",
-#          width = 100, height = 100)
+#          width = 280, height = 100)
 # 
 # ggsave("figures/p_female_in_m_TYstate_TYcsi_noarrow.png",
 #        p_female_in_m_TYstate_TYcsi, dpi = 900, units = "mm",
-#          width = 100, height = 100)
+#          width = 280, height = 100)
 ```
 <br/>  
 
@@ -1522,10 +1522,10 @@ p_female_in_m_TYcat4_TYcsi
 
 # ggsave("figures/p_female_in_m_TYcat4_TYcsi.png",
 #        p_female_in_m_TYcat4_TYcsi, dpi = 900, units = "mm",
-#          width = 100, height = 100)
+#          width = 280, height = 200)
 # 
 # ggsave("figures/p_female_in_m_TYcat4_TYcsi_noarrow.png",
 #        p_female_in_m_TYcat4_TYcsi, dpi = 900, units = "mm",
-#          width = 100, height = 100)
+#          width = 280, height = 200)
 ```
 <br/>  
