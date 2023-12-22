@@ -1,0 +1,15 @@
+---
+title: "Untitled"
+author: "Yamaguchi"
+date: "2023-12-19"
+output:
+  word_document: default
+  html_document: default
+---
+
+$$
+\begin{aligned}
+&Binomial(n_i, p_i)\\
+&logit(p_i) = log \Bigl(\frac{p_i}{1-p_i} \Bigl)= \beta_0 + \beta_1x_{1i} + \beta_2x_{2i} + \cdots\\ 
+\end{aligned}
+$$

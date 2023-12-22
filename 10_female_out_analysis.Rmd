@@ -286,7 +286,21 @@ female_out_summary <- female_out_final %>%
   replace_na(list(rs_pre = 0)) %>% 
   ungroup() %>% 
   mutate(rate_out = sum_out*10/n)
+```
 
+```{r}
+female_out_summary %>% 
+  mutate(rs_pre2 = ifelse(season == "nonmating", "非交尾期",
+                          ifelse(season == "mating" & rs_pre == 1, "発情", "非発情"))) %>% 
+  mutate(rs_pre2 = as.factor(rs_pre2)) %>% 
+  group_by(rs_pre2) %>% 
+  summarise(mean = mean(rate_out),
+            min = min(rate_out),
+            max = max(rate_out))
+```
+
+図示すると以下のようになる。  
+```{r}
 female_out_summary %>% 
   mutate(rs_pre2 = ifelse(season == "nonmating", "非交尾期",
                           ifelse(season == "mating" & rs_pre == 1, "発情", "非発情"))) %>% 
@@ -303,7 +317,7 @@ female_out_summary %>%
                 color = "black",
                 size = 2)+
   theme_bw(base_size = 15)+
-  scale_fill_manual(values = c("orange2", "green4"))+
+  scale_fill_manual(values = c("grey28", "white"))+
   labs(x = "", y = "Frequency of leaving troop (times/10 days)") +
   theme(aspect.ratio = 1,
         axis.title.y = element_text(family = "Times New Roman",
@@ -321,7 +335,7 @@ p_female_out_rate
 #        units = "mm")
 ```
 
-### オスが群れを離れる    
+### オスが群れを離れる頻度      
 オスはどのくらい一緒に群れを離れるかを算出する。  
 
 2020年までの間、TYがITと同じ日に離れたのは3回で、全体の23.1%だった。  

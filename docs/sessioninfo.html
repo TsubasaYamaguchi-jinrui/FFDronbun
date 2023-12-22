@@ -23,7 +23,7 @@
 <meta name="author" content="Tsubasa Yamaguchi" />
 
 
-<meta name="date" content="2023-12-19" />
+<meta name="date" content="2023-12-22" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -401,7 +401,7 @@ div.csl-indent {
 <li class="chapter" data-level="9.2" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#基本的な情報"><i class="fa fa-check"></i><b>9.2</b> 基本的な情報</a>
 <ul>
 <li class="chapter" data-level="9.2.1" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#メスが群れを離れる頻度"><i class="fa fa-check"></i><b>9.2.1</b> メスが群れを離れる頻度</a></li>
-<li class="chapter" data-level="9.2.2" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#オスが群れを離れる"><i class="fa fa-check"></i><b>9.2.2</b> オスが群れを離れる</a></li>
+<li class="chapter" data-level="9.2.2" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#オスが群れを離れる頻度"><i class="fa fa-check"></i><b>9.2.2</b> オスが群れを離れる頻度</a></li>
 </ul></li>
 <li class="chapter" data-level="9.3" data-path="10_female_out_analysis.html"><a href="10_female_out_analysis.html#分析モデリング"><i class="fa fa-check"></i><b>9.3</b> 分析(モデリング)</a>
 <ul>
@@ -470,6 +470,7 @@ div.csl-indent {
 <li class="chapter" data-level="11.3.1.3" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#モデリング2-2"><i class="fa fa-check"></i><b>11.3.1.3</b> モデリング2</a></li>
 <li class="chapter" data-level="11.3.1.4" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#モデリング3"><i class="fa fa-check"></i><b>11.3.1.4</b> モデリング3</a></li>
 </ul></li>
+<li class="chapter" data-level="11.3.2" data-path="12_female_in_analysis.html"><a href="12_female_in_analysis.html#非交尾期-3"><i class="fa fa-check"></i><b>11.3.2</b> 非交尾期</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="12" data-path="13_male_presence_aggression.html"><a href="13_male_presence_aggression.html"><i class="fa fa-check"></i><b>12</b> TY、ITの有無とオスからの被攻撃頻度</a>
@@ -539,7 +540,7 @@ div.csl-indent {
             <section class="normal" id="section-">
 <div id="実行環境" class="section level1 unnumbered hasAnchor">
 <h1>実行環境<a href="sessioninfo.html#実行環境" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<div class="sourceCode" id="cb679"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb679-1"><a href="sessioninfo.html#cb679-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb680"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb680-1"><a href="sessioninfo.html#cb680-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
 <pre><code>## R version 4.2.2 (2022-10-31 ucrt)
 ## Platform: x86_64-w64-mingw32/x64 (64-bit)
 ## Running under: Windows 10 x64 (build 22621)
@@ -593,56 +594,53 @@ div.csl-indent {
 ## loaded via a namespace (and not attached):
 ##   [1] estimability_1.4.1      coda_0.19-4             ragg_1.2.5             
 ##   [4] bit64_4.0.5             dygraphs_1.1.1.6        multcomp_1.4-25        
-##   [7] data.table_1.14.6       inline_0.3.19           doParallel_1.0.17      
-##  [10] generics_0.1.3          callr_3.7.3             TH.data_1.1-2          
-##  [13] bit_4.0.5               tzdb_0.3.0              webshot_0.5.5          
-##  [16] xml2_1.3.5              httpuv_1.6.7            xfun_0.39              
-##  [19] hms_1.1.3               jquerylib_0.1.4         evaluate_0.23          
-##  [22] promises_1.2.0.1        fansi_1.0.3             htmlwidgets_1.6.2      
-##  [25] reshape_0.8.9           tensorA_0.36.2          stats4_4.2.2           
-##  [28] ellipsis_0.3.2          crosstalk_1.2.0         backports_1.4.1        
-##  [31] fontLiberation_0.1.0    V8_4.2.2                bookdown_0.35          
-##  [34] markdown_1.11           RcppParallel_5.1.6      fontBitstreamVera_0.1.1
-##  [37] vctrs_0.6.3             abind_1.4-5             cachem_1.0.8           
-##  [40] withr_2.5.2             vroom_1.6.0             checkmate_2.1.0        
-##  [43] emmeans_1.8.8           archive_1.1.5           xts_0.12.2             
-##  [46] prettyunits_1.2.0       svglite_2.1.1           cluster_2.1.4          
-##  [49] lazyeval_0.2.2          crayon_1.5.2            crul_1.4.0             
-##  [52] labeling_0.4.3          pkgconfig_2.0.3         tweenr_2.0.2           
-##  [55] nlme_3.1-160            vipor_0.4.5             rlang_1.1.1            
-##  [58] lifecycle_1.0.4         miniUI_0.1.1.1          colourpicker_1.3.0     
-##  [61] sandwich_3.0-2          fontquiver_0.2.1        httpcode_0.3.0         
-##  [64] extrafontdb_1.0         Kendall_2.2.1           cellranger_1.1.0       
-##  [67] distributional_0.3.2    polyclip_1.10-4         lmtest_0.9-40          
-##  [70] matrixStats_0.63.0      Matrix_1.6-1            loo_2.6.0              
-##  [73] boot_1.3-28             zoo_1.8-11              base64enc_0.1-3        
-##  [76] beeswarm_0.4.0          processx_3.8.0          gap.datasets_0.0.6     
-##  [79] splines2_0.5.1          shape_1.4.6             shinystan_2.6.0        
-##  [82] magrittr_2.0.3          plyr_1.8.8              threejs_0.3.3          
-##  [85] compiler_4.2.2          rstantools_2.3.1.1      RColorBrewer_1.1-3     
-##  [88] lme4_1.1-34             cli_3.6.1               ps_1.7.2               
-##  [91] Brobdingnag_1.2-9       MASS_7.3-58.1           mgcv_1.8-41            
-##  [94] tidyselect_1.2.0        stringi_1.7.12          textshaping_0.3.6      
-##  [97] highr_0.10              yaml_2.3.7              askpass_1.2.0          
-## [100] bridgesampling_1.1-2    grid_4.2.2              sass_0.4.7             
-## [103] tools_4.2.2             timechange_0.1.1        rstudioapi_0.15.0      
-## [106] uuid_1.1-0              foreach_1.5.2           gridExtra_2.3          
-## [109] posterior_1.5.0         farver_2.1.1            digest_0.6.31          
-## [112] shiny_1.7.5.1           qgam_1.3.4              gfonts_0.2.0           
-## [115] later_1.3.0             httr_1.4.7              gdtools_0.3.3          
-## [118] QuickJSR_1.0.5          Rdpack_2.5              colorspace_2.0-3       
-## [121] rvest_1.0.3             splines_4.2.2           graphlayouts_1.0.0     
-## [124] shinythemes_1.2.0       xtable_1.8-4            jsonlite_1.8.4         
-## [127] nloptr_2.0.3            gap_1.5-3               R6_2.5.1               
-## [130] pillar_1.9.0            htmltools_0.5.4         mime_0.12              
-## [133] glue_1.6.2              fastmap_1.1.1           minqa_1.2.5            
-## [136] codetools_0.2-18        pkgbuild_1.4.2          mvtnorm_1.2-3          
-## [139] utf8_1.2.2              bslib_0.5.1             curl_4.3.3             
-## [142] gtools_3.9.4            officer_0.6.2           zip_2.2.2              
-## [145] shinyjs_2.1.0           openssl_2.0.5           Rttf2pt1_1.3.12        
-## [148] survival_3.5-5          rmarkdown_2.25          munsell_0.5.0          
-## [151] iterators_1.0.14        reshape2_1.4.4          gtable_0.3.4           
-## [154] rbibutils_2.2.15</code></pre>
+##   [7] data.table_1.14.6       inline_0.3.19           generics_0.1.3         
+##  [10] callr_3.7.3             TH.data_1.1-2           bit_4.0.5              
+##  [13] tzdb_0.3.0              webshot_0.5.5           xml2_1.3.5             
+##  [16] httpuv_1.6.7            xfun_0.39               hms_1.1.3              
+##  [19] jquerylib_0.1.4         evaluate_0.23           promises_1.2.0.1       
+##  [22] fansi_1.0.3             htmlwidgets_1.6.2       reshape_0.8.9          
+##  [25] tensorA_0.36.2          stats4_4.2.2            ellipsis_0.3.2         
+##  [28] crosstalk_1.2.0         backports_1.4.1         fontLiberation_0.1.0   
+##  [31] V8_4.2.2                bookdown_0.35           markdown_1.11          
+##  [34] RcppParallel_5.1.6      fontBitstreamVera_0.1.1 vctrs_0.6.3            
+##  [37] abind_1.4-5             cachem_1.0.8            withr_2.5.2            
+##  [40] vroom_1.6.0             checkmate_2.1.0         emmeans_1.8.8          
+##  [43] archive_1.1.5           xts_0.12.2              prettyunits_1.2.0      
+##  [46] svglite_2.1.1           cluster_2.1.4           lazyeval_0.2.2         
+##  [49] crayon_1.5.2            crul_1.4.0              labeling_0.4.3         
+##  [52] pkgconfig_2.0.3         tweenr_2.0.2            nlme_3.1-160           
+##  [55] vipor_0.4.5             rlang_1.1.1             lifecycle_1.0.4        
+##  [58] miniUI_0.1.1.1          colourpicker_1.3.0      sandwich_3.0-2         
+##  [61] fontquiver_0.2.1        httpcode_0.3.0          extrafontdb_1.0        
+##  [64] Kendall_2.2.1           cellranger_1.1.0        distributional_0.3.2   
+##  [67] polyclip_1.10-4         matrixStats_0.63.0      Matrix_1.6-1           
+##  [70] loo_2.6.0               boot_1.3-28             zoo_1.8-11             
+##  [73] base64enc_0.1-3         beeswarm_0.4.0          processx_3.8.0         
+##  [76] splines2_0.5.1          shape_1.4.6             shinystan_2.6.0        
+##  [79] magrittr_2.0.3          plyr_1.8.8              threejs_0.3.3          
+##  [82] compiler_4.2.2          rstantools_2.3.1.1      RColorBrewer_1.1-3     
+##  [85] lme4_1.1-34             cli_3.6.1               ps_1.7.2               
+##  [88] Brobdingnag_1.2-9       MASS_7.3-58.1           mgcv_1.8-41            
+##  [91] tidyselect_1.2.0        stringi_1.7.12          textshaping_0.3.6      
+##  [94] highr_0.10              yaml_2.3.7              askpass_1.2.0          
+##  [97] bridgesampling_1.1-2    grid_4.2.2              sass_0.4.7             
+## [100] tools_4.2.2             timechange_0.1.1        rstudioapi_0.15.0      
+## [103] uuid_1.1-0              gridExtra_2.3           posterior_1.5.0        
+## [106] farver_2.1.1            digest_0.6.31           shiny_1.7.5.1          
+## [109] gfonts_0.2.0            later_1.3.0             httr_1.4.7             
+## [112] gdtools_0.3.3           QuickJSR_1.0.5          colorspace_2.0-3       
+## [115] rvest_1.0.3             splines_4.2.2           graphlayouts_1.0.0     
+## [118] shinythemes_1.2.0       xtable_1.8-4            jsonlite_1.8.4         
+## [121] nloptr_2.0.3            R6_2.5.1                pillar_1.9.0           
+## [124] htmltools_0.5.4         mime_0.12               glue_1.6.2             
+## [127] fastmap_1.1.1           minqa_1.2.5             codetools_0.2-18       
+## [130] pkgbuild_1.4.2          mvtnorm_1.2-3           utf8_1.2.2             
+## [133] bslib_0.5.1             curl_4.3.3              gtools_3.9.4           
+## [136] officer_0.6.2           zip_2.2.2               shinyjs_2.1.0          
+## [139] openssl_2.0.5           Rttf2pt1_1.3.12         survival_3.5-5         
+## [142] rmarkdown_2.25          munsell_0.5.0           reshape2_1.4.4         
+## [145] gtable_0.3.4</code></pre>
 <p><strong>References</strong></p>
 
 <div id="refs" class="references csl-bib-body hanging-indent" line-spacing="2">

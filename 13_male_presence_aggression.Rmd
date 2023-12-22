@@ -108,10 +108,12 @@ no_male <- no_female_over0.5 %>%
   filter(study_period != "m18" & !str_detect(study_period, "nm")) %>% 
   select(groupID, prop_female, dur) %>% 
   left_join(group_all %>% 
-              select(-c(Kur:Kun,Mif:Har,Cur:Yun))) %>% 
+              select(-c(Kur:Kun,Mif:Trt,Har:Yun))) %>% 
   select(-(start:fin)) %>% 
   rowwise() %>% 
-  mutate(no_tm = sum(TY,IT,LK,KR,KM,TG, na.rm = TRUE)) %>% 
+  mutate(no_tm = ifelse(study_period != "m19",
+                        sum(TY,IT,LK,KR,KM,TG, na.rm = TRUE),
+                        sum(TY,IT,LK,KR, na.rm = TRUE))) %>% 
   ungroup() %>% 
   left_join(no_ntm, by = "date") %>% 
   mutate(no_male = no_ntm + no_tm) %>% 

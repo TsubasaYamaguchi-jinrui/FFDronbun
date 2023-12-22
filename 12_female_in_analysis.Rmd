@@ -8,7 +8,7 @@ knitr::include_graphics("image/female_in_analysis.png")
 
 ## データの加工  
 ### オスの出入り情報  
-まず、オスの出入り情報について変数を作成する。第\@ref(c10)章と同様に、連続した2日間のオスの確認状況をもとに  
+まず、オスの出入り情報について変数を作成する。第\@ref(c10)章と同様に、連続した2日間のオスの確認状況をもとにオスの動向について変数を作成する。    
 ```{r}
 TYIT_presence_pre %>% 
   mutate(TY_state4 = ifelse(TY_pre == 1 & TY == 1, "TY_stay",
@@ -164,7 +164,11 @@ datatable(female_in_final %>% mutate(across(where(is.numeric),~round(.,2))),
 ## 基本データの確認  
 *TY*と*IT*はどのくらい同じ日に戻っていたかを確認する。  
 ```{r}
-
+female_in_final %>% 
+  mutate(season = ifelse(str_detect(study_period, "nm"), "nonmating", "mating")) %>% 
+  group_by(femaleID, season) %>% 
+  summarise(n = n(),
+            sum_in = sum(female_in))
 ```
 
 
@@ -191,7 +195,7 @@ female_in_m <- female_in_final %>%
   mutate(N = 1:n())
 ```
 
-*TY*と*IT*の動向の組み合わせごとのN数は以下の通り。  
+*TY*と*IT*の動向の組み合わせごとのN数は以下の通り。同じ日に戻ることはなかった。    
 ```{r}
 female_in_m %>% 
   group_by(TY_return, IT_return) %>% 
@@ -441,15 +445,15 @@ model_parameters(m_female_in_m,
   font(part = "header", fontname = "Times New Roman") %>% 
   font(part = "body", j=2:7, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
-  bold(j=c(1,2,3,4,5),i = c(4,5, 6, 10, 11, 13),bold = TRUE) %>% 
+  bold(j=c(1,2,3,4,5),i = c(4,5, 6,8, 10, 11, 13),bold = TRUE) %>% 
   theme_zebra() %>% 
   align(j=2:7,part = "all",align = "center") -> table_female_in_m
 
 table_female_in_m
 
-# save_as_image(table_female_in_m,
-#               "tables/table_female_in_m.tiff",
-#               res = 600)
+save_as_image(table_female_in_m,
+              "tables/table_female_in_m.tiff",
+              res = 600)
 ```
 <br/>  
 
@@ -1536,3 +1540,17 @@ p_female_in_m_TYcat4_TYcsi
 #          width = 280, height = 200)
 ```
 <br/>  
+
+### 非交尾期  
+まず、データの加工を行う。データ数が少ないのと、区別が難しいので発情/非発情は分けない。    
+```{r}
+female_in_nm <- female_in_final %>% 
+  filter(str_detect(study_period, "nm")) %>% 
+  drop_na(CSI_TY)  %>% 
+  mutate(date = as_date(date))
+
+female_in_nm %>% 
+  filter(female_in == "1") %>% 
+  select(date, femaleID, TY_return, IT_return)
+```
+

@@ -60,8 +60,8 @@ no_female_over0.5 %>%
   ungroup() %>% 
   ## いなかった期間などを除外  
   mutate(sp_maleID = str_c(study_period,"_",maleID)) %>% 
-  filter(!(sp_maleID %in% c("m21_IT","m18_KM","m19_KM","m18_TG","m19_TG","nm22_IT",
-                            "m20_LK","m21_LK","nm19_KM","nm19_TG", "nm20_KM","nm20_TG",
+  filter(!(sp_maleID %in% c("m21_IT","m18_KM","m18_TG","nm22_IT",
+                            "m20_LK","m21_LK","nm19_KM","nm19_TG", 
                             "nm20_LK", "nm21_LK", "nm22_LK"))) %>% 
   select(-sp_maleID) %>% 
   mutate(maleID = fct_relevel(maleID, "TY", "IT", "LK", "KR", "KM", "TG")) -> male_presence_sum
@@ -81,12 +81,12 @@ male_presence_sum %>%
               values_from = "p") %>% 
   arrange(maleID) %>%  
   ## KMとTGを含めるか
-  filter(!(maleID %in% c("KM", "TG"))) %>% 
+  #filter(!(maleID %in% c("KM", "TG"))) %>% 
   flextable() %>% 
   theme_zebra() %>% 
   italic(j=1,part = "body") %>% 
-  font(j=2:9,part = "all",fontname = "Arial") %>% 
-  font(j=1, part = "body",fontname = "Arial") %>% 
+  font(j=2:9,part = "all",fontname = "Times New Roman") %>% 
+  font(j=1, part = "body",fontname = "Times New Roman") %>% 
   colformat_double(digits = 2) %>% 
   autofit(add_w = 0) %>% 
   align(j=2:9, part = "all", align = "center") -> table_male_presence
@@ -107,28 +107,29 @@ male_presence_sum %>%
   filter(!(maleID %in% c("KM", "TG"))) %>% 
   ggplot(aes(x = study_period, y = prop))+
   geom_col(aes(color = season,fill= season))+
-  scale_fill_manual(values = c("orange", "palegreen4"),
+  scale_fill_manual(values = c("grey34", "white"),
                     label = c("mating(m)","nonmating(nm)"))+
-  scale_color_manual(values = c("orange", "palegreen4"),
+  scale_color_manual(values = c("black", "black"),
                     label = c("mating(m)","nonmating(nm)"))+
   labs(y = "Proportion of confirmed days",x="")+
   theme_bw(base_size = 16)+
-  theme(axis.text = element_text(family = "Arial"),
+  theme(axis.text = element_text(family = "Times New Roman"),
         aspect.ratio = 0.6,
-        axis.title.y = element_text(family = "Arial"),
+        axis.title.y = element_text(family = "Times New Roman"),
         strip.background = element_blank(),
         strip.text.x = element_text(face = "bold.italic",
                                   hjust=0,
-                                  family = "Arial"),
+                                  family = "Times New Roman"),
         axis.ticks.x = element_blank(),
-        axis.text.x = element_text(family = "Arial",
+        axis.text.x = element_text(family = "Times New Roman",
                                     size = 12,
                                    angle = -45,
                                    vjust = -0.5),
-        legend.text = element_text(family = "Yu Gothic"))+
-  geom_text(aes(label = str_c(n,"/",sum), y = prop + 0.07, family = "Arial"),
+        legend.text = element_text(family = "Times New Roman"),
+        legend.title = element_text(family = "Times New Roman"))+
+  geom_text(aes(label = str_c(n,"/",sum), y = prop + 0.07, family = "Times New Roman"),
             size = 3)+
-  labs(fill = "",color = "")+
+  labs(fill = "Season",color = "Season")+
   scale_y_continuous(expand = c(0,0), breaks = seq(0,1,0.25))+
   coord_cartesian(ylim = c(0,1.13))+
   facet_rep_wrap(~maleID,
@@ -150,27 +151,27 @@ male_presence_sum %>%
   filter(maleID %in% c("TY", "IT")) %>% 
   ggplot(aes(x = study_period, y = prop))+
   geom_col(aes(color = season,fill= season))+
-  scale_fill_manual(values = c("orange", "palegreen4"),
+  scale_fill_manual(values = c("grey34", "white"),
                     label = c("mating(m)","nonmating(nm)"))+
-  scale_color_manual(values = c("orange", "palegreen4"),
+  scale_color_manual(values = c("black", "black"),
                     label = c("mating(m)","nonmating(nm)"))+
   labs(y = "Proportion of confirmed days",x="")+
   theme_bw(base_size = 16)+
-  theme(axis.text = element_text(family = "Arial"),
+  theme(axis.text = element_text(family = "Times New Roman"),
         aspect.ratio = 0.8,
-        axis.title.y = element_text(family = "Arial",
+        axis.title.y = element_text(family = "Times New Roman",
                                     size = 12.5),
         strip.background = element_blank(),
         strip.text.x = element_text(face = "bold.italic",
                                   hjust=0,
-                                  family = "Arial"),
+                                  family = "Times New Roman"),
         axis.ticks.x = element_blank(),
-        axis.text.x = element_text(family = "Arial",
+        axis.text.x = element_text(family = "Times New Roman",
                                     size = 12,
                                    angle = -45,
                                    vjust = -0.5),
         legend.text = element_text(family = "Yu Gothic"))+
-  geom_text(aes(label = str_c(n,"/",sum), y = prop + 0.07, family = "Arial"),
+  geom_text(aes(label = str_c(n,"/",sum), y = prop + 0.07, family = "Times New Roman"),
             size = 3)+
   labs(fill = "",color = "")+
   scale_y_continuous(expand = c(0,0), breaks = seq(0,1,0.25))+
@@ -185,45 +186,6 @@ p_male_presence_TYIT
 #        dpi = 600, width = 240, height = 100, units = "mm")
 ```
 
-交尾期のみについて書くと以下のようになる。   
-```{r, fig.dim = c(10,4)}
-male_presence_sum %>% 
-  mutate(prop = n/sum) %>% 
-  mutate(p = str_c(sprintf("%.2f",prop),"(",n,"/",sum,")")) %>% 
-  mutate(season = ifelse(str_detect(study_period, "nm"), "nm","m")) %>% 
-  filter(season != "nm") %>% 
-  ## TYとITのみ含める
-  filter(maleID %in% c("TY", "IT")) %>% 
-  ggplot(aes(x = study_period, y = prop))+
-  geom_col(color = "orange", fill = "orange")+
-  labs(y = "Proportion of confirmed days",x="")+
-  theme_bw(base_size = 18)+
-  theme(axis.text = element_text(family = "Arial"),
-        aspect.ratio = 0.8,
-        axis.title.y = element_text(family = "Arial",
-                                    size = 16),
-        strip.background = element_blank(),
-        strip.text.x = element_text(face = "bold.italic",
-                                  hjust=0,
-                                  family = "Arial"),
-        axis.ticks.x = element_blank(),
-        axis.text.x = element_text(family = "Arial"),
-        legend.text = element_text(family = "Yu Gothic"))+
-  geom_text(aes(label = str_c(n,"/",sum), y = prop + 0.07, family = "Arial"),
-            size = 5)+
-  labs(fill = "",color = "")+
-  scale_y_continuous(expand = c(0,0), breaks = seq(0,1,0.25))+
-  coord_cartesian(ylim = c(0,1.13))+
-  facet_rep_wrap(~maleID,
-                 repeat.tick.labels = "TRUE",
-                 ncol = 2) -> p_male_presence_TYIT_m
-
-p_male_presence_TYIT_m
-
-# ggsave("figures/p_male_presence_TYIT_m.png", p_male_presence_TYIT_m,
-#        dpi = 600, width = 200, height = 100, units = "mm")
-```
-
 KRとLKのみについてグラフを書くと以下のようになる。  
 ```{r, fig.dim = c(10,4)}
 male_presence_sum %>% 
@@ -234,27 +196,27 @@ male_presence_sum %>%
   filter(maleID %in% c("LK", "KR")) %>% 
   ggplot(aes(x = study_period, y = prop))+
   geom_col(aes(color = season,fill= season))+
-  scale_fill_manual(values = c("orange", "palegreen4"),
+  scale_fill_manual(values = c("grey34", "white"),
                     label = c("mating(m)","nonmating(nm)"))+
-  scale_color_manual(values = c("orange", "palegreen4"),
+  scale_color_manual(values = c("black", "black"),
                     label = c("mating(m)","nonmating(nm)"))+
   labs(y = "Proportion of confirmed days",x="")+
   theme_bw(base_size = 16)+
-  theme(axis.text = element_text(family = "Arial"),
+  theme(axis.text = element_text(family = "Times New Roman"),
         aspect.ratio = 0.8,
-        axis.title.y = element_text(family = "Arial",
+        axis.title.y = element_text(family = "Times New Roman",
                                     size = 12.5),
         strip.background = element_blank(),
         strip.text.x = element_text(face = "bold.italic",
                                   hjust=0,
-                                  family = "Arial"),
+                                  family = "Times New Roman"),
         axis.ticks.x = element_blank(),
-        axis.text.x = element_text(family = "Arial",
+        axis.text.x = element_text(family = "Times New Roman",
                                     size = 12,
                                    angle = -45,
                                    vjust = -0.5),
         legend.text = element_text(family = "Yu Gothic"))+
-  geom_text(aes(label = str_c(n,"/",sum), y = prop + 0.07, family = "Arial"),
+  geom_text(aes(label = str_c(n,"/",sum), y = prop + 0.07, family = "Times New Roman"),
             size = 3)+
   labs(fill = "",color = "")+
   scale_y_continuous(expand = c(0,0), breaks = seq(0,1,0.25))+
@@ -269,46 +231,6 @@ p_male_presence_LKKR
 #        dpi = 600, width = 240, height = 100, units = "mm")
 ```
 
-交尾期のみについて書くと以下のようになる。   
-```{r, fig.dim = c(10,4)}
-male_presence_sum %>% 
-  mutate(prop = n/sum) %>% 
-  mutate(p = str_c(sprintf("%.2f",prop),"(",n,"/",sum,")")) %>% 
-  mutate(season = ifelse(str_detect(study_period, "nm"), "nm","m")) %>% 
-  filter(season != "nm") %>% 
-  ## TYとITのみ含める
-  filter(maleID %in% c("LK", "KR")) %>% 
-  ggplot(aes(x = study_period, y = prop))+
-  geom_col(color = "orange", fill = "orange")+
-  labs(y = "Proportion of confirmed days",x="")+
-  theme_bw(base_size = 18)+
-  theme(axis.text = element_text(family = "Arial"),
-        aspect.ratio = 0.8,
-        axis.title.y = element_text(family = "Arial",
-                                    size = 16),
-        strip.background = element_blank(),
-        strip.text.x = element_text(face = "bold.italic",
-                                  hjust=0,
-                                  family = "Arial"),
-        axis.ticks.x = element_blank(),
-        axis.text.x = element_text(family = "Arial"),
-        legend.text = element_text(family = "Yu Gothic"))+
-  geom_text(aes(label = str_c(n,"/",sum), y = prop + 0.07, family = "Arial"),
-            size = 5)+
-  labs(fill = "",color = "")+
-  scale_y_continuous(expand = c(0,0), breaks = seq(0,1,0.25))+
-  coord_cartesian(ylim = c(0,1.13))+
-  facet_rep_wrap(~maleID,
-                 repeat.tick.labels = "TRUE",
-                 ncol = 2) -> p_male_presence_LKKR_m
-
-p_male_presence_LKKR_m
-
-# ggsave("figures/p_male_presence_LKKR_m.png", p_male_presence_LKKR_m,
-#        dpi = 600, width = 200, height = 100, units = "mm")
-```
-<br/>  
-
 KMとTGは以下の通り。  
 TYとITのみについてグラフを書くと以下のようになる。  
 ```{r, fig.dim = c(10,4)}
@@ -320,27 +242,27 @@ male_presence_sum %>%
   filter(maleID %in% c("KM", "TG")) %>% 
   ggplot(aes(x = study_period, y = prop))+
   geom_col(aes(color = season,fill= season))+
-  scale_fill_manual(values = c("orange", "palegreen4"),
+  scale_fill_manual(values = c("grey34", "white"),
                     label = c("mating(m)","nonmating(nm)"))+
-  scale_color_manual(values = c("orange", "palegreen4"),
+  scale_color_manual(values = c("black", "black"),
                     label = c("mating(m)","nonmating(nm)"))+
   labs(y = "Proportion of confirmed days",x="")+
   theme_bw(base_size = 16)+
-  theme(axis.text = element_text(family = "Arial"),
+  theme(axis.text = element_text(family = "Times New Roman"),
         aspect.ratio = 0.8,
-        axis.title.y = element_text(family = "Arial",
+        axis.title.y = element_text(family = "Times New Roman",
                                     size = 12.5),
         strip.background = element_blank(),
         strip.text.x = element_text(face = "bold.italic",
                                   hjust=0,
-                                  family = "Arial"),
+                                  family = "Times New Roman"),
         axis.ticks.x = element_blank(),
-        axis.text.x = element_text(family = "Arial",
+        axis.text.x = element_text(family = "Times New Roman",
                                     size = 12,
                                    angle = -45,
                                    vjust = -0.5),
         legend.text = element_text(family = "Yu Gothic"))+
-  geom_text(aes(label = str_c(n,"/",sum), y = prop + 0.07, family = "Arial"),
+  geom_text(aes(label = str_c(n,"/",sum), y = prop + 0.07, family = "Times New Roman"),
             size = 3)+
   labs(fill = "",color = "")+
   scale_y_continuous(expand = c(0,0), breaks = seq(0,1,0.25))+
@@ -355,44 +277,6 @@ p_male_presence_KMTG
 #        dpi = 600, width = 240, height = 100, units = "mm")
 ```
 
-交尾期のみについて描くと以下の通り。  
-```{r, fig.dim = c(10,4)}
-male_presence_sum %>% 
-  mutate(prop = n/sum) %>% 
-  mutate(p = str_c(sprintf("%.2f",prop),"(",n,"/",sum,")")) %>% 
-  mutate(season = ifelse(str_detect(study_period, "nm"), "nm","m")) %>% 
-  filter(season != "nm") %>% 
-  ## TYとITのみ含める
-  filter(maleID %in% c("KM", "TG")) %>% 
-  ggplot(aes(x = study_period, y = prop))+
-  geom_col(color = "orange", fill = "orange")+
-  labs(y = "Proportion of confirmed days",x="")+
-  theme_bw(base_size = 18)+
-  theme(axis.text = element_text(family = "Arial"),
-        aspect.ratio = 0.8,
-        axis.title.y = element_text(family = "Arial",
-                                    size = 16),
-        strip.background = element_blank(),
-        strip.text.x = element_text(face = "bold.italic",
-                                  hjust=0,
-                                  family = "Arial"),
-        axis.ticks.x = element_blank(),
-        axis.text.x = element_text(family = "Arial"),
-        legend.text = element_text(family = "Yu Gothic"))+
-  geom_text(aes(label = str_c(n,"/",sum), y = prop + 0.07, family = "Arial"),
-            size = 5)+
-  labs(fill = "",color = "")+
-  scale_y_continuous(expand = c(0,0), breaks = seq(0,1,0.25))+
-  coord_cartesian(ylim = c(0,1.13))+
-  facet_rep_wrap(~maleID,
-                 repeat.tick.labels = "TRUE",
-                 ncol = 2) -> p_male_presence_KMTG_m
-
-p_male_presence_KMTG_m
-
-# ggsave("figures/p_male_presence_KMTG_m.png", p_male_presence_KMTG_m,
-#        dpi = 600, width = 200, height = 100, units = "mm")
-```
 
 ## 群れを離れた頻度の算出  
 ひとまず、ここでは6時間以上群れ本体で確認できないときに「群れを離れて行動していた」とみなし、TYとITが群れを離れた頻度を算出する。  
@@ -466,7 +350,7 @@ male_out_sum %>%
   autofit(part = "all",add_w = 0.1) %>% 
   align(j = 2:5, align = "center", part = "all") %>% 
   font(part = "header", fontname = "Yu Gothic") %>% 
-  font(j=1:3, part = "body", fontname = "Arial") %>% 
+  font(j=1:3, part = "body", fontname = "Times New Roman") %>% 
   fontsize(size = 12) -> table_male_out
 
 table_male_out

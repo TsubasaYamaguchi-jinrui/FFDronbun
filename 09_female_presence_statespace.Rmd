@@ -99,6 +99,24 @@ no_female_over0.5_b <- no_female_over0.5 %>%
          nm22 = ifelse(study_period == "nm22",1,0))
 ```
 
+データは以下の通り。  
+```{r}
+datatable(no_female_over0.5_b)
+```
+<br/>  
+
+なお、それぞれの期間における確認メス割合の変動係数を計算すると以下のようになる。  
+```{r}
+no_female_over0.5_b %>% 
+  drop_na(no_female) %>% 
+  group_by(study_period) %>% 
+  summarise(sd = sd(prop_female),
+            mean = mean(prop_female)) %>% 
+  ungroup() %>% 
+  mutate(cv = sd/mean)
+```
+
+
 ## ローカルレベルモデル    
 ### 全期間のデータ  
 #### モデリング       

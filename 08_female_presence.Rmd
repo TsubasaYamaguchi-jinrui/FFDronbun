@@ -323,7 +323,7 @@ datatable(prop_female_presence %>% mutate(across(where(is.numeric),~round(.,3)))
 
 ### データの確認  
 まず、データを確認する。2019年交尾期から2021年交尾期までは、確認に数割合が低いメスがかなりいることが分かる。  
-```{r, fig.dim = c(10,10)}
+```{r, fig.dim = c(14,10)}
 prop_female_presence %>% 
   ggplot(aes(x = femaleID, y = prop_presence)) +
   geom_col() +

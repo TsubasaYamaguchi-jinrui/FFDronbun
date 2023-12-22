@@ -2,17 +2,13 @@
 以下では、基本的な情報をまとめる。  
 
 ## 追跡時間と観察日数  
-<<<<<<< HEAD
-240分以上かつ50%のメス(>5)が観察された日のみを含む。  
-=======
->>>>>>> a72d98704112aaa02e1d2d936ffc5d36eae01840
+240分以上かつ50%のメス(>5)が観察された日のみを含む。   
 ```{r}
 no_female_over0.5 %>% 
   group_by(study_period) %>% 
   summarise(N = n(),
             mean = mean(dur),
             sd = sd(dur)) %>% 
-<<<<<<< HEAD
   mutate(across(3:4,~round(.,2))) %>% 
   rename("調査期間" = 1, "観察日数" = 2, "平均追跡時(分)" = 3, "SD" = 4) %>% 
   flextable() %>% 
@@ -54,14 +50,7 @@ no_female_over0.5 %>%
 
 table_dur_wide
 
-# save_as_image(table_dur, "tables/table_dur.tiff",
+# save_as_image(table_dur_wide, "tables/table_dur_wide.tiff",
 #               res = 600)
-
-save_as_image(table_dur_wide, "tables/table_dur_wide.tiff",
-              res = 600)
-=======
-  flextable() %>% 
-  theme_zebra()
->>>>>>> a72d98704112aaa02e1d2d936ffc5d36eae01840
 ```
 
