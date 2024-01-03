@@ -9,16 +9,21 @@ no_female_over0.5 %>%
   summarise(N = n(),
             mean = mean(dur),
             sd = sd(dur)) %>% 
-  mutate(across(3:4,~round(.,2))) %>% 
-  rename("調査期間" = 1, "観察日数" = 2, "平均追跡時(分)" = 3, "SD" = 4) %>% 
+  ungroup() %>% 
+  left_join(prop_maingroup %>% 
+              select(study_period, prop), by = "study_period") %>%
+  mutate(across(3:5,~round(.,2))) %>% 
+  rename("調査期間" = 1, "群れ本体の観察日数" = 2, "平均追跡時(分)" = 3, "SD" = 4, "群れ本体\n観察日数割合"=5) %>% 
   flextable() %>% 
   colformat_double(digits=2) %>% 
   set_table_properties(layout="autofit",width = 0.9) %>% 
-  font(part = "header", fontname = "Segoe UI") %>% 
-  font(part = "body", j=2:4, fontname = "Segoe UI") %>% 
-  font(part = "body", j=1, fontname = "Segoe UI") %>% 
+  font(part = "header", fontname = "Yu Gothic") %>% 
+  font(part = "body", j=2:5, fontname = "Times New Roman") %>% 
+  font(part = "body", j=1, fontname = "Times New Roman") %>% 
   theme_zebra() %>% 
-  align(j=2:4,part = "all",align = "center") -> table_dur
+  hline_bottom() %>% 
+  hline_top() %>% 
+  align(j=2:5,part = "all",align = "center")  -> table_dur
 
 table_dur
 
@@ -46,9 +51,14 @@ no_female_over0.5 %>%
   fontsize(j = 1:7,
            size = 15) %>% 
   theme_zebra() %>% 
+  hline_bottom() %>% 
+  hline_top() %>% 
   align(j=2:7,part = "all",align = "center")-> table_dur_wide
 
 table_dur_wide
+ 
+# save_as_image(table_dur, "tables/table_dur.tiff",
+#               res = 600)
 
 # save_as_image(table_dur_wide, "tables/table_dur_wide.tiff",
 #               res = 600)

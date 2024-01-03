@@ -229,8 +229,8 @@ model_parameters(m_presence_agg, dispersion = TRUE) %>%
   colformat_double(digits=2) %>% 
   set_table_properties(layout="autofit",width = 0.9) %>% 
   autofit() %>% 
-  font(part = "header", fontname = "Segoe UI") %>% 
-  font(part = "body", j=2:7, fontname = "Segoe UI") %>% 
+  font(part = "header", fontname = "Times New Roman") %>% 
+  font(part = "body", j=2:7, fontname = "Times New Roman") %>% 
   font(part = "body", j=1, fontname = "Yu Gothic") %>% 
   bold(j=c(1,2,3,4,5),i = c(2,3,5, 6,7),bold = TRUE) %>% 
   theme_zebra() %>% 
@@ -275,14 +275,14 @@ fitted(m_presence_agg,
   labs(x = "Proportion of confirmed days",
        y = "Mean frequency of \ndaily aggression")+
   theme_bw(base_size = 15)+
-  theme(axis.title.y = element_text(family = "Yu Gothic"),
-        axis.title.x = element_text(family = "Arial",
+  theme(axis.title.y = element_text(family = "Times New Roman"),
+        axis.title.x = element_text(family = "Times New Roman",
                                     size = 15),
-        axis.text.x = element_text(family = "Arial"),
-        axis.text.y = element_text(family = "Arial"),
+        axis.text.x = element_text(family = "Times New Roman"),
+        axis.text.y = element_text(family = "Times New Roman"),
         aspect.ratio = 1,
         strip.background = element_blank(),
-        strip.text = element_text(family = "Arial",
+        strip.text = element_text(family = "Times New Roman",
                                   hjust = 0)) -> p_presence_agg
 
 p_presence_agg
@@ -300,18 +300,47 @@ female_presence_agg %>%
   ggplot(aes(x = prop_presence, y = prop_TY_std))+
   geom_point()+
   theme_bw(base_size = 15)+
-  theme(aspect.ratio = 1)+
+  theme(aspect.ratio = 1,
+        axis.title.y = element_text(family = "Times New Roman"),
+        axis.title.x = element_text(family = "Times New Roman",
+                                    size = 15),
+        axis.text.x = element_text(family = "Times New Roman"),
+        axis.text.y = element_text(family = "Times New Roman"),
+        strip.background = element_blank(),
+        strip.text = element_text(family = "Times New Roman",
+                                  hjust = 0))+
+  labs(x = "Proportion of days confirmed in main troop",
+       y = "Proportion of days conformed \nwith TY in main troop")+
   facet_rep_wrap(~study_period,
-                 repeat.tick.labels = TRUE)
+                 repeat.tick.labels = TRUE,
+                 scales = "free")  -> p_propTY
+
+# ggsave("figures/p_propTY.png",p_propTY, dpi = 600, units = "mm",
+#        width = 240, height = 100)
 
 female_presence_agg %>% 
   filter(study_period != "m21") %>% 
-  ggplot(aes(x = prop_presence, y = prop_IT))+
+  ggplot(aes(x = prop_presence, y = prop_IT_std))+
   geom_point()+
   theme_bw(base_size = 15)+
-  theme(aspect.ratio = 1)+
+  theme(aspect.ratio = 1,
+        axis.title.y = element_text(family = "Times New Roman"),
+        axis.title.x = element_text(family = "Times New Roman",
+                                    size = 15),
+        axis.text.x = element_text(family = "Times New Roman"),
+        axis.text.y = element_text(family = "Times New Roman"),
+        strip.background = element_blank(),
+        strip.text = element_text(family = "Times New Roman",
+                                  hjust = 0))+
+  labs(x = "Proportion of days confirmed in main troop",
+       y = "Proportion of days conformed \nwith IT in main troop")+
   facet_rep_wrap(~study_period,
-                 repeat.tick.labels = TRUE)
+                 repeat.tick.labels = TRUE,
+                 scales = "free")  -> p_propIT
+
+# ggsave("figures/p_propIT.png",p_propIT, dpi = 600, units = "mm",
+#        width = 180, height = 100)
+
 ```
 
 それでは、モデリングを行う。モデル式は以下の通り。  
