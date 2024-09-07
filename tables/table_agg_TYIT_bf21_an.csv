@@ -1,0 +1,13 @@
+Explanatory variables,Component,Median,95%CI,PD,Rhat,Bulk ESS,Tail ESS
+切片,conditional,-2.69,"[-3.08,-2.33]",100.00,1.00,15612.10,23662.35
+TY presence (Yes vs No),conditional,-0.33,"[-0.80,0.11]",93.16,1.00,17870.90,25072.24
+IT presence (Yes vs No),conditional,-1.18,"[-1.64,-0.75]",100.00,1.00,17476.60,24271.56
+CSI with TY,conditional,0.07,"[-0.14,0.26]",75.01,1.00,16825.86,21956.14
+CSI with IT,conditional,-0.04,"[-0.23,0.15]",67.64,1.00,19135.76,23746.14
+TY presence x CSI with TY,conditional,-0.07,"[-0.28,0.13]",75.59,1.00,51589.04,29315.14
+IT presence x CSI with IT,conditional,-0.04,"[-0.31,0.21]",62.40,1.00,54179.39,29669.02
+No. of present males,conditional,0.28,"[0.01,0.56]",97.81,1.00,16913.16,24733.88
+No. of estrous females,conditional,0.07,"[-0.12,0.25]",76.06,1.00,15148.08,22671.57
+Prop. of present females,conditional,-0.29,"[-0.45,-0.12]",99.95,1.00,12759.52,20339.77
+Prop. of time focal sampling,conditional,0.18,"[0.10,0.26]",100.00,1.00,49214.08,30389.58
+Study period(MS20 vs MS18),conditional,-1.74,"[-2.16,-1.32]",100.00,1.00,18847.58,25838.80
