@@ -9,13 +9,14 @@ rmd_files:
   - 06_decide_duration.Rmd  
   - 07_male_presence.Rmd  
   - 08_female_presence.Rmd  
-  - 09_female_presence_statespace.Rmd  
-  - 10_female_out_analysis.Rmd  
+  - 09_female_presence_statespace_revised.Rmd
+  - 10_female_out_analysis_revised.Rmd  
   - 11_female_out_network.Rmd  
-  - 12_female_in_analysis.Rmd  
-  - 13_male_presence_aggression.Rmd  
+  - 12_female_in_analysis_revised.Rmd  
+  - 13_male_presence_aggression_revised.Rmd  
   - 14_female_presence_aggression.Rmd  
   - 15_aggression_injury.Rmd  
+  - 17_basicinfo.Rmd  
   - sessioninfo.Rmd
 output_dir: "docs"  
 language:
