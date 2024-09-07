@@ -25,7 +25,6 @@ group_all %>%
   drop_na(dur) %>% 
   ## 最大メス数のデータを結合  
   left_join(max_female) %>% 
-  ## 確認メス割合が0.5以上を抽出
   mutate(prop_female = no_female/max_female) -> prop_females_all
   
 prop_females_all %>% 

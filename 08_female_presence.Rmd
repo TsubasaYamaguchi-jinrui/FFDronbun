@@ -4,15 +4,46 @@
 ## 各観察日のメス確認割合  
 前章(\@ref(c7))で、6歳以上のメス(以下、メス)が50%以上確認でき、240分以上追跡できた日のデータを抽出していた(`no_female_over0.5`)。以下では、1日に確認できた6歳以上のメスの割合が調査期間ごとにどのように異なっていたかを分析する。    
 
-なお、240分追跡した内、群れ本体ではない集団を追跡した割合は実に96.5%である。  
+なお、240分追跡した内、群れ本体を追跡した割合は実に96.5%である。  
 ```{r}
 prop_females_all %>% 
   filter(groupID != "nm21_23") %>% 
   ## 追跡時間240分以上  
   filter(dur >= 240) %>% 
   mutate(hontai = ifelse(prop_female >= 0.5,1,0)) %>% 
-  summarise(prop = mean(hontai))
+  summarise(prop = mean(hontai),
+            sum = sum(hontai),
+            all = n())
 ```
+<br/>  
+
+分布を示すと以下のようになります。  
+```{r}
+## メス割合が50%未満も含む場合
+prop_females_all %>% 
+  filter(prop_female > 0) %>% 
+  ggplot(aes(x = prop_female)) +
+  geom_histogram(color = "black",
+                 fill = "white",
+                 size = 0.4) +
+  theme_bw(base_size = 12) +
+  labs(x = "Proportion of adult females confirmed to be present",
+       y = "Frequency of observations (N)") +
+  scale_y_continuous(breaks = seq(0,250, by= 30),
+                     expand= c(0.01,0.01)) +
+  scale_x_continuous(expand = c(0.01, 0.01)) +
+  theme(aspect.ratio = 1,
+        axis.title.x = element_text(family = "Times New Roman",
+                                    size = 10),
+        axis.title.y = element_text(family = "Times New Roman"),
+        axis.text = element_text(family = "Times New Roman")) -> p_hist_group
+
+p_hist_group
+
+# ggsave("figures/p_hist_group.tif", p_hist_group,
+#        width = 100, height = 100, dpi = 1500, units = "mm")
+```
+<br/>  
 
 調査期間ごとに分けると以下のようになる。他の調査期間でも2021年非交尾期を除けば95%~100%の日は群れ本体を追っている。    
 ```{r}
@@ -24,8 +55,60 @@ prop_females_all %>%
   group_by(study_period) %>% 
   summarise(prop = mean(hontai),
             N = n(),
-            sum = sum(hontai))
+            sum = sum(hontai)) -> prop_maingroup
+
+prop_maingroup
 ```
+<br/>  
+
+続いて、前日確認された個体が次の日にも確認される割合を調べます。少ない日でも前日確認された個体の60%が次の日も確認されました。    
+```{r}
+no_female_over0.5 %>% 
+  select(groupID) %>% 
+  left_join(group_all %>% select(-c(TY,IT,KR,LK,KM,TG))) %>% 
+  select(-(start:fin)) %>% 
+  ## 縦型にする  
+  pivot_longer(Kur:Yun,
+               names_to = "femaleID",
+               values_to = "presence") %>% 
+  left_join(att, by = c("femaleID", "study_period")) %>% 
+  ## 6歳以上のみ抽出  
+  filter(age >= 6) %>% 
+  left_join(female_time_long %>% 
+              select(date, femaleID, presence) %>%
+              rename(time = presence),
+            by = c("date","femaleID")) %>% 
+  ## 死亡個体は除く  
+  filter(is.na(time)| time != "DD") %>% 
+  select(-time) %>% 
+  mutate(date = as_date(date)) -> female_pre_long
+
+female_pre_long %>% 
+  left_join(female_pre_long %>% 
+              mutate(date = date + 1) %>% 
+              rename(presence_pre = presence) %>% 
+              select(date, femaleID, presence_pre)) %>% 
+  drop_na(presence_pre) %>% 
+  filter(presence_pre == 1) %>% 
+  mutate(presence_successive = if_else(presence_pre == 1 & presence == 1, 1, 0)) %>% 
+  group_by(date, groupID, study_period) %>% 
+  summarise(prop = mean(presence_successive)) %>% 
+  ungroup() -> prop_presence_successive
+
+prop_presence_successive
+```
+<br/>  
+
+要約統計量は以下の通り。  
+```{r}
+prop_presence_successive %>% 
+  summarise(mean = mean(prop),
+            median = median(prop),
+            min = min(prop),
+            max = max(prop),
+            sd = sd(prop))
+```
+
 
 ### データの確認  
 まず、調査期間ごとにデータを図示する。2019年交尾期から2021年交尾期までの期間に1日に確認されたメスの割合が低い日が多くなっていることが分かる(特に交尾期)。    
@@ -85,12 +168,11 @@ $$
 
 ```{r}
 m_female_prop <- brm(data = no_female_over0.5 %>% mutate(date=as.factor(date)),
-                     no_female|trials(max_female) ~ study_period + (1|date),
+                     no_female|trials(max_female) ~ study_period,
                      family = "beta_binomial",
                      prior = c(prior(student_t(4,0,10),class = Intercept),
-                     prior(student_t(4,0,10), class = b),
-                     prior(student_t(4,0,5), class = sd)),
-                     iter = 11000, warmup = 6000, seed = 13,
+                     prior(student_t(4,0,10), class = b)),
+                     iter = 11000, warmup = 1000, seed = 123,
                      control=list(adapt_delta = 0.9999, max_treedepth = 20),
                      backend = "cmdstanr",
                      file = "model/m_female_prop")
@@ -162,7 +244,7 @@ testTemporalAutocorrelation(dh_female_prop, time = no_female_over0.5$date)
 
 
 #### 結果の確認  
-まず、モデルの結果は以下の通り。収束の問題は内容。有向サンプルサイズ(ESS)は1000を下回っているものがいくつかある。    
+まず、モデルの結果は以下の通り。収束の問題は内容。有向サンプルサイズは6000を上回っている。   
 ```{r}
 model_parameters(m_female_prop) %>% 
   data.frame() %>% 
@@ -318,7 +400,8 @@ no_female_over0.5 %>%
 データは以下のようになる。  
 ```{r}
 datatable(prop_female_presence %>% mutate(across(where(is.numeric),~round(.,3))),
-          options = list(scrollX = 60))
+          options = list(scrollX = 60),
+          filter = "top")
 ```
 
 ### データの確認  
@@ -626,8 +709,8 @@ model_parameters(m_female_presence_att, dispersion = TRUE, ci = 0.95) %>%
 
 table_female_presence_att
 
-save_as_image(table_female_presence_att, "tables/table_female_presence_att.tiff",
-              res = 600)
+# save_as_image(table_female_presence_att, "tables/table_female_presence_att.tiff",
+#               res = 600)
 ```
 <br/>  
 

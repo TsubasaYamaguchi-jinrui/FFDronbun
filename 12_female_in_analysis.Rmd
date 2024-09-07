@@ -451,9 +451,9 @@ model_parameters(m_female_in_m,
 
 table_female_in_m
 
-save_as_image(table_female_in_m,
-              "tables/table_female_in_m.tiff",
-              res = 600)
+# save_as_image(table_female_in_m,
+#               "tables/table_female_in_m.tiff",
+#               res = 600)
 ```
 <br/>  
 
@@ -958,9 +958,9 @@ model_parameters(m_female_in_m_TYstate,
 
 table_female_in_m_TYstate
 
-save_as_image(table_female_in_m_TYstate,
-              "tables/table_female_in_m.tiff",
-              res = 600)
+# save_as_image(table_female_in_m_TYstate,
+#               "tables/table_female_in_m.tiff",
+#               res = 600)
 ```
 <br/>  
 

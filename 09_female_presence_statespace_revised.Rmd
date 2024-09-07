@@ -1,0 +1,2460 @@
+# 各観察日の確認メス割合に関する時系列分析 {#c9}    
+前章(\@ref(c8))で扱った各観察日の確認メス割合は時系列データのため、モデルの残差に時系列相関が残ってしまっていた。そこで、以下では確認メス割合のデータを状態空間モデル[@Baba2019; @Matsuura2023]によって分析することでデータの時系列相関を考慮する。  
+
+## 1時間未満を欠席と扱う場合  
+### データの加工  
+モデルでは、*TY*と*IT*がその日群れ本体で確認されたか否かを変数として加える。2019年交尾期から2021年交尾期までは一時的に群れで確認されたものの、すぐにいなくなってしまった日が何日かあった。それらの日については、彼らの確認時間が1時間未満だったときは群れ本体にいなかったとして扱う。  
+
+まず、彼らの確認時間帯が記されたデータシートを読み込み、60分以上確認できたか否かの列を作成する。出入りがあった期間以外は、群れ本体にいた場合は終日確認されたので`group_all`からデータを引っ張ってくる。    
+
+```{r}
+male_time_18m <- group_all %>% 
+  filter(study_period == "m18") %>% 
+  select(date, groupID, TY, IT)  
+
+male_time_19nm <- group_all %>% 
+  filter(study_period == "nm19") %>% 
+  select(date, groupID, TY, IT)  
+
+male_time_19m_1h <- read_excel("../Data/data/2019mating/2019mating_raw.xlsx",
+                               sheet =　"male_presence_long") %>% 
+  mutate(study_period = "m19") %>% 
+  mutate(groupID = str_c(study_period,"_", groupID)) %>% 
+  ## 確認時間の算出
+  mutate(dur = ifelse(is.na(first), 0,
+                      difftime(last, first, units = "mins"))) %>% 
+  mutate(presence_1h = ifelse(dur >= 60,1,0)) %>% 
+  mutate(presence = ifelse(dur > 0, 1, 0)) %>% 
+  select(maleID, date, groupID, presence_1h) %>% 
+  pivot_wider(names_from = maleID,
+              values_from = presence_1h)
+
+male_time_20m_1h <- read_excel("../Data/data/2020mating/2020mating_raw.xlsx",
+                               sheet =　"male_presence_long") %>% 
+  mutate(study_period = "m20") %>% 
+  mutate(groupID = str_c(study_period,"_", groupID)) %>% 
+  ## 確認時間の算出
+  mutate(dur = ifelse(is.na(first), 0,
+                      difftime(last, first, units = "mins"))) %>% 
+  mutate(presence_1h = ifelse(dur >= 60,1,0)) %>% 
+  mutate(presence = ifelse(dur > 0, 1, 0)) %>% 
+  select(maleID, date, groupID, presence_1h) %>% 
+  pivot_wider(names_from = maleID,
+              values_from = presence_1h)
+
+male_time_21m_1h <- read_excel("../Data/data/2021mating/2021mating_raw.xlsx",
+                               sheet =　"male_presence_long") %>% 
+  mutate(study_period = "m21") %>% 
+  mutate(groupID = str_c(study_period,"_", groupID)) %>% 
+  ## 確認時間の算出
+  mutate(dur = ifelse(is.na(first), 0,
+                      difftime(last, first, units = "mins"))) %>% 
+  mutate(presence_1h = ifelse(dur >= 60,1,0)) %>% 
+  mutate(presence = ifelse(dur > 0, 1, 0)) %>% 
+  select(maleID, date, groupID, presence_1h) %>% 
+  pivot_wider(names_from = maleID,
+              values_from = presence_1h)
+
+male_time_20nm_1h <- read_excel("../Data/data/2020nonmating/2020nonmating_raw.xlsx",
+                                sheet =　"male_presence_long") %>% 
+  mutate(study_period = "nm20") %>% 
+  mutate(groupID = str_c(study_period,"_", groupID)) %>% 
+  ## 確認時間の算出
+  mutate(dur = ifelse(is.na(first), 0,
+                      difftime(last, first, units = "mins"))) %>% 
+  mutate(presence_1h = ifelse(dur >= 60,1,0)) %>% 
+  mutate(presence = ifelse(dur > 0, 1, 0)) %>% 
+  select(maleID, date, groupID, presence_1h) %>% 
+  pivot_wider(names_from = maleID,
+              values_from = presence_1h)
+
+male_time_21nm_1h <- read_excel("../Data/data/2021nonmating/2021nonmating_raw.xlsx",
+                                sheet =　"male_presence_long") %>% 
+  mutate(study_period = "nm21") %>% 
+  mutate(groupID = str_c(study_period,"_", groupID)) %>% 
+  ## 確認時間の算出
+  mutate(dur = ifelse(is.na(first), 0,
+                      difftime(last, first, units = "mins"))) %>% 
+  mutate(presence_1h = ifelse(dur >= 60,1,0)) %>% 
+  mutate(presence = ifelse(dur > 0, 1, 0)) %>% 
+  select(maleID, date, groupID, presence_1h) %>% 
+  pivot_wider(names_from = maleID,
+              values_from = presence_1h)
+
+male_time_22nm <- group_all %>% 
+  filter(study_period == "nm22") %>% 
+  select(date, groupID, TY, IT)  
+
+TYIT_presence_1h <- bind_rows(male_time_18m, male_time_19m_1h, male_time_20m_1h, male_time_21m_1h,
+                              male_time_19nm, male_time_20nm_1h, male_time_21nm_1h, male_time_22nm)
+```
+
+続いて、群れ本体が240日以上確認できた日のデータに先ほどのデータを結合する。また、データのない日付の行も補完する。    
+```{r}
+no_female_over0.5_TYIT_1h <- no_female_over0.5 %>% 
+  left_join(TYIT_presence_1h, by = c("date","groupID")) %>% 
+  mutate(date = as_date(date)) %>% 
+  complete(date = seq.Date(min(date), max(date), by ="1 day")) %>% 
+  mutate(m18 = ifelse(study_period == "m18",1,0),
+         m19 = ifelse(study_period == "m19",1,0),
+         m20 = ifelse(study_period == "m20",1,0),
+         m21 = ifelse(study_period == "m21",1,0),
+         nm19 = ifelse(study_period == "nm19",1,0),
+         nm20 = ifelse(study_period == "nm20",1,0),
+         nm21 = ifelse(study_period == "nm21",1,0),
+         nm22 = ifelse(study_period == "nm22",1,0))
+```
+
+データは以下の通り。  
+```{r}
+datatable(no_female_over0.5_TYIT_1h,
+          filter = "top",
+          options = list(scrollX = TRUE))
+```
+<br/>  
+
+なお、それぞれの期間における確認メス割合の変動係数を計算すると以下のようになる。  
+```{r}
+no_female_over0.5_TYIT_1h %>% 
+  drop_na(no_female) %>% 
+  group_by(study_period) %>% 
+  summarise(sd = sd(prop_female),
+            mean = mean(prop_female)) %>% 
+  ungroup() %>% 
+  mutate(cv = sd/mean)
+```
+
+
+## ローカルレベルモデル    
+### 全期間のデータ  
+#### モデリング       
+以下のモデルを考える。  
+
+- $no\_female_{t}$: 時点tの確認メス数  
+- $max_female_{t}$: 時点tでの最大メス数  
+- $TY_{t}$/$IT_{t}:$ t時点のTY/ITの群れ本体での有無   
+- $study\_period_{t}$: 調査期間を表すダミー変数  
+
+$$ 
+\begin{aligned}
+&no\_female_{t} \sim Binomial(p_t, max\_female_t)\\
+&logit(p_{t}) = \mu_{t} + \beta_1 \times TY_t + IT_t + \sum_{j = 2}^9 \beta_j \times study\_period_{t}\\
+& \mu_{t} = \mu_{t-1}+\epsilon_{t}\\
+& \epsilon_{t} \sim Normal(0,\sigma^2)\\
+& \beta_{1,2,3,4, 5,6,7,8,9} \sim Student\_t(0,4,10)\\
+&\sigma^2 \sim Student\_t(0,4,5)\\
+\end{aligned}
+$$
+
+データのリストは以下の通り。  
+```{r}
+## ITの欠損値を0に  
+no_female_over0.5_TYIT_1h_b <- no_female_over0.5_TYIT_1h %>% 
+  mutate(IT = ifelse(is.na(IT) & !is.na(TY), 0, IT))
+
+## 観測値がある行番号  
+nadrop_no_female <- drop_na(no_female_over0.5_TYIT_1h_b, prop_female)
+obs_no <- which(!is.na(no_female_over0.5_TYIT_1h_b$no_female))
+
+## 説明変数の行列を作成  
+X <- matrix(c(nadrop_no_female$TY,
+               nadrop_no_female$IT,
+               nadrop_no_female$m18,
+               nadrop_no_female$m19,
+               nadrop_no_female$m20,
+               nadrop_no_female$m21,
+               nadrop_no_female$nm19,
+               nadrop_no_female$nm20,
+               nadrop_no_female$nm21,
+               nadrop_no_female$nm22),
+             nrow = 383, ncol = 10)
+
+colnames(X) <- colnames(nadrop_no_female)[8:17]
+
+list_female_ss <- list(len_obs = nrow(nadrop_no_female),
+                        obs_no = obs_no,
+                        N = nrow(no_female_over0.5_TYIT_1h_b),
+                        X = X,
+                        D = ncol(X),
+                        no_female = nadrop_no_female$no_female,
+                        max_female = nadrop_no_female$max_female)
+```
+
+それでは、以下のようにcmdstanr[@Gabry2023]でモデルを回す。  
+```{r}
+# 通常の二項分布モデル
+# stan_female_ss <- cmdstan_model("stanfile/m_female_ss_binom.stan")
+# 
+# m_female_ss_rv <- stan_female_ss$sample(
+#   data = list_female_ss,
+#   seed = 13,
+#   iter_sampling = 5000,
+#   iter_warmup = 2000,
+#   thin = 1,
+#   chains = 4,
+#   adapt_delta = 0.999,
+#   max_treedepth = 20
+# )
+
+# m_female_ss_rv$save_object("model/m_female_ss_rv.rds")
+
+m_female_ss_rv <- readRDS("model/m_female_ss_rv.rds")  
+```
+
+##### モデルの診断  
+###### Rhat診断  
+Rhatは小さく、収束に問題ないよう。    
+```{r, fig.height = 4.5}
+rhat_female_ss_rv <- m_female_ss_rv %>% 
+  bayesplot::rhat()
+
+data.frame(Rhat = rhat_female_ss_rv) %>% 
+  ggplot(aes(x = Rhat))+
+  geom_histogram(fill = "white",
+                 color = "black")+
+  theme_bw()+
+  theme(aspect.ratio = 1)
+```
+<br/>  
+
+###### 有効サンプルサイズ  
+まず、有効サンプルサイズも少なくとも7000程度ある。  
+```{r, fig.height = 4.5}
+## Rhat, ESSの算出
+diag_female_ss_rv <- m_female_ss_rv$summary(variables = c("mu","p","b","lp__","s_t","mu_err"),
+                                            posterior::default_convergence_measures())
+
+diag_female_ss_rv %>%
+  pivot_longer(cols = 3:4,
+               names_to = "type",
+               values_to = "ESS") %>% 
+  group_by(type) %>% 
+  summarise(min = min(ESS, na.rm = TRUE),
+            max = max(ESS, na.rm = TRUE),
+            median = median(ESS, na.rm = TRUE))
+```
+<br/>  
+
+図示すると以下の通り。  
+```{r, fig.height = 4.5}
+diag_female_ss_rv %>% 
+  pivot_longer(cols = 3:4,
+               names_to = "type",
+               values_to = "ESS") %>% 
+  ggplot(aes(x = ESS)) +
+  facet_rep_wrap(~type,
+                 scales = "free")+
+  geom_histogram(fill = "white",
+                 color = "black")+
+  theme_bw()+
+  theme(aspect.ratio = 1)
+```
+<br/>  
+
+###### 残差の自己相関の確認  
+まず残差を算出するため、パラメータの要約統計量を算出します。  
+```{r, fig.height = 4.5}
+## 要約統計量の算出
+post_summary_female_ss_rv <- m_female_ss_rv$draws() %>% 
+  as_draws_df(nchains = 4) %>% 
+  mutate(iter = 1:n()) %>% 
+  pivot_longer(-iter,
+               names_to = "variable",
+               values_to = "value") %>% 
+  filter(!(variable %in% c(".draw", ".chain", ".iteration"))) %>% 
+  group_by(variable) %>% 
+  summarise(mean = mean(value),
+            median = median(value),
+            mad = mad(value),
+            lower_hdi = bayestestR::hdi(value)[[2]],
+            upper_hdi = bayestestR::hdi(value)[[3]],
+            pd = p_direction(value)$pd*100) %>% 
+  left_join(diag_female_ss_rv,
+            by = "variable")
+```
+<br/>  
+
+続いて残差を算出し、自己相関を調べます。自己相関が消えていることが分かります。    
+```{r}
+## 残差の算出
+postmean_female_ss_rv <- post_summary_female_ss_rv %>% 
+  filter(str_detect(variable, "p\\[")) %>% 
+  mutate(variable = parse_number(variable)) %>% 
+  arrange(variable) %>% 
+  bind_cols(no_female_over0.5_TYIT_1h_b) %>% 
+  mutate(resid = prop_female - median) 
+
+## 自己相関の
+acf_female_ss_rv <- acf(postmean_female_ss_rv$resid,
+                        na.action = na.pass,
+                        plot = F)
+
+data.frame(Lag = acf_female_ss_rv$lag[,,1],
+           acf = acf_female_ss_rv$acf[,,1]) %>% 
+  ggplot(aes(x = Lag, y = acf))+
+  geom_segment(aes(yend = 0, xend = Lag))+
+  theme_bw(base_size = 16)+
+  scale_y_continuous(breaks = seq(-1,1,0.2))+
+  theme(aspect.ratio = 1,
+        axis.title.y = element_text(family = "Arial"),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"))+
+  labs(y = "Autocorrelation of residuals") -> p_acf_female_ss_rv  
+
+p_acf_female_ss_rv
+
+ggsave("figures/p_acf_female_ss_rv.png", p_acf_female_ss_rv,
+       width = 100, height = 100, dpi = 600, units = "mm")
+```
+<br/>  
+
+###### 事後予測分布の確認   
+事後分布からの予測分布と実測値の分布を比較しても大きな乖離はない。   
+```{r, fig.height = 4.5}
+draws_female_ss_rv <- m_female_ss_rv$draws() %>% 
+  as_draws_df(nchains = 4)
+
+## pの事後分布から100個のサンプルを抽出してシミュレート    
+set.seed(123)
+sample_n <- sample(1:nrow(draws_female_ss_rv), size = 1000,
+                   replace = FALSE)
+
+post_p_female_ss_rv <- draws_female_ss_rv %>% 
+  select(starts_with("p")) %>% 
+  select(any_of(obs_no)) %>% 
+  mutate(iter = 1:n())  %>% 
+  pivot_longer(cols = starts_with("p"),
+               values_to = "p") %>% 
+  mutate(max_female = rep(nadrop_no_female$max_female, times = nrow(draws_female_ss_rv))) %>% 
+  filter(iter %in% sample_n) %>% 
+  mutate(pred = rbinom(nrow(.), size = max_female, prob = p))
+
+## 事後予測値を事後平均からシミュレート
+post_p_female_ss_rv %>% 
+  select(iter, name, pred) %>% 
+  pivot_wider(names_from = iter, 
+              values_from = pred) %>% 
+  select(-name) %>% 
+  mutate(y_actual = nadrop_no_female$no_female) %>% 
+  pivot_longer(everything(),
+               names_to = "n_draw", 
+               values_to = "post_pred") %>% 
+  mutate(type = ifelse(str_detect(n_draw, "y_"),"y","y_pred")) -> post_pred_female_ss_rv_long2
+
+## 図示  
+post_pred_female_ss_rv_long2 %>% 
+  ggplot(aes(x = post_pred))+
+  geom_line(stat = "density",
+            aes(group = n_draw,
+                color = type,
+                alpha = type))+
+  scale_color_manual(values = c("blue4","lightblue"))+
+  scale_alpha_discrete(range = c(1, 0.3))+
+  theme_bw()+
+  theme(aspect.ratio = 0.8)+
+  labs(x = "", y = "")
+```
+
+##### 結果の確認  
+結果は以下の通り。*TY*と*IT*がいる日は有意に確認メス数が多いことが分かった。  
+
+```{r}
+post_summary_female_ss_rv %>% 
+  filter(str_detect(variable, "b")) %>% 
+  mutate(num = parse_number(variable)) %>% 
+  arrange(num) %>% 
+  select(-num) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",lower_hdi),",",sprintf("%.2f", upper_hdi),"]")) %>% 
+  mutate(PD = sprintf("%.2f", pd)) %>% 
+  select(1,3,4, 11, 12, 8,9,10) %>% 
+  rename("Explanatory variables" = 1,
+         "Median" = 2,
+         "MAD" = 3,
+         "Rhat" = 6) %>% 
+  mutate(`Explanatory variables` = str_replace_all(`Explanatory variables`, c(
+    "b\\[1\\]" = "Presence of TY (vs. absent)",
+    "b\\[2\\]" = "Presence of IT (vs. absent)",
+    "b\\[3\\]" = "Study period (MS18)",
+    "b\\[4\\]" = "Study period (MS19)",
+    "b\\[5\\]" = "Study period (MS20)",
+    "b\\[6\\]" = "Study period (MS21)",
+    "b\\[7\\]" = "Study period (NMS19)",
+    "b\\[8\\]" = "Study period (NMS20)",
+    "b\\[9\\]" = "Study period (NMS21)",
+    "b\\[10\\]" = "Study period (NMS22)"))) %>% 
+  mutate(across(where(is.numeric), ~sprintf("%.2f", .))) -> table_female_ss_rv
+
+table_female_ss_rv
+
+write_csv(table_female_ss_rv, "tables/table_female_ss_rv.csv")
+```
+
+*TY*の有無をコントロールすると、調査期間間の効果の違いはない。つまり、調査期間間のメス確認割合の違いは*TY*の有無に大きく影響されていたことが分かった。  
+```{r}
+draws_female_ss_rv %>% 
+  select(4:11) %>% 
+  mutate(`m18 - m19` = `b[3]` - `b[4]`,
+         `m18 - m20` = `b[3]` - `b[5]`,
+         `m18 - m21` = `b[3]` - `b[6]`,
+         `m18 - nm19` = `b[3]` - `b[7]`,
+         `m18 - nm20` = `b[3]` - `b[8]`,
+         `m18 - nm21` = `b[3]` - `b[9]`,
+         `m18 - nm22` = `b[3]` - `b[10]`,
+         `m19 - m20` = `b[4]` - `b[5]`,
+         `m19 - m21` = `b[4]` - `b[6]`,
+         `m19 - nm19` = `b[4]` - `b[7]`,
+         `m19 - nm20` = `b[4]` - `b[8]`,
+         `m19 - nm21` = `b[4]` - `b[9]`,
+         `m19 - nm22` = `b[4]` - `b[10]`,
+         `m20 - m21` = `b[5]` - `b[6]`,
+         `m20 - nm19` = `b[5]` - `b[7]`,
+         `m20 - nm20` = `b[5]` - `b[8]`,
+         `m20 - nm21` = `b[5]` - `b[9]`,
+         `m20 - nm22` = `b[5]` - `b[10]`,
+         `m21 - nm19` = `b[6]` - `b[7]`,
+         `m21 - nm20` = `b[6]` - `b[8]`,
+         `m21 - nm21` = `b[6]` - `b[9]`,
+         `m21 - nm22` = `b[6]` - `b[10]`,
+         `nm19 - nm20` = `b[7]` - `b[8]`,
+         `nm19 - nm21` = `b[7]` - `b[9]`,
+         `nm19 - nm22` = `b[7]` - `b[10]`,
+         `nm20 - nm21` = `b[8]` - `b[9]`,
+         `nm20 - nm22` = `b[8]` - `b[10]`,
+         `nm21 - nm22` = `b[9]` - `b[10]`) %>% 
+  select(-c(1:9)) %>% 
+  pivot_longer(everything(),
+               names_to = "cat",
+               values_to = "Diff") %>% 
+  group_by(cat) %>% 
+  summarise(Median = median(Diff),
+            lower_hdi = bayestestR::hdi(Diff)[[2]],
+            upper_hdi = bayestestR::hdi(Diff)[[3]]) 
+```
+
+##### 結果の図示     
+それでは、結果を図示する。まずは、時系列的に$p_t$の事後平均と95%確信区間を図示する。*TY*と*IT*の有無で点の色を変えている。交尾期と非交尾期は分けて図示する。      
+```{r, height = 6}
+fit_female_ss_rv <- as_draws_df(draws_female_ss_rv, .nchains = 4) %>% 
+  select(contains("p[")) %>% 
+  pivot_longer(everything(),
+               names_to = "p",
+               values_to = "post") %>% 
+  drop_na() %>% 
+  group_by(p) %>% 
+  summarise(mean_prob = median(post),
+            lower_prob = bayestestR::hdi(post)[[2]],
+            upper_prob = bayestestR::hdi(post)[[3]]) %>% 
+  ungroup() %>% 
+  mutate(p2 = as.numeric(str_replace_all(p, c("p\\[" = "","\\]" = "")))) %>% 
+  arrange(p2) %>% 
+  bind_cols(nadrop_no_female) %>% 
+  mutate(TY = as.factor(TY),
+         IT = as.factor(IT)) %>% 
+  mutate(TY = fct_relevel(TY, "1", "0"),
+         IT = fct_relevel(IT, "1", "0")) %>% 
+  mutate(TYIT = ifelse(TY == "1" & IT == "1", "Both present",
+                       ifelse(TY == "1" & IT == "0", "TY only present",
+                              ifelse(IT == "1"& TY == "0", "IT only present", "Both absent")))) %>% 
+  mutate(TYIT = fct_relevel(TYIT, "Both present", "TY only present", "IT only present"))
+
+## 交尾期  
+fit_female_ss_rv %>% 
+  filter(!str_detect(study_period, "nm")) %>% 
+  mutate(study_period = str_replace_all(study_period, "m","MS")) %>% 
+  ggplot(aes(x=date))+
+  geom_line(aes(y = mean_prob),
+            color = "grey36")+
+  geom_ribbon(aes(ymin = lower_prob,ymax = upper_prob),alpha = 0.2)+
+  geom_point(aes(y = prop_female, 
+                 fill = TYIT, shape = TYIT, size = TYIT),
+             alpha = 0.8)+
+  scale_fill_manual(values = c("white","grey75","grey25", "grey30"),
+                    labels = c("Both present",
+                               expression(paste(italic("TY")," only")),
+                               expression(paste(italic("IT")," only")),
+                               "Both absent"))+
+  scale_shape_manual(values = c(21, 22,25,4),
+                     labels = c("Both present",
+                                expression(paste(italic("TY")," only")),
+                                expression(paste(italic("IT")," only")),
+                                "Both absent"))+
+  scale_size_manual(values = c(2.5,2.5,2,1.7),
+                    labels = c("Both present",
+                               expression(paste(italic("TY")," only")),
+                               expression(paste(italic("IT")," only")),
+                               "Both absent")) + 
+  scale_x_date(breaks = seq(as_date("2018-10-01"),as_date("2022-03-29"),by = "7 days"),
+               labels = date_format("%m/%d"))+
+  theme_bw(base_size = 12)+
+  theme(axis.text.x = element_text(angle = 45,
+                                   hjust =0.5,
+                                   vjust =0.5,
+                                   size = 10,
+                                   family = "Times New Roman"),
+        text = element_text("Times New Roman"),
+        strip.background = element_blank(),
+        strip.text = element_text(hjust = 0),
+        legend.text = element_text(hjust = 0),
+        aspect.ratio = 0.5)+
+  labs(y = "Proportion of present females",
+       x = "",
+       title = "A",
+       fill = expression("Presence of males"),
+       shape = expression("Presence of males"),
+       size = expression("Presence of males")) +
+  guides(fill = guide_legend(override.aes = list(size = 5)))+
+  facet_rep_wrap(~study_period,
+                 repeat.tick.labels = TRUE,
+                 scales = "free_x") -> p_female_ss_rv_TY_m
+
+p_female_ss_rv_TY_m
+
+ggsave("figures/p_female_ss_rv_TY_m.tif", p_female_ss_rv_TY_m,
+       dpi = 2000, units = "mm",
+       width = 300, height = 160)
+
+## 非交尾期  
+fit_female_ss_rv %>% 
+  filter(str_detect(study_period, "nm")) %>% 
+  mutate(study_period = str_replace_all(study_period, "nm","NMS")) %>% 
+  ggplot(aes(x=date))+
+  geom_line(aes(y = mean_prob),
+            color = "grey36")+
+  geom_ribbon(aes(ymin = lower_prob,ymax = upper_prob),alpha = 0.2)+
+  geom_point(aes(y = prop_female, 
+                 fill = TYIT, shape = TYIT, size = TYIT),
+             alpha = 0.8)+
+  scale_fill_manual(values = c("white","grey75","grey25", "grey30"),
+                    labels = c("Both present",
+                               expression(paste(italic("TY")," only")),
+                               expression(paste(italic("IT")," only")),
+                               "Both absent"))+
+  scale_shape_manual(values = c(21, 22,25,4),
+                     labels = c("Both present",
+                                expression(paste(italic("TY")," only")),
+                                expression(paste(italic("IT")," only")),
+                                "Both absent"))+
+  scale_size_manual(values = c(2.5,2.5,2,1.7),
+                    labels = c("Both present",
+                               expression(paste(italic("TY")," only")),
+                               expression(paste(italic("IT")," only")),
+                               "Both absent")) + 
+  scale_x_date(breaks = seq(as_date("2018-10-01"),as_date("2022-03-29"),by = "7 days"),
+               labels = date_format("%m/%d"))+
+  theme_bw(base_size = 12)+
+  theme(axis.text.x = element_text(angle = 45,
+                                   hjust =0.5,
+                                   vjust =0.5,
+                                   size = 10,
+                                   family = "Times New Roman"),
+        text = element_text("Times New Roman"),
+        strip.background = element_blank(),
+        strip.text = element_text(hjust = 0),
+        legend.text = element_text(hjust = 0),
+        aspect.ratio = 0.5)+
+  labs(y = "Proportion of present females",
+       x = "",
+       title = "B",
+       fill = expression("Presence of males"),
+       shape = expression("Presence of males"),
+       size = expression("Presence of males")) +
+  guides(fill = guide_legend(override.aes = list(size = 5)))+
+  facet_rep_wrap(~study_period,
+                 repeat.tick.labels = TRUE,
+                 scales = "free_x") -> p_female_ss_rv_TY_nm
+
+p_female_ss_rv_TY_nm
+
+ggsave("figures/p_female_ss_rv_TY_nm.tif", p_female_ss_rv_TY_nm,
+       dpi = 2000, units = "mm",
+       width = 300, height = 160)
+```
+<br/>  
+
+*TY*の有無で確認メス割合を比較したものを図示したのが以下である。　　
+```{r}
+draw_ss_p <- as_draws_df(draws_female_ss_rv, .nchains = 4) %>% 
+  select(contains("p[")) %>% 
+  pivot_longer(everything(),
+               names_to = "p",
+               values_to = "post") %>% 
+  drop_na() %>% 
+  mutate(p2 = parse_number(p)) %>% 
+  left_join(no_female_over0.5_TYIT_1h_b %>% mutate(p2 = 1:n()), by = "p2")
+
+n_days_TY <- nadrop_no_female %>% 
+  group_by(TY) %>% 
+  summarise(N = n()) %>% 
+  mutate(TY = as.factor(TY))
+
+draw_ss_p %>% 
+  group_by(TY) %>% 
+  summarise(median = median(post),
+            lower_hdi = bayestestR::hdi(post)[[2]],
+            upper_hdi = bayestestR::hdi(post)[[3]]) %>% 
+  mutate(TY = as.factor(TY)) -> post_female_ss_rv_TY
+
+nadrop_no_female %>% 
+  mutate(TY = as.factor(TY)) %>% 
+  ggplot(aes(x = TY, y = prop_female))+
+  geom_boxplot(width = 0.5,
+               outlier.alpha = 0.5,
+               fill = "white",
+               linewidth = 1) +
+  geom_point(data = post_female_ss_rv_TY,
+             aes(y = median),
+             color = "grey65",size = 3) +
+  geom_errorbar(data = post_female_ss_rv_TY,
+                aes(y = median, ymin = lower_hdi,ymax = upper_hdi),
+                color = "grey65",size = 0.4,
+                width = 0.2) +
+  geom_text(data = n_days_TY, 
+            aes(label = str_c("N == ",N), 
+                y = 1.035, 
+                family = "Arial"),
+            parse = T,
+            size = 3,
+            family = "Times New Roman")+
+  scale_x_discrete(labels = c("No","Yes"))+
+  labs(y = "Proportion of present females",
+       x = expression(paste(italic("TY"), " presence")),
+       fill = "",
+       title = "A") +
+  theme_bw(base_size = 12) +
+  guides(fill = "none")+
+  theme(aspect.ratio = 1,
+        text = element_text("Times New Roman")) -> p_female_ss_rv_TY
+
+ggsave("figures/p_female_ss_rv_TY.png",p_female_ss_rv_TY,
+       dpi = 2000, units = "mm",
+       width = 100, height = 100)
+```
+
+2021年以前のデータとMCMCサンプルを用いて*IT*についても同様の作図をする。  
+```{r}
+n_days_IT <- nadrop_no_female %>% 
+  filter(!(study_period %in% c("nm22","m21"))) %>% 
+  group_by(IT) %>% 
+  summarise(N = n()) %>% 
+  mutate(IT = as.factor(IT))
+
+draw_ss_p %>% 
+  filter(!(study_period %in% c("nm22","m21"))) %>% 
+  group_by(IT) %>% 
+  summarise(median = median(post),
+            lower_hdi = bayestestR::hdi(post)[[2]],
+            upper_hdi = bayestestR::hdi(post)[[3]]) %>% 
+  mutate(IT = as.factor(IT)) -> post_female_ss_rv_IT
+
+nadrop_no_female %>% 
+  filter(!(study_period %in% c("nm22","m21"))) %>% 
+  mutate(IT = as.factor(IT)) %>% 
+  ggplot(aes(x = IT, y = prop_female))+
+  geom_boxplot(width = 0.5,
+               outlier.alpha = 0.5,
+               fill = "white",
+               linewidth = 1) +
+  geom_point(data = post_female_ss_rv_IT,
+             aes(y = median),
+             color = "grey65",size = 3) +
+  geom_errorbar(data = post_female_ss_rv_IT,
+                aes(y = median, ymin = lower_hdi,ymax = upper_hdi),
+                color = "grey65",size = 0.4,
+                width = 0.2) +
+  geom_text(data = n_days_IT, 
+            aes(label = str_c("N == ",N), 
+                y = 1.035, 
+                family = "Arial"),
+            parse = T,
+            size = 3,
+            family = "Times New Roman")+
+  scale_x_discrete(labels = c("No","Yes"))+
+  labs(y = "Proportion of present females",
+       x = expression(paste(italic("IT"), " presence")),
+       fill = "",
+       title = "B") +
+  theme_bw(base_size = 12) +
+  guides(fill = "none")+
+  theme(aspect.ratio = 1,
+        text = element_text("Times New Roman")) -> p_female_ss_rv_IT
+
+ggsave("figures/p_female_ss_rv_IT.png",p_female_ss_rv_IT,
+       dpi = 2000, units = "mm",
+       width = 100, height = 100)
+```
+
+
+```{r, fig.height = 4}
+p_female_ss_rv_TYIT <- p_female_ss_rv_TY + p_female_ss_rv_IT
+
+p_female_ss_rv_TYIT 
+
+ggsave("figures/p_female_ss_rv_TYIT.tif",p_female_ss_rv_TYIT,
+       dpi = 2000, units = "mm",
+       width = 200, height = 110)
+```
+
+### 2021非交尾期までのデータ  
+*IT*は2021年非交尾までしかいなかった。そこで、その時点までのデータを用いてモデリングを行う。  
+
+#### データの加工  
+```{r}
+no_female_over0.5_bf21 <- no_female_over0.5_TYIT_1h %>% 
+  filter(is.na(prop_female) | (study_period != "m21" & study_period != "nm22")) %>% 
+  filter(date <= "2021-03-27")
+```
+
+#### モデリング  
+データのリストは以下の通り。  
+```{r}
+## 観測値がある行番号  
+nadrop_no_female_bf21 <- drop_na(no_female_over0.5_bf21, IT)
+obs_no_bf21 <- which(!is.na(no_female_over0.5_bf21$no_female))
+
+## 説明変数の行列を作成  
+X_bf21 <- matrix(c(nadrop_no_female_bf21$TY,
+                   nadrop_no_female_bf21$IT,
+                   nadrop_no_female_bf21$m18,
+                   nadrop_no_female_bf21$m19,
+                   nadrop_no_female_bf21$m20,
+                   nadrop_no_female_bf21$nm19,
+                   nadrop_no_female_bf21$nm20,
+                   nadrop_no_female_bf21$nm21),
+                 nrow = 265, ncol = 8)
+
+list_female_ss_bf21 <- list(len_obs = nrow(nadrop_no_female_bf21),
+                            obs_no = obs_no_bf21,
+                            N = nrow(no_female_over0.5_bf21),
+                            X = X_bf21,
+                            D = ncol(X_bf21),
+                            no_female = nadrop_no_female_bf21$no_female,
+                            max_female = nadrop_no_female_bf21$max_female)
+```
+
+それでは、以下のようにcmdstanr[@Gabry2023]でモデルを回す。  
+```{r}
+# stan_female_ss_bf21 <- cmdstan_model("stanfile/m_female_ss_binom.stan")
+# 
+# m_female_ss_bf21_rv <- stan_female_ss_bf21$sample(
+#   data = list_female_ss_bf21,
+#   seed = 13,
+#   iter_sampling = 5000,
+#   iter_warmup = 2000,
+#   thin = 1,
+#   chains = 4,
+#   adapt_delta = 0.999,
+#   max_treedepth = 20)
+# 
+# m_female_ss_bf21_rv$save_object("model/m_female_ss_bf21_rv.rds")
+
+m_female_ss_bf21_rv <- readRDS("model/m_female_ss_bf21_rv.rds")
+```
+
+#### モデルの診断  
+##### Rhat診断  
+Rhatは小さく、収束に問題ないよう。    
+```{r, fig.height = 4.5}
+rhat_female_ss_bf21_rv <- m_female_ss_bf21_rv %>% 
+  bayesplot::rhat()
+
+data.frame(Rhat = rhat_female_ss_bf21_rv) %>% 
+  ggplot(aes(x = Rhat))+
+  geom_histogram(fill = "white",
+                 color = "black")+
+  theme_bw()+
+  theme(aspect.ratio = 1)
+```
+<br/>  
+
+##### 有効サンプルサイズ  
+まず、有効サンプルサイズも少なくとも6500程度ある。  
+```{r, fig.height = 4.5}
+## Rhat, ESSの算出
+diag_female_ss_bf21_rv <- m_female_ss_bf21_rv$summary(variables = c("mu","p","b","lp__","s_t","mu_err"),
+                                                      posterior::default_convergence_measures())
+
+diag_female_ss_bf21_rv %>%
+  pivot_longer(cols = 3:4,
+               names_to = "type",
+               values_to = "ESS") %>% 
+  group_by(type) %>% 
+  summarise(min = min(ESS, na.rm = TRUE),
+            max = max(ESS, na.rm = TRUE),
+            median = median(ESS, na.rm = TRUE))
+```
+<br/>  
+
+図示すると以下の通り。  
+```{r, fig.height = 4.5}
+diag_female_ss_bf21_rv %>% 
+  pivot_longer(cols = 3:4,
+               names_to = "type",
+               values_to = "ESS") %>% 
+  ggplot(aes(x = ESS)) +
+  facet_rep_wrap(~type,
+                 scales = "free")+
+  geom_histogram(fill = "white",
+                 color = "black")+
+  theme_bw()+
+  theme(aspect.ratio = 1)
+```
+<br/>  
+
+##### 残差の自己相関の確認  
+まず残差を算出するため、パラメータの要約統計量を算出します。  
+```{r, fig.height = 4.5}
+## 要約統計量の算出
+post_summary_female_ss_bf21_rv <- m_female_ss_bf21_rv$draws() %>% 
+  as_draws_df(nchains = 4) %>% 
+  mutate(iter = 1:n()) %>% 
+  pivot_longer(-iter,
+               names_to = "variable",
+               values_to = "value") %>% 
+  filter(!(variable %in% c(".draw", ".chain", ".iteration"))) %>% 
+  group_by(variable) %>% 
+  summarise(mean = mean(value),
+            median = median(value),
+            mad = mad(value),
+            lower_hdi = bayestestR::hdi(value)[[2]],
+            upper_hdi = bayestestR::hdi(value)[[3]],
+            pd = p_direction(value)$pd*100) %>% 
+  left_join(diag_female_ss_bf21_rv,
+            by = "variable")
+```
+<br/>  
+
+続いて残差を算出し、自己相関を調べます。自己相関が消えていることが分かります。    
+```{r}
+## 残差の算出
+postmean_female_ss_bf21_rv <- post_summary_female_ss_bf21_rv %>% 
+  filter(str_detect(variable, "p\\[")) %>% 
+  mutate(variable = parse_number(variable)) %>% 
+  arrange(variable) %>% 
+  bind_cols(no_female_over0.5_bf21) %>% 
+  mutate(resid = prop_female - median) 
+
+## 自己相関の
+acf_female_ss_bf21_rv <- acf(postmean_female_ss_bf21_rv$resid,
+                        na.action = na.pass,
+                        plot = F)
+
+data.frame(Lag = acf_female_ss_bf21_rv$lag[,,1],
+           acf = acf_female_ss_bf21_rv$acf[,,1]) %>% 
+  ggplot(aes(x = Lag, y = acf))+
+  geom_segment(aes(yend = 0, xend = Lag))+
+  theme_bw(base_size = 16)+
+  theme(aspect.ratio = 1,
+        axis.title.y = element_text(family = "Arial"),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"))+
+  labs(y = "Autocorrelation of residuals") -> p_acf_female_ss_bf21_rv  
+
+p_acf_female_ss_bf21_rv
+
+ggsave("figures/p_acf_female_ss_bf21_rv.png", p_acf_female_ss_bf21_rv,
+       width = 100, height = 100, dpi = 600, units = "mm")
+```
+<br/>  
+
+##### 事後予測分布の確認  
+
+事後分布からの予測分布と実測値の分布を比較しても大きな乖離はない。   
+```{r, fig.height = 4.5}
+draws_female_ss_bf21_rv <- m_female_ss_bf21_rv$draws() %>% 
+  as_draws_df(nchains = 4)
+
+## pの事後分布から100個のサンプルを抽出してシミュレート    
+set.seed(123)
+sample_n <- sample(1:nrow(draws_female_ss_bf21_rv), size = 1000,
+                   replace = FALSE)
+
+post_p_female_ss_bf21_rv <- draws_female_ss_bf21_rv %>% 
+  select(starts_with("p")) %>% 
+  select(any_of(obs_no_bf21)) %>% 
+  mutate(iter = 1:n())  %>% 
+  pivot_longer(cols = starts_with("p"),
+               values_to = "p") %>% 
+  mutate(max_female = rep(nadrop_no_female_bf21$max_female, times = nrow(draws_female_ss_bf21_rv))) %>% 
+  filter(iter %in% sample_n) %>% 
+  mutate(pred = rbinom(nrow(.), size = max_female, prob = p))
+
+## 事後予測値を事後平均からシミュレート
+post_p_female_ss_bf21_rv %>% 
+  select(iter, name, pred) %>% 
+  pivot_wider(names_from = iter, 
+              values_from = pred) %>% 
+  select(-name) %>% 
+  mutate(y_actual = nadrop_no_female_bf21$no_female) %>% 
+  pivot_longer(everything(),
+               names_to = "n_draw", 
+               values_to = "post_pred") %>% 
+  mutate(type = ifelse(str_detect(n_draw, "y_"),"y","y_pred")) -> post_pred_female_ss_bf21_rv_long2
+
+## 図示  
+post_pred_female_ss_bf21_rv_long2 %>% 
+  ggplot(aes(x = post_pred))+
+  geom_line(stat = "density",
+            aes(group = n_draw,
+                color = type,
+                alpha = type))+
+  scale_color_manual(values = c("blue4","lightblue"))+
+  scale_alpha_discrete(range = c(1, 0.3))+
+  theme_bw()+
+  theme(aspect.ratio = 0.8)+
+  labs(x = "", y = "")
+```
+
+#### 結果の確認  
+結果は以下の通り。*TY*と*IT*がいる日は有意に確認メス数が多いことが分かった。  
+
+```{r}
+post_summary_female_ss_bf21_rv %>% 
+  filter(str_detect(variable, "b")) %>% 
+  mutate(num = parse_number(variable)) %>% 
+  arrange(num) %>% 
+  select(-num) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",lower_hdi),",",sprintf("%.2f", upper_hdi),"]")) %>% 
+  mutate(PD = sprintf("%.2f", pd)) %>% 
+  select(1,3,4, 11, 12, 8,9,10) %>% 
+  rename("Explanatory variables" = 1,
+         "Median" = 2,
+         "MAD" = 3,
+         "Rhat" = 6) %>% 
+  mutate(`Explanatory variables` = str_replace_all(`Explanatory variables`, c(
+    "b\\[1\\]" = "Presence of TY (vs. absent)",
+    "b\\[2\\]" = "Presence of IT (vs. absent)",
+    "b\\[3\\]" = "Study period (MS18)",
+    "b\\[4\\]" = "Study period (MS19)",
+    "b\\[5\\]" = "Study period (MS20)",
+    "b\\[6\\]" = "Study period (MS21)",
+    "b\\[7\\]" = "Study period (NMS19)",
+    "b\\[8\\]" = "Study period (NMS20)",
+    "b\\[9\\]" = "Study period (NMS21)",
+    "b\\[10\\]" = "Study period (NMS22)"))) %>% 
+  mutate(across(where(is.numeric), ~sprintf("%.2f", .))) -> table_female_ss_bf21_rv
+
+table_female_ss_bf21_rv
+
+write_csv(table_female_ss_bf21_rv, "tables/table_female_ss_bf21_rv.csv")
+```
+
+*TY*の有無をコントロールすると、調査期間間の効果の違いはない。つまり、調査期間間のメス確認割合の違いは*TY*の有無に大きく影響されていたことが分かった。  
+```{r}
+draws_female_ss_bf21_rv %>% 
+  select(4:9) %>% 
+  mutate(`m18 - m19` = `b[3]` - `b[4]`,
+         `m18 - m20` = `b[3]` - `b[5]`,
+         `m18 - m21` = `b[3]` - `b[6]`,
+         `m18 - nm19` = `b[3]` - `b[7]`,
+         `m18 - nm20` = `b[3]` - `b[8]`,
+         `m19 - m20` = `b[4]` - `b[5]`,
+         `m19 - m21` = `b[4]` - `b[6]`,
+         `m19 - nm19` = `b[4]` - `b[7]`,
+         `m19 - nm20` = `b[4]` - `b[8]`,
+         `m20 - m21` = `b[5]` - `b[6]`,
+         `m20 - nm19` = `b[5]` - `b[7]`,
+         `m20 - nm20` = `b[5]` - `b[8]`,
+         `m21 - nm19` = `b[6]` - `b[7]`,
+         `m21 - nm20` = `b[6]` - `b[8]`,
+         `nm19 - nm20` = `b[7]` - `b[8]`) %>% 
+  select(-c(1:9)) %>% 
+  pivot_longer(everything(),
+               names_to = "cat",
+               values_to = "Diff") %>% 
+  group_by(cat) %>% 
+  summarise(Median = median(Diff),
+            lower_hdi = bayestestR::hdi(Diff)[[2]],
+            upper_hdi = bayestestR::hdi(Diff)[[3]]) 
+```
+
+#### 結果の図示     
+それでは、結果を図示する。まずは、時系列的に$p_t$の事後平均と95%確信区間を図示する。*TY*と*IT*の有無で点の色を変えている。交尾期と非交尾期は分けて図示する。      
+```{r, height = 6}
+fit_female_ss_bf21_rv <- as_draws_df(draws_female_ss_bf21_rv, .nchains = 4) %>% 
+  select(contains("p[")) %>% 
+  pivot_longer(everything(),
+               names_to = "p",
+               values_to = "post") %>% 
+  drop_na() %>% 
+  group_by(p) %>% 
+  summarise(mean_prob = median(post),
+            lower_prob = bayestestR::hdi(post)[[2]],
+            upper_prob = bayestestR::hdi(post)[[3]]) %>% 
+  ungroup() %>% 
+  mutate(p2 = as.numeric(str_replace_all(p, c("p\\[" = "","\\]" = "")))) %>% 
+  arrange(p2) %>% 
+  bind_cols(nadrop_no_female_bf21) %>% 
+  mutate(TY = as.factor(TY),
+         IT = as.factor(IT)) %>% 
+  mutate(TY = fct_relevel(TY, "1", "0"),
+         IT = fct_relevel(IT, "1", "0")) %>% 
+  mutate(TYIT = ifelse(TY == "1" & IT == "1", "Both present",
+                       ifelse(TY == "1" & IT == "0", "TY only present",
+                              ifelse(IT == "1"& TY == "0", "IT only present", "Both absent")))) %>% 
+  mutate(TYIT = fct_relevel(TYIT, "Both present", "TY only present", "IT only present"))
+
+## 交尾期  
+fit_female_ss_bf21_rv %>% 
+  filter(!str_detect(study_period, "nm")) %>% 
+  mutate(study_period = str_replace_all(study_period, "m","MS")) %>% 
+  ggplot(aes(x=date))+
+  geom_line(aes(y = mean_prob),
+            color = "grey36")+
+  geom_ribbon(aes(ymin = lower_prob,ymax = upper_prob),alpha = 0.2)+
+  geom_point(aes(y = prop_female, 
+                 fill = TYIT, shape = TYIT, size = TYIT),
+             alpha = 0.8)+
+  scale_fill_manual(values = c("white","grey75","grey25", "grey30"),
+                    labels = c("Both present",
+                               expression(paste(italic("TY")," only")),
+                               expression(paste(italic("IT")," only")),
+                               "Both absent"))+
+  scale_shape_manual(values = c(21, 22,25,4),
+                     labels = c("Both present",
+                                expression(paste(italic("TY")," only")),
+                                expression(paste(italic("IT")," only")),
+                                "Both absent"))+
+  scale_size_manual(values = c(2.5,2.5,2,1.7),
+                    labels = c("Both present",
+                               expression(paste(italic("TY")," only")),
+                               expression(paste(italic("IT")," only")),
+                               "Both absent")) + 
+  scale_x_date(breaks = seq(as_date("2018-10-01"),as_date("2022-03-29"),by = "7 days"),
+               labels = date_format("%m/%d"))+
+  theme_bw(base_size = 12)+
+  theme(axis.text.x = element_text(angle = 45,
+                                   hjust =0.5,
+                                   vjust =0.5,
+                                   size = 10,
+                                   family = "Times New Roman"),
+        text = element_text("Times New Roman"),
+        strip.background = element_blank(),
+        strip.text = element_text(hjust = 0),
+        legend.text = element_text(hjust = 0),
+        aspect.ratio = 0.5)+
+  labs(y = "Proportion of present females",
+       x = "",
+       title = "A",
+       fill = expression("Presence of males"),
+       shape = expression("Presence of males"),
+       size = expression("Presence of males")) +
+  guides(fill = guide_legend(override.aes = list(size = 5)))+
+  facet_rep_wrap(~study_period,
+                 repeat.tick.labels = TRUE,
+                 scales = "free_x") -> p_female_ss_bf21_rv_TY_m
+
+p_female_ss_bf21_rv_TY_m
+
+ggsave("figures/p_female_ss_bf21_rv_TY_m.tif", p_female_ss_bf21_rv_TY_m,
+       dpi = 2000, units = "mm",
+       width = 300, height = 160)
+
+## 非交尾期  
+fit_female_ss_bf21_rv %>% 
+  filter(str_detect(study_period, "nm")) %>% 
+  mutate(study_period = str_replace_all(study_period, "nm","NMS")) %>% 
+  ggplot(aes(x=date))+
+  geom_line(aes(y = mean_prob),
+            color = "grey36")+
+  geom_ribbon(aes(ymin = lower_prob,ymax = upper_prob),alpha = 0.2)+
+  geom_point(aes(y = prop_female, 
+                 fill = TYIT, shape = TYIT, size = TYIT),
+             alpha = 0.8)+
+  scale_fill_manual(values = c("white","grey75","grey25", "grey30"),
+                    labels = c("Both present",
+                               expression(paste(italic("TY")," only")),
+                               expression(paste(italic("IT")," only")),
+                               "Both absent"))+
+  scale_shape_manual(values = c(21, 22,25,4),
+                     labels = c("Both present",
+                                expression(paste(italic("TY")," only")),
+                                expression(paste(italic("IT")," only")),
+                                "Both absent"))+
+  scale_size_manual(values = c(2.5,2.5,2,1.7),
+                    labels = c("Both present",
+                               expression(paste(italic("TY")," only")),
+                               expression(paste(italic("IT")," only")),
+                               "Both absent")) + 
+  scale_x_date(breaks = seq(as_date("2018-10-01"),as_date("2022-03-29"),by = "7 days"),
+               labels = date_format("%m/%d"))+
+  theme_bw(base_size = 12)+
+  theme(axis.text.x = element_text(angle = 45,
+                                   hjust =0.5,
+                                   vjust =0.5,
+                                   size = 10,
+                                   family = "Times New Roman"),
+        text = element_text("Times New Roman"),
+        strip.background = element_blank(),
+        strip.text = element_text(hjust = 0),
+        legend.text = element_text(hjust = 0),
+        aspect.ratio = 0.5)+
+  labs(y = "Proportion of present females",
+       x = "",
+       title = "B",
+       fill = expression("Presence of males"),
+       shape = expression("Presence of males"),
+       size = expression("Presence of males")) +
+  guides(fill = guide_legend(override.aes = list(size = 5)))+
+  facet_rep_wrap(~study_period,
+                 repeat.tick.labels = TRUE,
+                 scales = "free_x") -> p_female_ss_bf21_rv_TY_nm
+
+p_female_ss_bf21_rv_TY_nm
+
+ggsave("figures/p_female_ss_bf21_rv_TY_nm.tif", p_female_ss_bf21_rv_TY_nm,
+       dpi = 2000, units = "mm",
+       width = 300, height = 160)
+```
+<br/>  
+
+*TY*の有無で確認メス割合を比較したものを図示したのが以下である。　　
+```{r}
+draw_ss_p <- as_draws_df(draws_female_ss_bf21_rv, .nchains = 4) %>% 
+  select(contains("p[")) %>% 
+  pivot_longer(everything(),
+               names_to = "p",
+               values_to = "post") %>% 
+  drop_na() %>% 
+  mutate(p2 = parse_number(p)) %>% 
+  left_join(no_female_over0.5_bf21 %>% mutate(p2 = 1:n()), by = "p2")
+
+n_days_TY <- nadrop_no_female_bf21 %>% 
+  group_by(TY) %>% 
+  summarise(N = n()) %>% 
+  mutate(TY = as.factor(TY))
+
+draw_ss_p %>% 
+  group_by(TY) %>% 
+  summarise(median = median(post),
+            lower_hdi = bayestestR::hdi(post)[[2]],
+            upper_hdi = bayestestR::hdi(post)[[3]]) %>% 
+  mutate(TY = as.factor(TY)) -> post_female_ss_bf21_rv_TY
+
+nadrop_no_female_bf21 %>% 
+  mutate(TY = as.factor(TY)) %>% 
+  ggplot(aes(x = TY, y = prop_female))+
+  geom_boxplot(width = 0.5,
+               outlier.alpha = 0.5,
+               fill = "white",
+               linewidth = 1) +
+  geom_point(data = post_female_ss_bf21_rv_TY,
+             aes(y = median),
+             color = "grey65",size = 3) +
+  geom_errorbar(data = post_female_ss_bf21_rv_TY,
+                aes(y = median, ymin = lower_hdi,ymax = upper_hdi),
+                color = "grey65",size = 0.4,
+                width = 0.2) +
+  geom_text(data = n_days_TY, 
+            aes(label = str_c("N == ",N), 
+                y = 1.035, 
+                family = "Arial"),
+            parse = T,
+            size = 3,
+            family = "Times New Roman")+
+  scale_x_discrete(labels = c("No","Yes"))+
+  labs(y = "Proportion of present females",
+       x = expression(paste(italic("TY"), " presence")),
+       fill = "",
+       title = "A") +
+  theme_bw(base_size = 12) +
+  guides(fill = "none")+
+  theme(aspect.ratio = 1,
+        text = element_text("Times New Roman")) -> p_female_ss_bf21_rv_TY
+
+ggsave("figures/p_female_ss_bf21_rv_TY.png",p_female_ss_bf21_rv_TY,
+       dpi = 2000, units = "mm",
+       width = 100, height = 100)
+```
+
+2021年以前のデータとMCMCサンプルを用いて*IT*についても同様の作図をする。  
+```{r}
+n_days_IT <- nadrop_no_female_bf21 %>% 
+  filter(!(study_period %in% c("nm22","m21"))) %>% 
+  group_by(IT) %>% 
+  summarise(N = n()) %>% 
+  mutate(IT = as.factor(IT))
+
+draw_ss_p %>% 
+  filter(!(study_period %in% c("nm22","m21"))) %>% 
+  group_by(IT) %>% 
+  summarise(median = median(post),
+            lower_hdi = bayestestR::hdi(post)[[2]],
+            upper_hdi = bayestestR::hdi(post)[[3]]) %>% 
+  mutate(IT = as.factor(IT)) -> post_female_ss_bf21_rv_IT
+
+nadrop_no_female_bf21 %>% 
+  filter(!(study_period %in% c("nm22","m21"))) %>% 
+  mutate(IT = as.factor(IT)) %>% 
+  ggplot(aes(x = IT, y = prop_female))+
+  geom_boxplot(width = 0.5,
+               outlier.alpha = 0.5,
+               fill = "white",
+               linewidth = 1) +
+  geom_point(data = post_female_ss_bf21_rv_IT,
+             aes(y = median),
+             color = "grey65",size = 3) +
+  geom_errorbar(data = post_female_ss_bf21_rv_IT,
+                aes(y = median, ymin = lower_hdi,ymax = upper_hdi),
+                color = "grey65",size = 0.4,
+                width = 0.2) +
+  geom_text(data = n_days_IT, 
+            aes(label = str_c("N == ",N), 
+                y = 1.035, 
+                family = "Arial"),
+            parse = T,
+            size = 3,
+            family = "Times New Roman")+
+  scale_x_discrete(labels = c("No","Yes"))+
+  labs(y = "Proportion of present females",
+       x = expression(paste(italic("IT"), " presence")),
+       fill = "",
+       title = "B") +
+  theme_bw(base_size = 12) +
+  guides(fill = "none")+
+  theme(aspect.ratio = 1,
+        text = element_text("Times New Roman")) -> p_female_ss_bf21_rv_IT
+
+ggsave("figures/p_female_ss_bf21_rv_IT.png",p_female_ss_bf21_rv_IT,
+       dpi = 2000, units = "mm",
+       width = 100, height = 100)
+```
+
+
+```{r, fig.height = 4}
+p_female_ss_bf21_rv_TYIT <- p_female_ss_bf21_rv_TY + p_female_ss_bf21_rv_IT
+
+p_female_ss_bf21_rv_TYIT
+
+ggsave("figures/p_female_ss_bf21_rv_TYIT.tif",p_female_ss_bf21_rv_TYIT,
+       dpi = 2000, units = "mm",
+       width = 200, height = 110)
+```
+
+## 1時間未満も出席と扱う場合  
+### データの加工  
+続いて、1時間未満の確認でも出席とする場合のモデリングを行う。まず、彼らの確認時間帯が記されたデータシートを読み込み、1分でも確認できたか否かの列を作成する。出入りがあった期間以外は、群れ本体にいた場合は終日確認されたので`group_all`からデータを引っ張ってくる。    
+
+```{r}
+male_time_18m <- group_all %>% 
+  filter(study_period == "m18") %>% 
+  select(date, groupID, TY, IT)  
+
+male_time_19nm <- group_all %>% 
+  filter(study_period == "nm19") %>% 
+  select(date, groupID, TY, IT)  
+
+male_time_19m <- read_excel("../Data/data/2019mating/2019mating_raw.xlsx",
+                               sheet =　"male_presence_long") %>% 
+  mutate(study_period = "m19") %>% 
+  mutate(groupID = str_c(study_period,"_", groupID)) %>% 
+  ## 確認時間の算出
+  mutate(dur = ifelse(is.na(first), 0,
+                      difftime(last, first, units = "mins"))) %>% 
+  mutate(presence = ifelse(dur > 0, 1, 0)) %>% 
+  select(maleID, date, groupID, presence) %>% 
+  pivot_wider(names_from = maleID,
+              values_from = presence)
+
+male_time_20m <- read_excel("../Data/data/2020mating/2020mating_raw.xlsx",
+                               sheet =　"male_presence_long") %>% 
+  mutate(study_period = "m20") %>% 
+  mutate(groupID = str_c(study_period,"_", groupID)) %>% 
+  ## 確認時間の算出
+  mutate(dur = ifelse(is.na(first), 0,
+                      difftime(last, first, units = "mins"))) %>% 
+  mutate(presence = ifelse(dur > 0, 1, 0)) %>% 
+  select(maleID, date, groupID, presence) %>% 
+  pivot_wider(names_from = maleID,
+              values_from = presence)
+
+male_time_21m <- read_excel("../Data/data/2021mating/2021mating_raw.xlsx",
+                               sheet =　"male_presence_long") %>% 
+  mutate(study_period = "m21") %>% 
+  mutate(groupID = str_c(study_period,"_", groupID)) %>% 
+  ## 確認時間の算出
+  mutate(dur = ifelse(is.na(first), 0,
+                      difftime(last, first, units = "mins"))) %>% 
+  mutate(presence = ifelse(dur > 0, 1, 0)) %>% 
+  select(maleID, date, groupID, presence) %>% 
+  pivot_wider(names_from = maleID,
+              values_from = presence)
+
+male_time_20nm <- read_excel("../Data/data/2020nonmating/2020nonmating_raw.xlsx",
+                                sheet =　"male_presence_long") %>% 
+  mutate(study_period = "nm20") %>% 
+  mutate(groupID = str_c(study_period,"_", groupID)) %>% 
+  ## 確認時間の算出
+  mutate(dur = ifelse(is.na(first), 0,
+                      difftime(last, first, units = "mins"))) %>% 
+  mutate(presence = ifelse(dur > 0, 1, 0)) %>% 
+  select(maleID, date, groupID, presence) %>% 
+  pivot_wider(names_from = maleID,
+              values_from = presence)
+
+male_time_21nm <- read_excel("../Data/data/2021nonmating/2021nonmating_raw.xlsx",
+                                sheet =　"male_presence_long") %>% 
+  mutate(study_period = "nm21") %>% 
+  mutate(groupID = str_c(study_period,"_", groupID)) %>% 
+  ## 確認時間の算出
+  mutate(dur = ifelse(is.na(first), 0,
+                      difftime(last, first, units = "mins"))) %>% 
+  mutate(presence = ifelse(dur > 0, 1, 0)) %>% 
+  select(maleID, date, groupID, presence) %>% 
+  pivot_wider(names_from = maleID,
+              values_from = presence)
+
+male_time_22nm <- group_all %>% 
+  filter(study_period == "nm22") %>% 
+  select(date, groupID, TY, IT)  
+
+TYIT_presence <- bind_rows(male_time_18m, male_time_19m, male_time_20m, male_time_21m,
+                              male_time_19nm, male_time_20nm, male_time_21nm, male_time_22nm)
+```
+
+続いて、群れ本体が240日以上確認できた日のデータに先ほどのデータを結合する。また、データのない日付の行も補完する。    
+```{r}
+no_female_over0.5_TYIT <- no_female_over0.5 %>% 
+  left_join(TYIT_presence, by = c("date","groupID")) %>% 
+  mutate(date = as_date(date)) %>% 
+  complete(date = seq.Date(min(date), max(date), by ="1 day")) %>% 
+  mutate(m18 = ifelse(study_period == "m18",1,0),
+         m19 = ifelse(study_period == "m19",1,0),
+         m20 = ifelse(study_period == "m20",1,0),
+         m21 = ifelse(study_period == "m21",1,0),
+         nm19 = ifelse(study_period == "nm19",1,0),
+         nm20 = ifelse(study_period == "nm20",1,0),
+         nm21 = ifelse(study_period == "nm21",1,0),
+         nm22 = ifelse(study_period == "nm22",1,0))
+```
+
+データは以下の通り。  
+```{r}
+datatable(no_female_over0.5_TYIT,
+          filter = "top",
+          options = list(scrollX = TRUE))
+```
+<br/>  
+
+なお、それぞれの期間における確認メス割合の変動係数を計算すると以下のようになる。  
+```{r}
+no_female_over0.5_TYIT %>% 
+  drop_na(no_female) %>% 
+  group_by(study_period) %>% 
+  summarise(sd = sd(prop_female),
+            mean = mean(prop_female)) %>% 
+  ungroup() %>% 
+  mutate(cv = sd/mean)
+```
+
+
+## ローカルレベルモデル    
+### 全期間のデータ  
+#### モデリング       
+以下のモデルを考える。  
+
+- $no\_female_{t}$: 時点tの確認メス数  
+- $max_female_{t}$: 時点tでの最大メス数  
+- $TY_{t}$/$IT_{t}:$ t時点のTY/ITの群れ本体での有無   
+- $study\_period_{t}$: 調査期間を表すダミー変数  
+
+$$ 
+\begin{aligned}
+&no\_female_{t} \sim Binomial(p_t, max\_female_t)\\
+&logit(p_{t}) = \mu_{t} + \beta_1 \times TY_t + IT_t + \sum_{j = 2}^9 \beta_j \times study\_period_{t}\\
+& \mu_{t} = \mu_{t-1}+\epsilon_{t}\\
+& \epsilon_{t} \sim Normal(0,\sigma^2)\\
+& \beta_{1,2,3,4, 5,6,7,8,9} \sim Student\_t(0,4,10)\\
+&\sigma^2 \sim Student\_t(0,4,5)\\
+\end{aligned}
+$$
+
+データのリストは以下の通り。  
+```{r}
+## ITの欠損値を0に  
+no_female_over0.5_TYIT_b <- no_female_over0.5_TYIT %>% 
+  mutate(IT = ifelse(is.na(IT) & !is.na(TY), 0, IT))
+
+## 観測値がある行番号  
+nadrop_no_female2 <- drop_na(no_female_over0.5_TYIT_b, prop_female)
+obs_no2 <- which(!is.na(no_female_over0.5_TYIT_b$no_female))
+
+## 説明変数の行列を作成  
+X2 <- matrix(c(nadrop_no_female2$TY,
+               nadrop_no_female2$IT,
+               nadrop_no_female2$m18,
+               nadrop_no_female2$m19,
+               nadrop_no_female2$m20,
+               nadrop_no_female2$m21,
+               nadrop_no_female2$nm19,
+               nadrop_no_female2$nm20,
+               nadrop_no_female2$nm21,
+               nadrop_no_female2$nm22),
+             nrow = 383, ncol = 10)
+
+colnames(X2) <- colnames(nadrop_no_female2)[8:17]
+
+list_female_ss2 <- list(len_obs = nrow(nadrop_no_female2),
+                        obs_no = obs_no2,
+                        N = nrow(no_female_over0.5_TYIT_b),
+                        X = X2,
+                        D = ncol(X2),
+                        no_female = nadrop_no_female2$no_female,
+                        max_female = nadrop_no_female2$max_female)
+```
+
+それでは、以下のようにcmdstanr[@Gabry2023]でモデルを回す。  
+```{r}
+# stan_female_ss2 <- cmdstan_model("stanfile/m_female_ss_binom.stan")
+# 
+# m_female_ss_rv_1min <- stan_female_ss2$sample(
+#   data = list_female_ss2,
+#   seed = 13,
+#   iter_sampling = 5000,
+#   iter_warmup = 2000,
+#   thin = 1,
+#   chains = 4,
+#   adapt_delta = 0.999,
+#   max_treedepth = 20
+# )
+
+# m_female_ss_rv_1min$save_object("model/m_female_ss_rv_1min.rds")
+
+m_female_ss_rv_1min <- readRDS("model/m_female_ss_rv_1min.rds")  
+```
+
+##### モデルの診断  
+###### Rhat診断  
+Rhatは小さく、収束に問題ないよう。    
+```{r, fig.height = 4.5}
+rhat_female_ss_rv_1min <- m_female_ss_rv_1min %>% 
+  bayesplot::rhat()
+
+data.frame(Rhat = rhat_female_ss_rv_1min) %>% 
+  ggplot(aes(x = Rhat))+
+  geom_histogram(fill = "white",
+                 color = "black")+
+  theme_bw()+
+  theme(aspect.ratio = 1)
+```
+<br/>  
+
+###### 有効サンプルサイズ  
+まず、有効サンプルサイズも少なくとも7000程度ある。  
+```{r, fig.height = 4.5}
+## Rhat, ESSの算出
+diag_female_ss_rv_1min <- m_female_ss_rv_1min$summary(variables = c("mu","p","b","lp__","s_t","mu_err"),
+                                            posterior::default_convergence_measures())
+
+diag_female_ss_rv_1min %>%
+  pivot_longer(cols = 3:4,
+               names_to = "type",
+               values_to = "ESS") %>% 
+  group_by(type) %>% 
+  summarise(min = min(ESS, na.rm = TRUE),
+            max = max(ESS, na.rm = TRUE),
+            median = median(ESS, na.rm = TRUE))
+```
+<br/>  
+
+図示すると以下の通り。  
+```{r, fig.height = 4.5}
+diag_female_ss_rv_1min %>% 
+  pivot_longer(cols = 3:4,
+               names_to = "type",
+               values_to = "ESS") %>% 
+  ggplot(aes(x = ESS)) +
+  facet_rep_wrap(~type,
+                 scales = "free")+
+  geom_histogram(fill = "white",
+                 color = "black")+
+  theme_bw()+
+  theme(aspect.ratio = 1)
+```
+<br/>  
+
+###### 残差の自己相関の確認  
+まず残差を算出するため、パラメータの要約統計量を算出します。  
+```{r, fig.height = 4.5}
+## 要約統計量の算出
+post_summary_female_ss_rv_1min <- m_female_ss_rv_1min$draws() %>% 
+  as_draws_df(nchains = 4) %>% 
+  mutate(iter = 1:n()) %>% 
+  pivot_longer(-iter,
+               names_to = "variable",
+               values_to = "value") %>% 
+  filter(!(variable %in% c(".draw", ".chain", ".iteration"))) %>% 
+  group_by(variable) %>% 
+  summarise(mean = mean(value),
+            median = median(value),
+            mad = mad(value),
+            lower_hdi = bayestestR::hdi(value)[[2]],
+            upper_hdi = bayestestR::hdi(value)[[3]],
+            pd = p_direction(value)$pd*100) %>% 
+  left_join(diag_female_ss_rv_1min,
+            by = "variable")
+```
+<br/>  
+
+続いて残差を算出し、自己相関を調べます。自己相関が消えていることが分かります。    
+```{r}
+## 残差の算出
+postmean_female_ss_rv_1min <- post_summary_female_ss_rv_1min %>% 
+  filter(str_detect(variable, "p\\[")) %>% 
+  mutate(variable = parse_number(variable)) %>% 
+  arrange(variable) %>% 
+  bind_cols(no_female_over0.5_TYIT_b) %>% 
+  mutate(resid = prop_female - median) 
+
+## 自己相関の
+acf_female_ss_rv_1min <- acf(postmean_female_ss_rv_1min$resid,
+                        na.action = na.pass,
+                        plot = F)
+
+data.frame(Lag = acf_female_ss_rv_1min$lag[,,1],
+           acf = acf_female_ss_rv_1min$acf[,,1]) %>% 
+  ggplot(aes(x = Lag, y = acf))+
+  geom_segment(aes(yend = 0, xend = Lag))+
+  theme_bw(base_size = 16)+
+  theme(aspect.ratio = 1,
+        axis.title.y = element_text(family = "Arial"),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"))+
+  labs(y = "Autocorrelation of residuals") -> p_acf_female_ss_rv_1min  
+
+p_acf_female_ss_rv_1min
+
+ggsave("figures/p_acf_female_ss_rv_1min.png", p_acf_female_ss_rv_1min,
+       width = 100, height = 100, dpi = 600, units = "mm")
+```
+<br/>  
+
+###### 事後予測分布の確認   
+事後分布からの予測分布と実測値の分布を比較しても大きな乖離はない。   
+```{r, fig.height = 4.5}
+draws_female_ss_rv_1min <- m_female_ss_rv_1min$draws() %>% 
+  as_draws_df(nchains = 4)
+
+## pの事後分布から100個のサンプルを抽出してシミュレート    
+set.seed(123)
+sample_n <- sample(1:nrow(draws_female_ss_rv_1min), size = 1000,
+                   replace = FALSE)
+
+post_p_female_ss_rv_1min <- draws_female_ss_rv_1min %>% 
+  select(starts_with("p")) %>% 
+  select(any_of(obs_no2)) %>% 
+  mutate(iter = 1:n())  %>% 
+  pivot_longer(cols = starts_with("p"),
+               values_to = "p") %>% 
+  mutate(max_female = rep(nadrop_no_female2$max_female, times = nrow(draws_female_ss_rv_1min))) %>% 
+  filter(iter %in% sample_n) %>% 
+  mutate(pred = rbinom(nrow(.), size = max_female, prob = p))
+
+## 事後予測値を事後平均からシミュレート
+post_p_female_ss_rv_1min %>% 
+  select(iter, name, pred) %>% 
+  pivot_wider(names_from = iter, 
+              values_from = pred) %>% 
+  select(-name) %>% 
+  mutate(y_actual = nadrop_no_female2$no_female) %>% 
+  pivot_longer(everything(),
+               names_to = "n_draw", 
+               values_to = "post_pred") %>% 
+  mutate(type = ifelse(str_detect(n_draw, "y_"),"y","y_pred")) -> post_pred_female_ss_rv_1min_ri_long2
+
+## 図示  
+post_pred_female_ss_rv_1min_ri_long2 %>% 
+  ggplot(aes(x = post_pred))+
+  geom_line(stat = "density",
+            aes(group = n_draw,
+                color = type,
+                alpha = type))+
+  scale_color_manual(values = c("blue4","lightblue"))+
+  scale_alpha_discrete(range = c(1, 0.3))+
+  theme_bw()+
+  theme(aspect.ratio = 0.8)+
+  labs(x = "", y = "")
+```
+
+##### 結果の確認  
+結果は以下の通り。*TY*と*IT*がいる日は有意に確認メス数が多いことが分かった。  
+
+```{r}
+post_summary_female_ss_rv_1min %>% 
+  filter(str_detect(variable, "b")) %>% 
+  mutate(num = parse_number(variable)) %>% 
+  arrange(num) %>% 
+  select(-num) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",lower_hdi),",",sprintf("%.2f", upper_hdi),"]")) %>% 
+  mutate(PD = sprintf("%.2f", pd)) %>% 
+  select(1,3,4, 11, 12, 8,9,10) %>% 
+  rename("Explanatory variables" = 1,
+         "Median" = 2,
+         "MAD" = 3,
+         "Rhat" = 6) %>% 
+  mutate(`Explanatory variables` = str_replace_all(`Explanatory variables`, c(
+    "b\\[1\\]" = "Presence of TY (vs. absent)",
+    "b\\[2\\]" = "Presence of IT (vs. absent)",
+    "b\\[3\\]" = "Study period (MS18)",
+    "b\\[4\\]" = "Study period (MS19)",
+    "b\\[5\\]" = "Study period (MS20)",
+    "b\\[6\\]" = "Study period (MS21)",
+    "b\\[7\\]" = "Study period (NMS19)",
+    "b\\[8\\]" = "Study period (NMS20)",
+    "b\\[9\\]" = "Study period (NMS21)",
+    "b\\[10\\]" = "Study period (NMS22)"))) %>% 
+  mutate(across(where(is.numeric), ~sprintf("%.2f", .))) -> table_female_ss_rv_1min
+
+table_female_ss_rv_1min
+
+write_csv(table_female_ss_rv_1min, "tables/table_female_ss_rv_1min.csv")
+```
+
+*TY*の有無をコントロールすると、調査期間間の効果の違いはない。つまり、調査期間間のメス確認割合の違いは*TY*の有無に大きく影響されていたことが分かった。  
+```{r}
+draws_female_ss_rv_1min %>% 
+  select(4:11) %>% 
+  mutate(`m18 - m19` = `b[3]` - `b[4]`,
+         `m18 - m20` = `b[3]` - `b[5]`,
+         `m18 - m21` = `b[3]` - `b[6]`,
+         `m18 - nm19` = `b[3]` - `b[7]`,
+         `m18 - nm20` = `b[3]` - `b[8]`,
+         `m18 - nm21` = `b[3]` - `b[9]`,
+         `m18 - nm22` = `b[3]` - `b[10]`,
+         `m19 - m20` = `b[4]` - `b[5]`,
+         `m19 - m21` = `b[4]` - `b[6]`,
+         `m19 - nm19` = `b[4]` - `b[7]`,
+         `m19 - nm20` = `b[4]` - `b[8]`,
+         `m19 - nm21` = `b[4]` - `b[9]`,
+         `m19 - nm22` = `b[4]` - `b[10]`,
+         `m20 - m21` = `b[5]` - `b[6]`,
+         `m20 - nm19` = `b[5]` - `b[7]`,
+         `m20 - nm20` = `b[5]` - `b[8]`,
+         `m20 - nm21` = `b[5]` - `b[9]`,
+         `m20 - nm22` = `b[5]` - `b[10]`,
+         `m21 - nm19` = `b[6]` - `b[7]`,
+         `m21 - nm20` = `b[6]` - `b[8]`,
+         `m21 - nm21` = `b[6]` - `b[9]`,
+         `m21 - nm22` = `b[6]` - `b[10]`,
+         `nm19 - nm20` = `b[7]` - `b[8]`,
+         `nm19 - nm21` = `b[7]` - `b[9]`,
+         `nm19 - nm22` = `b[7]` - `b[10]`,
+         `nm20 - nm21` = `b[8]` - `b[9]`,
+         `nm20 - nm22` = `b[8]` - `b[10]`,
+         `nm21 - nm22` = `b[9]` - `b[10]`) %>% 
+  select(-c(1:9)) %>% 
+  pivot_longer(everything(),
+               names_to = "cat",
+               values_to = "Diff") %>% 
+  group_by(cat) %>% 
+  summarise(Median = median(Diff),
+            lower_hdi = bayestestR::hdi(Diff)[[2]],
+            upper_hdi = bayestestR::hdi(Diff)[[3]]) 
+```
+
+##### 結果の図示     
+それでは、結果を図示する。まずは、時系列的に$p_t$の事後平均と95%確信区間を図示する。*TY*と*IT*の有無で点の色を変えている。交尾期と非交尾期は分けて図示する。      
+```{r, height = 6}
+fit_female_ss_rv_1min <- as_draws_df(draws_female_ss_rv_1min, .nchains = 4) %>% 
+  select(contains("p[")) %>% 
+  pivot_longer(everything(),
+               names_to = "p",
+               values_to = "post") %>% 
+  drop_na() %>% 
+  group_by(p) %>% 
+  summarise(mean_prob = median(post),
+            lower_prob = bayestestR::hdi(post)[[2]],
+            upper_prob = bayestestR::hdi(post)[[3]]) %>% 
+  ungroup() %>% 
+  mutate(p2 = as.numeric(str_replace_all(p, c("p\\[" = "","\\]" = "")))) %>% 
+  arrange(p2) %>% 
+  bind_cols(nadrop_no_female2) %>% 
+  mutate(TY = as.factor(TY),
+         IT = as.factor(IT)) %>% 
+  mutate(TY = fct_relevel(TY, "1", "0"),
+         IT = fct_relevel(IT, "1", "0")) %>% 
+  mutate(TYIT = ifelse(TY == "1" & IT == "1", "Both present",
+                       ifelse(TY == "1" & IT == "0", "TY only present",
+                              ifelse(IT == "1"& TY == "0", "IT only present", "Both absent")))) %>% 
+  mutate(TYIT = fct_relevel(TYIT, "Both present", "TY only present", "IT only present"))
+
+## 交尾期  
+fit_female_ss_rv_1min %>% 
+  filter(!str_detect(study_period, "nm")) %>% 
+  mutate(study_period = str_replace_all(study_period, "m","MS")) %>% 
+  ggplot(aes(x=date))+
+  geom_line(aes(y = mean_prob),
+            color = "grey36")+
+  geom_ribbon(aes(ymin = lower_prob,ymax = upper_prob),alpha = 0.2)+
+  geom_point(aes(y = prop_female, 
+                 fill = TYIT, shape = TYIT, size = TYIT),
+             alpha = 0.8)+
+  scale_fill_manual(values = c("white","grey75","grey25", "grey30"),
+                    labels = c("Both present",
+                               expression(paste(italic("TY")," only")),
+                               expression(paste(italic("IT")," only")),
+                               "Both absent"))+
+  scale_shape_manual(values = c(21, 22,25,4),
+                     labels = c("Both present",
+                                expression(paste(italic("TY")," only")),
+                                expression(paste(italic("IT")," only")),
+                                "Both absent"))+
+  scale_size_manual(values = c(2.5,2.5,2,1.7),
+                    labels = c("Both present",
+                               expression(paste(italic("TY")," only")),
+                               expression(paste(italic("IT")," only")),
+                               "Both absent")) + 
+  scale_x_date(breaks = seq(as_date("2018-10-01"),as_date("2022-03-29"),by = "7 days"),
+               labels = date_format("%m/%d"))+
+  theme_bw(base_size = 12)+
+  theme(axis.text.x = element_text(angle = 45,
+                                   hjust =0.5,
+                                   vjust =0.5,
+                                   size = 10,
+                                   family = "Times New Roman"),
+        text = element_text("Times New Roman"),
+        strip.background = element_blank(),
+        strip.text = element_text(hjust = 0),
+        legend.text = element_text(hjust = 0),
+        aspect.ratio = 0.5)+
+  labs(y = "Proportion of present females",
+       x = "",
+       title = "A",
+       fill = expression("Presence of males"),
+       shape = expression("Presence of males"),
+       size = expression("Presence of males")) +
+  guides(fill = guide_legend(override.aes = list(size = 5)))+
+  facet_rep_wrap(~study_period,
+                 repeat.tick.labels = TRUE,
+                 scales = "free_x") -> p_female_ss_rv_1min_TY_m
+
+p_female_ss_rv_1min_TY_m
+
+ggsave("figures/p_female_ss_rv_1min_TY_m.tif", p_female_ss_rv_1min_TY_m,
+       dpi = 2000, units = "mm",
+       width = 300, height = 160)
+
+## 非交尾期  
+fit_female_ss_rv_1min %>% 
+  filter(str_detect(study_period, "nm")) %>% 
+  mutate(study_period = str_replace_all(study_period, "nm","NMS")) %>% 
+  ggplot(aes(x=date))+
+  geom_line(aes(y = mean_prob),
+            color = "grey36")+
+  geom_ribbon(aes(ymin = lower_prob,ymax = upper_prob),alpha = 0.2)+
+  geom_point(aes(y = prop_female, 
+                 fill = TYIT, shape = TYIT, size = TYIT),
+             alpha = 0.8)+
+  scale_fill_manual(values = c("white","grey75","grey25", "grey30"),
+                    labels = c("Both present",
+                               expression(paste(italic("TY")," only")),
+                               expression(paste(italic("IT")," only")),
+                               "Both absent"))+
+  scale_shape_manual(values = c(21, 22,25,4),
+                     labels = c("Both present",
+                                expression(paste(italic("TY")," only")),
+                                expression(paste(italic("IT")," only")),
+                                "Both absent"))+
+  scale_size_manual(values = c(2.5,2.5,2,1.7),
+                    labels = c("Both present",
+                               expression(paste(italic("TY")," only")),
+                               expression(paste(italic("IT")," only")),
+                               "Both absent")) + 
+  scale_x_date(breaks = seq(as_date("2018-10-01"),as_date("2022-03-29"),by = "7 days"),
+               labels = date_format("%m/%d"))+
+  theme_bw(base_size = 12)+
+  theme(axis.text.x = element_text(angle = 45,
+                                   hjust =0.5,
+                                   vjust =0.5,
+                                   size = 10,
+                                   family = "Times New Roman"),
+        text = element_text("Times New Roman"),
+        strip.background = element_blank(),
+        strip.text = element_text(hjust = 0),
+        legend.text = element_text(hjust = 0),
+        aspect.ratio = 0.5)+
+  labs(y = "Proportion of present females",
+       x = "",
+       title = "B",
+       fill = expression("Presence of males"),
+       shape = expression("Presence of males"),
+       size = expression("Presence of males")) +
+  guides(fill = guide_legend(override.aes = list(size = 5)))+
+  facet_rep_wrap(~study_period,
+                 repeat.tick.labels = TRUE,
+                 scales = "free_x") -> p_female_ss_rv_1min_TY_nm
+
+p_female_ss_rv_1min_TY_nm
+
+ggsave("figures/p_female_ss_rv_1min_TY_nm.tif", p_female_ss_rv_1min_TY_nm,
+       dpi = 2000, units = "mm",
+       width = 300, height = 160)
+```
+<br/>  
+
+*TY*の有無で確認メス割合を比較したものを図示したのが以下である。　　
+```{r}
+draw_ss_p <- as_draws_df(draws_female_ss_rv_1min, .nchains = 4) %>% 
+  select(contains("p[")) %>% 
+  pivot_longer(everything(),
+               names_to = "p",
+               values_to = "post") %>% 
+  drop_na() %>% 
+  mutate(p2 = parse_number(p)) %>% 
+  left_join(no_female_over0.5_TYIT_b %>% mutate(p2 = 1:n()), by = "p2")
+
+n_days_TY <- nadrop_no_female2 %>% 
+  group_by(TY) %>% 
+  summarise(N = n()) %>% 
+  mutate(TY = as.factor(TY))
+
+draw_ss_p %>% 
+  group_by(TY) %>% 
+  summarise(median = median(post),
+            lower_hdi = bayestestR::hdi(post)[[2]],
+            upper_hdi = bayestestR::hdi(post)[[3]]) %>% 
+  mutate(TY = as.factor(TY)) -> post_female_ss_rv_1min_TY
+
+nadrop_no_female2 %>% 
+  mutate(TY = as.factor(TY)) %>% 
+  ggplot(aes(x = TY, y = prop_female))+
+  geom_boxplot(width = 0.5,
+               outlier.alpha = 0.5,
+               fill = "white",
+               linewidth = 1) +
+  geom_point(data = post_female_ss_rv_1min_TY,
+             aes(y = median),
+             color = "grey65",size = 3) +
+  geom_errorbar(data = post_female_ss_rv_1min_TY,
+                aes(y = median, ymin = lower_hdi,ymax = upper_hdi),
+                color = "grey65",size = 0.4,
+                width = 0.2) +
+  geom_text(data = n_days_TY, 
+            aes(label = str_c("N == ",N), 
+                y = 1.035, 
+                family = "Arial"),
+            parse = T,
+            size = 3,
+            family = "Times New Roman")+
+  scale_x_discrete(labels = c("No","Yes"))+
+  labs(y = "Proportion of present females",
+       x = expression(paste(italic("TY"), " presence")),
+       fill = "",
+       title = "A") +
+  theme_bw(base_size = 12) +
+  guides(fill = "none")+
+  theme(aspect.ratio = 1,
+        text = element_text("Times New Roman")) -> p_female_ss_rv_1min_TY
+
+ggsave("figures/p_female_ss_rv_1min_TY.png",p_female_ss_rv_1min_TY,
+       dpi = 2000, units = "mm",
+       width = 100, height = 100)
+```
+
+2021年以前のデータとMCMCサンプルを用いて*IT*についても同様の作図をする。  
+```{r}
+n_days_IT <- nadrop_no_female2 %>% 
+  filter(!(study_period %in% c("nm22","m21"))) %>% 
+  group_by(IT) %>% 
+  summarise(N = n()) %>% 
+  mutate(IT = as.factor(IT))
+
+draw_ss_p %>% 
+  filter(!(study_period %in% c("nm22","m21"))) %>% 
+  group_by(IT) %>% 
+  summarise(median = median(post),
+            lower_hdi = bayestestR::hdi(post)[[2]],
+            upper_hdi = bayestestR::hdi(post)[[3]]) %>% 
+  mutate(IT = as.factor(IT)) -> post_female_ss_rv_1min_IT
+
+nadrop_no_female2 %>% 
+  filter(!(study_period %in% c("nm22","m21"))) %>% 
+  mutate(IT = as.factor(IT)) %>% 
+  ggplot(aes(x = IT, y = prop_female))+
+  geom_boxplot(width = 0.5,
+               outlier.alpha = 0.5,
+               fill = "white",
+               linewidth = 1) +
+  geom_point(data = post_female_ss_rv_1min_IT,
+             aes(y = median),
+             color = "grey65",size = 3) +
+  geom_errorbar(data = post_female_ss_rv_1min_IT,
+                aes(y = median, ymin = lower_hdi,ymax = upper_hdi),
+                color = "grey65",size = 0.4,
+                width = 0.2) +
+  geom_text(data = n_days_IT, 
+            aes(label = str_c("N == ",N), 
+                y = 1.035, 
+                family = "Arial"),
+            parse = T,
+            size = 3,
+            family = "Times New Roman")+
+  scale_x_discrete(labels = c("No","Yes"))+
+  labs(y = "Proportion of present females",
+       x = expression(paste(italic("IT"), " presence")),
+       fill = "",
+       title = "B") +
+  theme_bw(base_size = 12) +
+  guides(fill = "none")+
+  theme(aspect.ratio = 1,
+        text = element_text("Times New Roman")) -> p_female_ss_rv_1min_IT
+
+ggsave("figures/p_female_ss_rv_1min_IT.png",p_female_ss_rv_1min_IT,
+       dpi = 2000, units = "mm",
+       width = 100, height = 100)
+```
+
+
+```{r, fig.height = 4}
+p_female_ss_rv_1min_TYIT <- p_female_ss_rv_1min_TY + p_female_ss_rv_1min_IT
+
+p_female_ss_rv_1min_TYIT 
+
+ggsave("figures/p_female_ss_rv_1min_TYIT.tif",p_female_ss_rv_1min_TYIT,
+       dpi = 2000, units = "mm",
+       width = 200, height = 110)
+```
+
+### 2021非交尾期までのデータ  
+*IT*は2021年非交尾までしかいなかった。そこで、その時点までのデータを用いてモデリングを行う。  
+
+#### 全期間     
+##### データの加工  
+```{r}
+no_female_over0.5_bf21_1min <- no_female_over0.5_TYIT %>% 
+  filter(is.na(prop_female) | (study_period != "m21" & study_period != "nm22")) %>% 
+  filter(date <= "2021-03-27")
+```
+
+##### モデリング  
+データのリストは以下の通り。  
+```{r}
+## 観測値がある行番号  
+nadrop_no_female_bf21_1min <- drop_na(no_female_over0.5_bf21_1min, IT)
+obs_no_bf21_1min <- which(!is.na(no_female_over0.5_bf21_1min$no_female))
+
+## 説明変数の行列を作成  
+X_bf21_1min <- matrix(c(nadrop_no_female_bf21_1min$TY,
+                   nadrop_no_female_bf21_1min$IT,
+                   nadrop_no_female_bf21_1min$m18,
+                   nadrop_no_female_bf21_1min$m19,
+                   nadrop_no_female_bf21_1min$m20,
+                   nadrop_no_female_bf21_1min$nm19,
+                   nadrop_no_female_bf21_1min$nm20,
+                   nadrop_no_female_bf21_1min$nm21),
+                 nrow = 265, ncol = 8)
+
+list_female_ss_bf21_1min <- list(len_obs = nrow(nadrop_no_female_bf21_1min),
+                            obs_no = obs_no_bf21_1min,
+                            N = nrow(no_female_over0.5_bf21_1min),
+                            X = X_bf21_1min,
+                            D = ncol(X_bf21_1min),
+                            no_female = nadrop_no_female_bf21_1min$no_female,
+                            max_female = nadrop_no_female_bf21_1min$max_female)
+```
+
+それでは、以下のようにcmdstanr[@Gabry2023]でモデルを回す。  
+```{r}
+# stan_female_ss_bf21_1min <- cmdstan_model("stanfile/m_female_ss_binom.stan")
+# 
+# m_female_ss_bf21_rv_1min <- stan_female_ss_bf21_1min$sample(
+#   data = list_female_ss_bf21_1min,
+#   seed = 113,
+#   iter_sampling = 5000,
+#   iter_warmup = 2000,
+#   thin = 1,
+#   chains = 4,
+#   adapt_delta = 0.999,
+#   max_treedepth = 20)
+# 
+# m_female_ss_bf21_rv_1min$save_object("model/m_female_ss_bf21_rv_1min.rds")
+
+m_female_ss_bf21_rv_1min <- readRDS("model/m_female_ss_bf21_rv_1min.rds")
+```
+
+###### モデルの診断  
+###### Rhat診断  
+Rhatは小さく、収束に問題ないよう。    
+```{r, fig.height = 4.5}
+rhat_female_ss_bf21_rv_1min <- m_female_ss_bf21_rv_1min %>% 
+  bayesplot::rhat()
+
+data.frame(Rhat = rhat_female_ss_bf21_rv_1min) %>% 
+  ggplot(aes(x = Rhat))+
+  geom_histogram(fill = "white",
+                 color = "black")+
+  theme_bw()+
+  theme(aspect.ratio = 1)
+```
+<br/>  
+
+###### 有効サンプルサイズ  
+まず、有効サンプルサイズも少なくとも6500程度ある。  
+```{r, fig.height = 4.5}
+## Rhat, ESSの算出
+diag_female_ss_bf21_rv_1min <- m_female_ss_bf21_rv_1min$summary(variables = c("mu","p","b","lp__","s_t","mu_err"),
+                                                      posterior::default_convergence_measures())
+
+diag_female_ss_bf21_rv_1min %>%
+  pivot_longer(cols = 3:4,
+               names_to = "type",
+               values_to = "ESS") %>% 
+  group_by(type) %>% 
+  summarise(min = min(ESS, na.rm = TRUE),
+            max = max(ESS, na.rm = TRUE),
+            median = median(ESS, na.rm = TRUE))
+```
+<br/>  
+
+図示すると以下の通り。  
+```{r, fig.height = 4.5}
+diag_female_ss_bf21_rv_1min %>% 
+  pivot_longer(cols = 3:4,
+               names_to = "type",
+               values_to = "ESS") %>% 
+  ggplot(aes(x = ESS)) +
+  facet_rep_wrap(~type,
+                 scales = "free")+
+  geom_histogram(fill = "white",
+                 color = "black")+
+  theme_bw()+
+  theme(aspect.ratio = 1)
+```
+<br/>  
+
+###### 残差の自己相関の確認  
+まず残差を算出するため、パラメータの要約統計量を算出します。  
+```{r, fig.height = 4.5}
+## 要約統計量の算出
+post_summary_female_ss_bf21_rv_1min <- m_female_ss_bf21_rv_1min$draws() %>% 
+  as_draws_df(nchains = 4) %>% 
+  mutate(iter = 1:n()) %>% 
+  pivot_longer(-iter,
+               names_to = "variable",
+               values_to = "value") %>% 
+  filter(!(variable %in% c(".draw", ".chain", ".iteration"))) %>% 
+  group_by(variable) %>% 
+  summarise(mean = mean(value),
+            median = median(value),
+            mad = mad(value),
+            lower_hdi = bayestestR::hdi(value)[[2]],
+            upper_hdi = bayestestR::hdi(value)[[3]],
+            pd = p_direction(value)$pd*100) %>% 
+  left_join(diag_female_ss_bf21_rv_1min,
+            by = "variable")
+```
+<br/>  
+
+続いて残差を算出し、自己相関を調べます。自己相関が消えていることが分かります。    
+```{r}
+## 残差の算出
+postmean_female_ss_bf21_rv_1min <- post_summary_female_ss_bf21_rv_1min %>% 
+  filter(str_detect(variable, "p\\[")) %>% 
+  mutate(variable = parse_number(variable)) %>% 
+  arrange(variable) %>% 
+  bind_cols(no_female_over0.5_bf21_1min) %>% 
+  mutate(resid = prop_female - median) 
+
+## 自己相関の
+acf_female_ss_bf21_rv_1min <- acf(postmean_female_ss_bf21_rv_1min$resid,
+                        na.action = na.pass,
+                        plot = F)
+
+data.frame(Lag = acf_female_ss_bf21_rv_1min$lag[,,1],
+           acf = acf_female_ss_bf21_rv_1min$acf[,,1]) %>% 
+  ggplot(aes(x = Lag, y = acf))+
+  geom_segment(aes(yend = 0, xend = Lag))+
+  theme_bw(base_size = 16)+
+  theme(aspect.ratio = 1,
+        axis.title.y = element_text(family = "Arial"),
+        axis.title.x = element_text(family = "Arial",
+                                    size = 15),
+        axis.text.x = element_text(family = "Arial"),
+        axis.text.y = element_text(family = "Arial"))+
+  labs(y = "Autocorrelation of residuals") -> p_acf_female_ss_bf21_rv_1min  
+
+p_acf_female_ss_bf21_rv_1min
+
+ggsave("figures/p_acf_female_ss_bf21_rv_1min.png", p_acf_female_ss_bf21_rv_1min,
+       width = 100, height = 100, dpi = 600, units = "mm")
+```
+<br/>  
+
+###### 事後予測分布の確認  
+
+事後分布からの予測分布と実測値の分布を比較しても大きな乖離はない。   
+```{r, fig.height = 4.5}
+draws_female_ss_bf21_rv_1min <- m_female_ss_bf21_rv_1min$draws() %>% 
+  as_draws_df(nchains = 4)
+
+## pの事後分布から100個のサンプルを抽出してシミュレート    
+set.seed(123)
+sample_n <- sample(1:nrow(draws_female_ss_bf21_rv_1min), size = 1000,
+                   replace = FALSE)
+
+post_p_female_ss_bf21_rv_1min <- draws_female_ss_bf21_rv_1min %>% 
+  select(starts_with("p")) %>% 
+  select(any_of(obs_no_bf21_1min)) %>% 
+  mutate(iter = 1:n())  %>% 
+  pivot_longer(cols = starts_with("p"),
+               values_to = "p") %>% 
+  mutate(max_female = rep(nadrop_no_female_bf21_1min$max_female, times = nrow(draws_female_ss_bf21_rv_1min))) %>% 
+  filter(iter %in% sample_n) %>% 
+  mutate(pred = rbinom(nrow(.), size = max_female, prob = p))
+
+## 事後予測値を事後平均からシミュレート
+post_p_female_ss_bf21_rv_1min %>% 
+  select(iter, name, pred) %>% 
+  pivot_wider(names_from = iter, 
+              values_from = pred) %>% 
+  select(-name) %>% 
+  mutate(y_actual = nadrop_no_female_bf21_1min$no_female) %>% 
+  pivot_longer(everything(),
+               names_to = "n_draw", 
+               values_to = "post_pred") %>% 
+  mutate(type = ifelse(str_detect(n_draw, "y_"),"y","y_pred")) -> post_pred_female_ss_bf21_rv_1min_ri_long2
+
+## 図示  
+post_pred_female_ss_bf21_rv_1min_ri_long2 %>% 
+  ggplot(aes(x = post_pred))+
+  geom_line(stat = "density",
+            aes(group = n_draw,
+                color = type,
+                alpha = type))+
+  scale_color_manual(values = c("blue4","lightblue"))+
+  scale_alpha_discrete(range = c(1, 0.3))+
+  theme_bw()+
+  theme(aspect.ratio = 0.8)+
+  labs(x = "", y = "")
+```
+
+##### 結果の確認  
+結果は以下の通り。*TY*と*IT*がいる日は有意に確認メス数が多いことが分かった。  
+
+```{r}
+post_summary_female_ss_bf21_rv_1min %>% 
+  filter(str_detect(variable, "b")) %>% 
+  mutate(num = parse_number(variable)) %>% 
+  arrange(num) %>% 
+  select(-num) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",lower_hdi),",",sprintf("%.2f", upper_hdi),"]")) %>% 
+  mutate(PD = sprintf("%.2f", pd)) %>% 
+  select(1,3,4, 11, 12, 8,9,10) %>% 
+  rename("Explanatory variables" = 1,
+         "Median" = 2,
+         "MAD" = 3,
+         "Rhat" = 6) %>% 
+  mutate(`Explanatory variables` = str_replace_all(`Explanatory variables`, c(
+    "b\\[1\\]" = "Presence of TY (vs. absent)",
+    "b\\[2\\]" = "Presence of IT (vs. absent)",
+    "b\\[3\\]" = "Study period (MS18)",
+    "b\\[4\\]" = "Study period (MS19)",
+    "b\\[5\\]" = "Study period (MS20)",
+    "b\\[6\\]" = "Study period (MS21)",
+    "b\\[7\\]" = "Study period (NMS19)",
+    "b\\[8\\]" = "Study period (NMS20)",
+    "b\\[9\\]" = "Study period (NMS21)",
+    "b\\[10\\]" = "Study period (NMS22)"))) %>% 
+  mutate(across(where(is.numeric), ~sprintf("%.2f", .))) -> table_female_ss_bf21_rv_1min
+
+table_female_ss_bf21_rv_1min
+
+write_csv(table_female_ss_bf21_rv_1min, "tables/table_female_ss_bf21_rv_1min.csv")
+```
+
+*TY*の有無をコントロールすると、調査期間間の効果の違いはない。つまり、調査期間間のメス確認割合の違いは*TY*の有無に大きく影響されていたことが分かった。  
+```{r}
+draws_female_ss_bf21_rv_1min %>% 
+  select(4:9) %>% 
+  mutate(`m18 - m19` = `b[3]` - `b[4]`,
+         `m18 - m20` = `b[3]` - `b[5]`,
+         `m18 - m21` = `b[3]` - `b[6]`,
+         `m18 - nm19` = `b[3]` - `b[7]`,
+         `m18 - nm20` = `b[3]` - `b[8]`,
+         `m19 - m20` = `b[4]` - `b[5]`,
+         `m19 - m21` = `b[4]` - `b[6]`,
+         `m19 - nm19` = `b[4]` - `b[7]`,
+         `m19 - nm20` = `b[4]` - `b[8]`,
+         `m20 - m21` = `b[5]` - `b[6]`,
+         `m20 - nm19` = `b[5]` - `b[7]`,
+         `m20 - nm20` = `b[5]` - `b[8]`,
+         `m21 - nm19` = `b[6]` - `b[7]`,
+         `m21 - nm20` = `b[6]` - `b[8]`,
+         `nm19 - nm20` = `b[7]` - `b[8]`) %>% 
+  select(-c(1:9)) %>% 
+  pivot_longer(everything(),
+               names_to = "cat",
+               values_to = "Diff") %>% 
+  group_by(cat) %>% 
+  summarise(Median = median(Diff),
+            lower_hdi = bayestestR::hdi(Diff)[[2]],
+            upper_hdi = bayestestR::hdi(Diff)[[3]]) 
+```
+
+##### 結果の図示     
+それでは、結果を図示する。まずは、時系列的に$p_t$の事後平均と95%確信区間を図示する。*TY*と*IT*の有無で点の色を変えている。交尾期と非交尾期は分けて図示する。      
+```{r, height = 6}
+fit_female_ss_bf21_rv_1min <- as_draws_df(draws_female_ss_bf21_rv_1min, .nchains = 4) %>% 
+  select(contains("p[")) %>% 
+  pivot_longer(everything(),
+               names_to = "p",
+               values_to = "post") %>% 
+  drop_na() %>% 
+  group_by(p) %>% 
+  summarise(mean_prob = median(post),
+            lower_prob = bayestestR::hdi(post)[[2]],
+            upper_prob = bayestestR::hdi(post)[[3]]) %>% 
+  ungroup() %>% 
+  mutate(p2 = as.numeric(str_replace_all(p, c("p\\[" = "","\\]" = "")))) %>% 
+  arrange(p2) %>% 
+  bind_cols(nadrop_no_female_bf21_1min) %>% 
+  mutate(TY = as.factor(TY),
+         IT = as.factor(IT)) %>% 
+  mutate(TY = fct_relevel(TY, "1", "0"),
+         IT = fct_relevel(IT, "1", "0")) %>% 
+  mutate(TYIT = ifelse(TY == "1" & IT == "1", "Both present",
+                       ifelse(TY == "1" & IT == "0", "TY only present",
+                              ifelse(IT == "1"& TY == "0", "IT only present", "Both absent")))) %>% 
+  mutate(TYIT = fct_relevel(TYIT, "Both present", "TY only present", "IT only present"))
+
+## 交尾期  
+fit_female_ss_bf21_rv_1min %>% 
+  filter(!str_detect(study_period, "nm")) %>% 
+  mutate(study_period = str_replace_all(study_period, "m","MS")) %>% 
+  ggplot(aes(x=date))+
+  geom_line(aes(y = mean_prob),
+            color = "grey36")+
+  geom_ribbon(aes(ymin = lower_prob,ymax = upper_prob),alpha = 0.2)+
+  geom_point(aes(y = prop_female, 
+                 fill = TYIT, shape = TYIT, size = TYIT),
+             alpha = 0.8)+
+  scale_fill_manual(values = c("white","grey75","grey25", "grey30"),
+                    labels = c("Both present",
+                               expression(paste(italic("TY")," only")),
+                               expression(paste(italic("IT")," only")),
+                               "Both absent"))+
+  scale_shape_manual(values = c(21, 22,25,4),
+                     labels = c("Both present",
+                                expression(paste(italic("TY")," only")),
+                                expression(paste(italic("IT")," only")),
+                                "Both absent"))+
+  scale_size_manual(values = c(2.5,2.5,2,1.7),
+                    labels = c("Both present",
+                               expression(paste(italic("TY")," only")),
+                               expression(paste(italic("IT")," only")),
+                               "Both absent")) + 
+  scale_x_date(breaks = seq(as_date("2018-10-01"),as_date("2022-03-29"),by = "7 days"),
+               labels = date_format("%m/%d"))+
+  theme_bw(base_size = 12)+
+  theme(axis.text.x = element_text(angle = 45,
+                                   hjust =0.5,
+                                   vjust =0.5,
+                                   size = 10,
+                                   family = "Times New Roman"),
+        text = element_text("Times New Roman"),
+        strip.background = element_blank(),
+        strip.text = element_text(hjust = 0),
+        legend.text = element_text(hjust = 0),
+        aspect.ratio = 0.5)+
+  labs(y = "Proportion of present females",
+       x = "",
+       title = "A",
+       fill = expression("Presence of males"),
+       shape = expression("Presence of males"),
+       size = expression("Presence of males")) +
+  guides(fill = guide_legend(override.aes = list(size = 5)))+
+  facet_rep_wrap(~study_period,
+                 repeat.tick.labels = TRUE,
+                 scales = "free_x") -> p_female_ss_bf21_rv_1min_TY_m
+
+p_female_ss_bf21_rv_1min_TY_m
+
+ggsave("figures/p_female_ss_bf21_rv_1min_TY_m.tif", p_female_ss_bf21_rv_1min_TY_m,
+       dpi = 2000, units = "mm",
+       width = 300, height = 160)
+
+## 非交尾期  
+fit_female_ss_bf21_rv_1min %>% 
+  filter(str_detect(study_period, "nm")) %>% 
+  mutate(study_period = str_replace_all(study_period, "nm","NMS")) %>% 
+  ggplot(aes(x=date))+
+  geom_line(aes(y = mean_prob),
+            color = "grey36")+
+  geom_ribbon(aes(ymin = lower_prob,ymax = upper_prob),alpha = 0.2)+
+  geom_point(aes(y = prop_female, 
+                 fill = TYIT, shape = TYIT, size = TYIT),
+             alpha = 0.8)+
+  scale_fill_manual(values = c("white","grey75","grey25", "grey30"),
+                    labels = c("Both present",
+                               expression(paste(italic("TY")," only")),
+                               expression(paste(italic("IT")," only")),
+                               "Both absent"))+
+  scale_shape_manual(values = c(21, 22,25,4),
+                     labels = c("Both present",
+                                expression(paste(italic("TY")," only")),
+                                expression(paste(italic("IT")," only")),
+                                "Both absent"))+
+  scale_size_manual(values = c(2.5,2.5,2,1.7),
+                    labels = c("Both present",
+                               expression(paste(italic("TY")," only")),
+                               expression(paste(italic("IT")," only")),
+                               "Both absent")) + 
+  scale_x_date(breaks = seq(as_date("2018-10-01"),as_date("2022-03-29"),by = "7 days"),
+               labels = date_format("%m/%d"))+
+  theme_bw(base_size = 12)+
+  theme(axis.text.x = element_text(angle = 45,
+                                   hjust =0.5,
+                                   vjust =0.5,
+                                   size = 10,
+                                   family = "Times New Roman"),
+        text = element_text("Times New Roman"),
+        strip.background = element_blank(),
+        strip.text = element_text(hjust = 0),
+        legend.text = element_text(hjust = 0),
+        aspect.ratio = 0.5)+
+  labs(y = "Proportion of present females",
+       x = "",
+       title = "B",
+       fill = expression("Presence of males"),
+       shape = expression("Presence of males"),
+       size = expression("Presence of males")) +
+  guides(fill = guide_legend(override.aes = list(size = 5)))+
+  facet_rep_wrap(~study_period,
+                 repeat.tick.labels = TRUE,
+                 scales = "free_x") -> p_female_ss_bf21_rv_1min_TY_nm
+
+p_female_ss_bf21_rv_1min_TY_nm
+
+ggsave("figures/p_female_ss_bf21_rv_1min_TY_nm.tif", p_female_ss_bf21_rv_1min_TY_nm,
+       dpi = 2000, units = "mm",
+       width = 300, height = 160)
+```
+<br/>  
+
+*TY*の有無で確認メス割合を比較したものを図示したのが以下である。　　
+```{r}
+draw_ss_p <- as_draws_df(draws_female_ss_bf21_rv_1min, .nchains = 4) %>% 
+  select(contains("p[")) %>% 
+  pivot_longer(everything(),
+               names_to = "p",
+               values_to = "post") %>% 
+  drop_na() %>% 
+  mutate(p2 = parse_number(p)) %>% 
+  left_join(no_female_over0.5_bf21_1min %>% mutate(p2 = 1:n()), by = "p2")
+
+n_days_TY <- nadrop_no_female_bf21_1min %>% 
+  group_by(TY) %>% 
+  summarise(N = n()) %>% 
+  mutate(TY = as.factor(TY))
+
+draw_ss_p %>% 
+  group_by(TY) %>% 
+  summarise(median = median(post),
+            lower_hdi = bayestestR::hdi(post)[[2]],
+            upper_hdi = bayestestR::hdi(post)[[3]]) %>% 
+  mutate(TY = as.factor(TY)) -> post_female_ss_bf21_rv_1min_TY
+
+nadrop_no_female_bf21_1min %>% 
+  mutate(TY = as.factor(TY)) %>% 
+  ggplot(aes(x = TY, y = prop_female))+
+  geom_boxplot(width = 0.5,
+               outlier.alpha = 0.5,
+               fill = "white",
+               linewidth = 1) +
+  geom_point(data = post_female_ss_bf21_rv_1min_TY,
+             aes(y = median),
+             color = "grey65",size = 3) +
+  geom_errorbar(data = post_female_ss_bf21_rv_1min_TY,
+                aes(y = median, ymin = lower_hdi,ymax = upper_hdi),
+                color = "grey65",size = 0.4,
+                width = 0.2) +
+  geom_text(data = n_days_TY, 
+            aes(label = str_c("N == ",N), 
+                y = 1.035, 
+                family = "Arial"),
+            parse = T,
+            size = 3,
+            family = "Times New Roman")+
+  scale_x_discrete(labels = c("No","Yes"))+
+  labs(y = "Proportion of present females",
+       x = expression(paste(italic("TY"), " presence")),
+       fill = "",
+       title = "A") +
+  theme_bw(base_size = 12) +
+  guides(fill = "none")+
+  theme(aspect.ratio = 1,
+        text = element_text("Times New Roman")) -> p_female_ss_bf21_rv_1min_TY
+
+ggsave("figures/p_female_ss_bf21_rv_1min_TY.png",p_female_ss_bf21_rv_1min_TY,
+       dpi = 2000, units = "mm",
+       width = 100, height = 100)
+```
+
+2021年以前のデータとMCMCサンプルを用いて*IT*についても同様の作図をする。  
+```{r}
+n_days_IT <- nadrop_no_female_bf21_1min %>% 
+  filter(!(study_period %in% c("nm22","m21"))) %>% 
+  group_by(IT) %>% 
+  summarise(N = n()) %>% 
+  mutate(IT = as.factor(IT))
+
+draw_ss_p %>% 
+  filter(!(study_period %in% c("nm22","m21"))) %>% 
+  group_by(IT) %>% 
+  summarise(median = median(post),
+            lower_hdi = bayestestR::hdi(post)[[2]],
+            upper_hdi = bayestestR::hdi(post)[[3]]) %>% 
+  mutate(IT = as.factor(IT)) -> post_female_ss_bf21_rv_1min_IT
+
+nadrop_no_female_bf21_1min %>% 
+  filter(!(study_period %in% c("nm22","m21"))) %>% 
+  mutate(IT = as.factor(IT)) %>% 
+  ggplot(aes(x = IT, y = prop_female))+
+  geom_boxplot(width = 0.5,
+               outlier.alpha = 0.5,
+               fill = "white",
+               linewidth = 1) +
+  geom_point(data = post_female_ss_bf21_rv_1min_IT,
+             aes(y = median),
+             color = "grey65",size = 3) +
+  geom_errorbar(data = post_female_ss_bf21_rv_1min_IT,
+                aes(y = median, ymin = lower_hdi,ymax = upper_hdi),
+                color = "grey65",size = 0.4,
+                width = 0.2) +
+  geom_text(data = n_days_IT, 
+            aes(label = str_c("N == ",N), 
+                y = 1.035, 
+                family = "Arial"),
+            parse = T,
+            size = 3,
+            family = "Times New Roman")+
+  scale_x_discrete(labels = c("No","Yes"))+
+  labs(y = "Proportion of present females",
+       x = expression(paste(italic("IT"), " presence")),
+       fill = "",
+       title = "B") +
+  theme_bw(base_size = 12) +
+  guides(fill = "none")+
+  theme(aspect.ratio = 1,
+        text = element_text("Times New Roman")) -> p_female_ss_bf21_rv_1min_IT
+
+ggsave("figures/p_female_ss_bf21_rv_1min_IT.png",p_female_ss_bf21_rv_1min_IT,
+       dpi = 2000, units = "mm",
+       width = 100, height = 100)
+```
+
+
+```{r, fig.height = 4}
+p_female_ss_bf21_rv_1min_TYIT <- p_female_ss_bf21_rv_1min_TY + p_female_ss_bf21_rv_1min_IT
+
+p_female_ss_bf21_rv_1min_TYIT
+
+ggsave("figures/p_female_ss_bf21_rv_1min_TYIT.tif",p_female_ss_bf21_rv_1min_TYIT,
+       dpi = 2000, units = "mm",
+       width = 200, height = 110)
+```

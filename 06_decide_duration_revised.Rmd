@@ -1,0 +1,257 @@
+# メスの発見までに要する時間 {#c6}    
+これ以降で、各観察日に群れで確認した個体数を分析する。そのとき、何分以上追跡した日であれば十分にメスを探索する時間があったとみなし、分析に含めることができるだろうか。以下ではこの基準を決めるため、メスを確認するのにどの程度時間がかかっていたかを**生存時間解析**[^foot1]を用いて分析する。  
+
+[^foot1]: 生存時間解析については[こちら](https://tsubasayamaguchi-jinrui.github.io/SurvivalAnalysis/)。
+
+## データの読み込み・加工  
+### データの読み込み  
+
+まずは、各観察日にそれぞれの個体を確認した時刻を記したデータシートを読み込む。
+
+```{r}
+## 確認した時間  
+female_time <- read_csv("../Data/data/others/female_pre_time.csv") %>% 
+  mutate(date = as_date(date))
+```
+
+データは以下の通り。2018年交尾期から2022年交尾期まで、6歳以上の個体の確認時刻が記入されている。分析には、2019年交尾期から2022年非交尾期までのデータを用いる。
+
+-   `?`: 確認されたが確認時刻は不明  
+-   `DD`: 死亡   
+-   `NS`: そのとき5歳以下  
+-   `NA`: 確認できず  
+
+```{r}
+datatable(female_time,
+          options = list(scrollX = 50))
+```
+<br/>  
+
+個体の属性を記したデータシートも読み込む。  
+
+```{r}
+#個体の属性情報
+att <- read_csv("../Data/data/others/attributes_sp_over6.csv")
+```
+
+各調査期間における年齢と順位が記されている。  
+
+```{r}
+datatable(att)
+```
+
+### データの加工   
+メスの確認時刻のデータを縦型に変換し、分析のためにデータを加工・成型する。  
+
+```{r}
+female_time %>% 
+  pivot_longer(cols = Kur:Cur,
+               names_to = "femaleID",
+               values_to = "presence") %>% 
+  mutate(date = as_date(date)) %>% 
+  ## 2022交尾期のデータは含めない  
+  filter(date <= "2022-08-31") %>% 
+  ## 調査期間の情報を追加  
+  left_join(group_all %>% select(date, study_period) %>% distinct(date, study_period)) %>% 
+  left_join(att, by = c("study_period","femaleID")) -> female_time_long
+  
+female_time_long %>% 
+  ## 死亡個体(DD)と確認時間不明個体(?)、非対象個体(6歳未満)(NS)は除く
+  filter((presence != "?" & presence != "DD" & presence != "NS")| is.na(presence)) %>% 
+  ## 確認時刻をdatetime形式に
+  mutate(found_time = str_c(date," ", presence)) %>% 
+  mutate(found_time = as_datetime(found_time)) %>%    
+  ## 確認の有無についての列を作成  
+  mutate(confirmed = ifelse(is.na(presence),0,1)) %>% 
+  mutate(date = as_date(date)) %>% 
+  ## 1日前の日付を表す列を作成  
+  mutate(date_pre = date-1) -> female_time_long_b
+```
+
+分析には、3通りのデータを用いた。  
+
+1. 前日に全頭確認でき、かつその日も全頭確認できた日のみのデータ。前日に全頭確認できた日に限定したのは、分析対象日の前日に分派が生じており、分析対象の日の途中に分派していたサブグループが合流した、というような場合をできるだけ除外するためである。これにより、分派していない状態で全個体を探すのにかかる時間を可能な限り正確に推定できる。  
+  - 2つ以上の集団を観察した日は、全頭確認している可能性のある大きい方の集団のデータを用いた。  
+  - 途中で中断があり、中断以後に個体が見つかっている場合も除いた。    
+
+2. 確認できない個体も含めた全個体のデータ。つまり、右側打ち切りの内、固定打ち切りのデータ[@Allison2014]も含まれる。  
+  - 2つ以上の集団を観察した日は大きい方の集団のデータを用いた。   
+  - 扱いが難しいので、中断があった日は除く。  
+  
+3. 確認できた全個体のデータ  
+  - 2つ以上の集団を観察した日は大きい方の集団のデータを用いた   
+  - 扱いが難しいので、中断があった場合は再開以後に見つけた個体のデータは除く  
+
+まず、1のためのデータを作成する。  
+```{r}
+## 2つ以上の集団を観察した日に小さかった集団のID
+exc_groupID <- c("m19_23","m19_24","m19_41","m19_53","m19_54","nm21_20","nm21_22","nm21_43","m20_52","m20_57","m21_35","m21_54")
+
+## 各観察日の最大個体と確認個体数(確認時刻が記録できているメスのみ)を算出
+female_time %>% 
+  pivot_longer(cols = Kur:Cur,
+               names_to = "femaleID",
+               values_to = "presence") %>% 
+  filter(is.na(presence)|(presence != "DD" & presence != "NS")) %>% 
+  group_by(date) %>% 
+  mutate(max_female = n()) %>% 
+  distinct(date, max_female)  -> max_female
+
+group_all %>% 
+  select(groupID, study_period, date, Kur:Yun) %>% 
+  select(-c(TY,IT, LK,KR,KM,TG)) %>% 
+  pivot_longer(cols = Kur:Yun,
+               names_to = "femaleID",
+               values_to = "presence") %>% 
+  left_join(female_time_long_b %>% select(-study_period, -presence), by = c("date","femaleID")) %>% 
+  ## 6歳以上でかつ確認時刻が記録できている個体のみを抽出
+  filter(age >= 6, confirmed == 1) %>% 
+  ## groupIDごとに個体数を算出
+  group_by(date, groupID) %>% 
+  summarise(no_female = sum(presence, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  ## groupIDが上記のものは除く  
+  filter(!(groupID %in% exc_groupID)) %>% 
+  left_join(max_female, by = "date")  -> no_female
+
+## 確認時刻データを結合する  
+female_time_long_b %>% 
+  ## 前日に全頭いたかの列を作成  
+  left_join(no_female %>% select(-groupID), by = c("date_pre" = "date")) %>% 
+  mutate(inc = ifelse(no_female == max_female,1,0)) %>% 
+  select(-max_female, -no_female) %>% 
+  ## 当日に全頭いたかの列を作成
+  left_join(no_female, by = "date") %>% 
+  mutate(inc2 = ifelse(max_female == no_female,1,0)) %>% 
+  ## 前日も当日も全頭確認できている日のみを抽出  
+  filter(inc == 1 & inc2 == 1)  -> female_time_anal
+  
+## 中断があり、中断以前に全頭が見つけられていない日は除く  
+female_time_anal %>% 
+  group_by(date, groupID) %>% 
+  summarise(last_found = max(found_time)) %>% 
+  ungroup() %>% 
+  left_join(group_all %>% select(1:6), by = c("groupID", "date")) %>% 
+  mutate(exclude = ifelse(is.na(suspend),0,
+                          ifelse(last_found < suspend, 0, 1))) %>% 
+  select(-last_found) -> suspend_exclude
+
+female_time_anal %>% 
+  left_join(suspend_exclude, by = c("date", "groupID")) %>% 
+  ## 中断以前に全頭見つかっていない日は除く（結果的に0）
+  filter(exclude != 1) %>% 
+  ## 各個体が開始から何分で見つかったか
+  mutate(dur = as.numeric(found_time - start)/60) %>% 
+  ## 各個体は何番目に見つかったか  
+  group_by(date) %>% 
+  arrange(dur, .by_group = TRUE) %>% 
+  mutate(N = 1:n()) %>% 
+  ## その時間まで見つかっていた割合
+  mutate(prop = N/max_female) %>% 
+  ungroup() %>% 
+  ## 2018年交尾期のデータは用いない  
+  filter(study_period != "m18") -> female_time_anal_b
+```
+
+データは以下の通り。  
+```{r}
+datatable(female_time_anal_b,
+          options = list(scrollX = 60,
+                         filter = "top"))
+```
+<br/>  
+
+続いて、2のためのデータを作成する。群れが多数の小集団に分かれていたと思われる9月28~30日、雨で小屋前での観察だけだった2021年12月8日(確認時刻の記録がない)、確認個体の記録がない2022年3月28日のデータは除く。        
+```{r}
+exc_date <- c(as_date("2019-09-28"),as_date("2019-09-29"), as_date("2019-09-30"), 
+              as_date("2021-12-08"), as_date("2022-03-28"))
+
+group_all %>% 
+  select(groupID, study_period, start:fin, date, Kur:Yun) %>% 
+  select(-c(TY,IT, LK,KR,KM,TG)) %>% 
+  ## 縦型に変換  
+  pivot_longer(cols = Kur:Yun,
+               names_to = "femaleID",
+               values_to = "presence") %>% 
+  right_join(female_time_long_b %>% select(-study_period, -presence), by = c("date","femaleID")) %>% 
+  ## 2つ以上の集団を観察した場合、小さい方は除く  
+  filter(!(groupID %in% exc_groupID)) %>% 
+  ## 上記の日付は除く  
+  filter(!(date %in% exc_date)) %>% 
+  ## 中断がある日は除く  
+  filter(is.na(suspend)) %>% 
+  ## 調査のない日は除く %>% 
+  filter(!is.na(start)) %>% 
+  ## 追跡時間
+  mutate(dur_follow = as.numeric(difftime(fin, start, units = "mins"))) %>% 
+  ## 2018年交尾期のデータは用いない  
+  filter(study_period != "m18") %>% 
+  ## 各個体が開始から何分で見つかったか
+  ## 見つかっていない場合は追跡時間  
+  mutate(dur = ifelse(presence == 1,
+                      as.numeric(difftime(found_time, start, units = "mins")),
+                      dur_follow)) %>% 
+  ## 各個体は何番目に見つかったか  
+  group_by(date) %>% 
+  arrange(dur, .by_group = TRUE) %>% 
+  mutate(N = 1:n()) %>% 
+  ungroup() %>% 
+  left_join(no_female, by = c("date","groupID")) %>% 
+  mutate(prop = N/max_female) %>% 
+  ## 複数の集団を発見したとき、小さい集団にいた方の個体のconfirmedを0にする  
+  mutate(confirmed = ifelse(confirmed == 1 & presence == 0,
+                            presence, confirmed)) -> female_time_anal_all
+```
+
+データは以下の通り。  
+```{r}
+datatable(female_time_anal_all,
+          options = list(scrollX = 60,
+                         filter = "top"))
+```
+<br/>  
+
+最後に、3のためのデータを作成する。群れが多数の小集団に分かれていたと思われる9月28~30日、雨で小屋前での観察だけだった2021年12月8日(確認時刻の記録がない)、確認個体の記録がない2022年3月28日のデータは除く。        
+```{r}
+exc_date <- c(as_date("2019-09-28"),as_date("2019-09-29"), as_date("2019-09-30"), 
+              as_date("2021-12-08"), as_date("2022-03-28"))
+
+group_all %>% 
+  select(groupID, study_period, start:fin, date, Kur:Yun) %>% 
+  select(-c(TY,IT, LK,KR,KM,TG)) %>% 
+  ## 縦型に変換  
+  pivot_longer(cols = Kur:Yun,
+               names_to = "femaleID",
+               values_to = "presence") %>% 
+  right_join(female_time_long_b %>% select(-study_period, -presence), by = c("date","femaleID")) %>% 
+  ## 2つ以上の集団を観察した場合、小さい方は除く  
+  filter(!(groupID %in% exc_groupID)) %>% 
+  ## 上記の日付は除く  
+  filter(!(date %in% exc_date)) %>% 
+  ## 中断以後に見つけた個体は除く    
+  filter(is.na(suspend)|found_time <= suspend) %>% 
+  ## 調査のない日は除く %>% 
+  filter(!is.na(start)) %>% 
+  ## 追跡時間
+  mutate(dur_follow = as.numeric(difftime(fin, start, units = "mins"))) %>% 
+  ## 2018年交尾期のデータは用いない  
+  filter(study_period != "m18") %>% 
+  ## 各個体が開始から何分で見つかったか
+  ## 見つかっていない場合は追跡時間  
+  mutate(dur = ifelse(presence == 1,
+                      as.numeric(difftime(found_time, start, units = "mins")),
+                      dur_follow)) %>% 
+  left_join(no_female, by = c("date","groupID")) %>% 
+  ## 複数の集団を発見したとき、小さい集団にいた方の個体のconfirmedを0にする  
+  mutate(confirmed = ifelse(confirmed == 1 & presence == 0,
+                            presence, confirmed)) %>% 
+  filter(confirmed == 1) -> female_time_anal_all_pre
+```
+
+データは以下の通り。  
+```{r}
+datatable(female_time_anal_all_pre,
+          options = list(scrollX = 60,
+                         filter = "top"))
+```
+<br/>    

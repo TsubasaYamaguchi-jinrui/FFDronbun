@@ -20,6 +20,7 @@ library(knitr)
 library(easystats)
 library(DT)
 library(scales)
+library(emmeans)
 ## モデリング  
 library(brms)
 library(rethinking)
@@ -39,6 +40,7 @@ library(igraph)
 library(tidygraph)
 library(ggraph)
 ## グラフや表関連
+library(ggtext)
 library(ggforce)
 library(ggbeeswarm)
 library(plotly)
@@ -58,7 +60,6 @@ library(ggrepel)
 # ## フォント関連
 library(extrafont)
 require(systemfonts)
-require(fontregisterer)
 # ベイズモデルの設定
 rstan_options(auto_write = TRUE) 
 options(mc.cores = parallel::detectCores()) 

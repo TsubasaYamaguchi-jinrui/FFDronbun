@@ -1,5 +1,5 @@
 # TY、ITの有無とオスからの被攻撃頻度 {#c13}   
-第\@ref(c10)章の結果から、メスたちは*TY*や*IT*が群れにいない日や、TYが群れから離れたのと同じ日に群れを離れやすい傾向があることが分かった。 @Yamaguchi2022 が正しければ、これは*TY*や*IT*がメスにとって他のオスからの「用心棒」となっているため、オスの攻撃を回避するために彼らの動きに応じてメスたちが動いた結果だと考えられる。  
+第\@ref(c10)章の結果から、メスたちは*TY*と*IT*が群れから離れたのと同じ日に群れを離れやすい傾向があることが分かった。 @Yamaguchi2022 が正しければ、これは*TY*や*IT*がメスにとって他のオスからの「用心棒」となっているため、オスの攻撃を回避するために彼らの動きに応じてメスたちが動いた結果だと考えられる。  
 
 本章では、実際に彼らが群れにいなかった日にはメスが受ける攻撃は増加したのかを検討する。  
 
@@ -21,7 +21,7 @@ agg_daily_each <- no_female_over0.5 %>%
             by = c("study_period", "femaleID")) %>% 
   filter(age >= 6) %>% 
   filter(presence == 1) %>%
-  filter(study_period != "m18" & !str_detect(study_period, "nm")) %>% 
+  filter(study_period != "m18", !str_detect(study_period, "nm")) %>% 
   ## 攻撃頻度を結合
   left_join(agg_rate_each %>% select(groupID, femaleID, rate_agg, no_agg),
             by = c("groupID", "femaleID")) %>% 
@@ -108,7 +108,7 @@ no_male <- no_female_over0.5 %>%
   filter(study_period != "m18" & !str_detect(study_period, "nm")) %>% 
   select(groupID, prop_female, dur) %>% 
   left_join(group_all %>% 
-              select(-c(Kur:Kun,Mif:Trt,Har:Yun))) %>% 
+              select(-c(Kur:Kun,Mif:Har,Cur:Yun))) %>% 
   select(-(start:fin)) %>% 
   rowwise() %>% 
   mutate(no_tm = ifelse(study_period != "m19",

@@ -54,7 +54,8 @@ m_agginj <- brm(injury01 ~ rate_agg_std*rs2  + study_period + (1|femaleID),
 DHARMaパッケージ[@Hartig2022]とDHARMa.helperパッケージ[@Francisco2023]でモデルの前提が満たされているかを確認する。特に問題はないよう。 
 ```{r, fig.height = 4}
 ## 全個体への攻撃  
-dh_check_brms(m_agginj)
+dh_check_brms(m_agginj,
+              quantreg = TRUE)
 ```
 <br/>  
 

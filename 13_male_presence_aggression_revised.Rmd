@@ -1,0 +1,1651 @@
+# TY、ITの有無とオスからの被攻撃頻度 {#c13}   
+第\@ref(c10)章の結果から、メスたちは*TY*と*IT*が群れから離れたのと同じ日に群れを離れやすい傾向があることが分かった。 @Yamaguchi2022 が正しければ、これは*TY*や*IT*がメスにとって他のオスからの「用心棒」となっているため、オスの攻撃を回避するために彼らの動きに応じてメスたちが動いた結果だと考えられる。  
+
+本章では、実際に彼らが群れにいなかった日にはメスが受ける攻撃は増加したのかを検討する。  
+
+## データの加工  
+### 各観察日の被攻撃頻度  
+まず各観察日におけるそれぞれのメスの被攻撃頻度とそれぞれのメスの発情の有無を算出する。なお、分析には群れ本体を観察し、240分以上観察できた日のみを用いる。  
+
+```{r}
+## 日ごとの被攻撃頻度の算出  
+agg_daily_each <- no_female_over0.5 %>% 
+  select(groupID, prop_female, dur) %>% 
+  left_join(group_all %>% select(-c(TY,IT,KR,LK,KM,TG))) %>% 
+  select(-(start:fin)) %>% 
+  ## 縦型にする  
+  pivot_longer(Kur:Yun,
+               names_to = "femaleID",
+               values_to = "presence") %>% 
+  left_join(att,
+            by = c("study_period", "femaleID")) %>% 
+  filter(age >= 6) %>% 
+  filter(presence == 1) %>%
+  filter(study_period != "m18", !str_detect(study_period, "nm")) %>% 
+  ## 攻撃頻度を結合
+  left_join(agg_rate_each %>% select(groupID, femaleID, rate_agg, no_agg),
+            by = c("groupID", "femaleID")) %>% 
+  left_join(female_all %>% select(date, femaleID, rs2),
+            by = c("date","femaleID")) %>% 
+  ## 発情の記録がない2019/9/27は除外
+  filter(!is.na(rs2)) %>% 
+  ## 攻撃が一度もない日の値を補完
+  replace_na(list(rate_agg = 0, no_agg = 0))
+```
+
+### TYとITの確認状況  
+続いて、これらにTYとITの確認状況や発情メス数、確認した合計オス数のデータを結合する。*TY*や*IT*が群れにいるか否かの効果を見たいため、彼らが少なくとも3時間以上確認できた日と、一度も確認できなかった日を比較する。    
+
+まず、*TY*と*IT*が3時間以上確認できたか否かについて算出する。  
+```{r}
+male_time_19m_3h <- read_excel("../Data/data/2019mating/2019mating_raw.xlsx",
+                               sheet =　"male_presence_long") %>% 
+  mutate(study_period = "m19") %>% 
+  mutate(groupID = str_c(study_period,"_", groupID)) %>% 
+  ## 確認時間の算出
+  mutate(dur = ifelse(is.na(first), 0,
+                      difftime(last, first, units = "mins"))) %>% 
+  ## 180以上は1, 1~179分は2, 0分は0とした。  
+  mutate(presence_3h = ifelse(dur >= 180,1,
+                              ifelse(0 < dur & dur < 180, 2, 0))) %>% 
+  select(maleID, date, groupID, presence_3h) %>% 
+  pivot_wider(names_from = maleID,
+              values_from = presence_3h)
+
+male_time_20m_3h <- read_excel("../Data/data/2020mating/2020mating_raw.xlsx",
+                               sheet =　"male_presence_long") %>% 
+  mutate(study_period = "m20") %>% 
+  mutate(groupID = str_c(study_period,"_", groupID)) %>% 
+  ## 確認時間の算出
+  mutate(dur = ifelse(is.na(first), 0,
+                      difftime(last, first, units = "mins"))) %>% 
+  mutate(presence_3h = ifelse(dur >= 180,1,
+                              ifelse(0 < dur & dur < 180, 2, 0))) %>% 
+  select(maleID, date, groupID, presence_3h) %>% 
+  pivot_wider(names_from = maleID,
+              values_from = presence_3h)
+
+male_time_21m_3h <- read_excel("../Data/data/2021mating/2021mating_raw.xlsx",
+                               sheet =　"male_presence_long") %>% 
+  mutate(study_period = "m21") %>% 
+  mutate(groupID = str_c(study_period,"_", groupID)) %>% 
+  ## 確認時間の算出
+  mutate(dur = ifelse(is.na(first), 0,
+                      difftime(last, first, units = "mins"))) %>% 
+  mutate(presence_3h = ifelse(dur >= 180,1,
+                              ifelse(0 < dur & dur < 180, 2, 0))) %>% 
+  select(maleID, date, groupID, presence_3h) %>% 
+  pivot_wider(names_from = maleID,
+              values_from = presence_3h)
+
+male_time_3h <- bind_rows(male_time_19m_3h,
+                          male_time_20m_3h,
+                          male_time_21m_3h) %>% 
+  replace_na(list(IT = 0))
+```
+
+### 確認オス数と発情メス数  
+まず、各観察日の確認オス数を算出する。  
+```{r}
+no_ntm_m19 <- male_19m %>% 
+  filter(!(maleID %in% c("TY", "IT", "KR", "LK"))) %>% 
+  group_by(date) %>% 
+  summarise(no_ntm = sum(presence, na.rm = TRUE))
+
+no_ntm_m20 <- male_20m %>% 
+  filter(!(maleID %in% c("TY", "IT", "KR", "LK", "KM", "TG"))) %>% 
+  group_by(date) %>% 
+  summarise(no_ntm = sum(presence, na.rm = TRUE))
+
+no_ntm_m21 <- male_21m %>% 
+  filter(!(maleID %in% c("TY", "IT", "KR", "LK", "KM", "TG"))) %>% 
+  group_by(date) %>% 
+  summarise(no_ntm = sum(presence, na.rm = TRUE))
+
+no_ntm <- bind_rows(no_ntm_m19, no_ntm_m20, no_ntm_m21)
+
+no_male <- no_female_over0.5 %>% 
+  filter(study_period != "m18" & !str_detect(study_period, "nm")) %>% 
+  select(groupID, prop_female, dur) %>% 
+  left_join(group_all %>% 
+              select(-c(Kur:Kun,Mif:Trt,Har:Yun))) %>% 
+  select(-(start:fin)) %>% 
+  rowwise() %>% 
+  mutate(no_tm = ifelse(study_period != "m19",
+                        sum(TY,IT,LK,KR,KM,TG, na.rm = TRUE),
+                        sum(TY,IT,LK,KR, na.rm = TRUE))) %>% 
+  ungroup() %>% 
+  left_join(no_ntm, by = "date") %>% 
+  mutate(no_male = no_ntm + no_tm) %>% 
+  select(date, groupID, no_male)
+```
+
+続いて、各観察日の発情メス数を算出する。  
+```{r}
+no_est <- agg_daily_each %>% 
+  group_by(date, groupID) %>% 
+  summarise(no_est = sum(rs2))
+```
+
+### 個体追跡状況  
+各メスが各観察日に個体追跡された時間と、一日の追跡時間に占める割合を算出する。  
+
+```{r}
+focal_combined %>% 
+  group_by(no_focal, date, subject) %>% 
+  summarise(dur_focal = max(time)) %>% 
+  mutate(date = as_date(date)) %>% 
+  rename(femaleID = subject) %>% 
+  ungroup() %>% 
+  group_by(date, femaleID) %>% 
+  summarise(dur_focal = sum(dur_focal)) %>% 
+  ungroup()  ->  focal_summary
+``` 
+
+
+### データの結合  
+最後に、上記のデータを全て結合する。  
+```{r}
+agg_daily_all <- agg_daily_each %>% 
+  left_join(male_time_3h,
+            by = c("date", "groupID")) %>% 
+  left_join(no_male,
+            by = c("date", "groupID")) %>% 
+  left_join(no_est,
+            by = c("date", "groupID")) %>% 
+  left_join(CSI_TY_combined %>% 
+              rename(femaleID = subject) %>% 
+              select(femaleID, CSI_TY),
+            by = "femaleID") %>% 
+  left_join(CSI_IT_combined %>% 
+              rename(femaleID = subject) %>% 
+              select(femaleID, CSI_IT),
+            by = "femaleID") %>% 
+  left_join(focal_summary, 
+            by = c("femaleID", "date")) %>% 
+  replace_na(list(dur_focal = 0)) %>% 
+  mutate(prop_focal = dur_focal/dur) %>% 
+  group_by(study_period) %>% 
+  mutate(rank_scaled = rank/max(rank)) %>% 
+  ungroup()
+```
+
+## 分析    
+分析は発情メスと非発情メスで分けます。  
+
+#### 全期間 + TY/ITの有無  
+まず、全期間のデータを用いて分析を行う。  
+
+##### データの加工  
+TYとITがどちらも3時間以上確認されたか、一度も確認されていない日だけを抽出する。  
+```{r}
+agg_daily_all_es <- agg_daily_all %>% 
+  filter(TY != 2 & IT != 2) %>% 
+  filter(rs2 == "1") %>% 
+  mutate(logdur = log(dur/60)) %>% 
+  mutate(date = as.factor(date)) %>% 
+  drop_na(CSI_TY) %>% 
+  mutate(CSI_TY_std = standardize(CSI_TY),
+         CSI_IT_std = standardize(CSI_IT),
+         est_std = standardize(no_est),
+         male_std = standardize(no_male),
+         rank_std = standardize(rank_scaled),
+         age_std = standardize(age),
+         prop_std = standardize(prop_female),
+         focal_std = standardize(prop_focal)) 
+
+agg_daily_all_an <- agg_daily_all %>% 
+  filter(TY != 2 & IT != 2) %>% 
+  filter(rs2 == "0") %>% 
+  mutate(logdur = log(dur/60)) %>% 
+  mutate(date = as.factor(date)) %>% 
+  drop_na(CSI_TY) %>% 
+  mutate(CSI_TY_std = standardize(CSI_TY),
+         CSI_IT_std = standardize(CSI_IT),
+         est_std = standardize(no_est),
+         male_std = standardize(no_male),
+         rank_std = standardize(rank_scaled),
+         age_std = standardize(age),
+         prop_std = standardize(prop_female),
+         focal_std = standardize(prop_focal)) 
+```
+
+##### モデリング      
+モデルの概要は以下の通り。データは各観察日におけるそれぞれのメスのデータである。    
+
+- 応答変数: オスからの被攻撃回数  
+- 説明変数: TYの有無、TYとのCSI、発情の有無×TYの有無、TYとのCSI×TYの有無、発情メス数、確認オス数、調査期間      
+- オフセット項: 群れの追跡時間  
+- 分布: 負の二項分布  
+- リンク関数: log関数  
+- 事前分布: 関数にある通り弱情報分布  
+
+```{r}
+m_agg_TYIT_es_rv <- brm(no_agg ~ TY*CSI_TY_std +  IT*CSI_IT_std +
+                          est_std + male_std + prop_std + focal_std + 
+                          study_period + offset(logdur) +
+                          (1|femaleID) + (1|date),
+                        family = negbinomial,
+                        iter = 11000, warmup = 1000, seed = 13,
+                        prior = c(prior(student_t(4,0,15), class = "b"),
+                                  prior(student_t(4,0,15), class = "Intercept"),
+                                  prior(student_t(4,0,10), class = "sd"),
+                                  prior(gamma(0.01,0.01), class = "shape")),
+                        control=list(adapt_delta = 0.99, max_treedepth = 20),
+                        backend = "cmdstanr",
+                        data = agg_daily_all_es,
+                        file = "model/m_agg_TYIT_es_rv.rds")
+
+m_agg_TYIT_an_rv <- brm(no_agg ~ TY*CSI_TY_std + IT*CSI_IT_std +
+                          est_std + male_std + prop_std + focal_std + 
+                          study_period + offset(logdur) +
+                          (1|femaleID) + (1|date),
+                        family = "negbinomial",
+                        iter = 11000, warmup = 1000, seed = 13,
+                        prior = c(prior(student_t(4,0,15), class = "b"),
+                                  prior(student_t(4,0,15), class = "Intercept"),
+                                  prior(student_t(4,0,10), class = "sd"),
+                                  prior(gamma(0.01,0.01), class = "shape")),
+                        control=list(adapt_delta = 0.99, max_treedepth = 20),
+                        backend = "cmdstanr",
+                        data = agg_daily_all_an,
+                        file = "model/m_agg_TYIT_an_rv.rds")
+```
+
+###### モデルのチェック  
+DHARMaパッケージ[@Hartig2022]とDHARMa.helperパッケージ[@Francisco2023]でモデルの前提が満たされているかを確認する。どちらのモデルも特に問題はないよう。 
+```{r, fig.height = 4}
+dh_m_agg_TYIT_es_rv <- dh_check_brms(m_agg_TYIT_es_rv, quantreg = TRUE)
+dh_m_agg_TYIT_an_rv <- dh_check_brms(m_agg_TYIT_an_rv, quantreg = TRUE)
+```
+<br/>  
+
+bayesplotパッケージ[@Gabry2022]の`pp_check`関数で、事後分布からの予測分布と実測値の分布を比較しても大きな乖離はない。   
+```{r, fig.height = 4.5}
+## 全個体への攻撃  
+pp_check(m_agg_TYIT_es_rv, ndraws = 100)+
+  theme_bw()+
+  theme(aspect.ratio = 0.9)
+
+pp_check(m_agg_TYIT_an_rv, ndraws = 100)+
+  theme_bw()+
+  theme(aspect.ratio = 0.9)
+```  
+<br/>  
+
+多重共線性のチェックも行ったが、VIFに問題はない。  
+```{r}
+check_collinearity(m_agg_TYIT_es_rv)
+check_collinearity(m_agg_TYIT_an_rv)
+```
+<br/>  
+
+Rhatにも問題はなく、収束の問題はないよう。  
+```{r, fig.dim = c(8,4)}
+data.frame(Rhat = brms::rhat(m_agg_TYIT_es_rv)) %>% 
+  ggplot(aes(x = Rhat))+
+  geom_histogram(fill = "white",
+                 color = "black")+
+  theme_bw()+
+  theme(aspect.ratio = 1) 
+
+data.frame(Rhat = brms::rhat(m_agg_TYIT_an_rv)) %>% 
+  ggplot(aes(x = Rhat))+
+  geom_histogram(fill = "white",
+                 color = "black")+
+  theme_bw()+
+  theme(aspect.ratio = 1) 
+```
+<br/>  
+
+ゼロ過剰の問題もない。  
+```{r}
+testZeroInflation(dh_m_agg_TYIT_es_rv)
+testZeroInflation(dh_m_agg_TYIT_an_rv)
+```
+
+
+##### 結果の確認  
+結果は以下の通り。太字になっている変数は95%確信区間が0をまたいでおらず、有意な影響があるといえる。まずは発情メスについては、発情メス数のみが有意な影響を持っていた。      
+```{r, echo = FALSE}
+summary_agg_TYIT_es_rv <- summary(m_agg_TYIT_es_rv)
+
+model_parameters(m_agg_TYIT_es_rv, ci = 0.95,
+                 centrality = "median", ci_method = "hdi") %>% 
+  data.frame() %>% 
+  dplyr::select(1,2,3,5,6, 7,8) %>% 
+  filter(Parameter != "shape") %>% 
+  mutate("Bulk ESS" = summary_agg_TYIT_es_rv$fixed$Bulk_ESS,
+         "Tail ESS" = summary_agg_TYIT_es_rv$fixed$Tail_ESS) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
+  dplyr::select(c(1,2,3, 10), everything()) %>% 
+  dplyr::select(-CI_low, -CI_high) %>% 
+  mutate(pd = str_c(sprintf("%.2f",pd*100))) %>% 
+  rename(PD = pd)  %>% 
+  mutate(Parameter = fct_relevel(Parameter,
+                                 "b_Intercept","b_TY","b_IT",
+                                 "b_CSI_TY_std","b_CSI_IT_std",
+                                 "b_TY:CSI_TY_std",
+                                 "b_IT:CSI_IT_std",
+                                 "b_male_std","b_est_std", 
+                                 "b_prop_std", "b_focal_std",
+                                 "b_study_periodm20", "b_study_periodm21")) %>% 
+  arrange(Parameter) %>% 
+  mutate(Parameter = str_replace_all(Parameter, c("b_Intercept"="切片",
+                                                  "b_study_periodm20" = "Study period(MS20 vs MS18)",
+                                                  "b_study_periodm21" = "Study period(MS21 vs MS18)",
+                                                  "^b_TY$" = "TY presence (Yes vs No)",
+                                                  "^b_IT$" = "IT presence (Yes vs No)",
+                                                  "b_male_std" = "No. of present males",
+                                                  "b_est_std" = "No. of estrous females",
+                                                  "b_prop_std" = "Prop. of present females",
+                                                  "b_focal_std" = "Prop. of time focal sampling", 
+                                                  "b_CSI_TY_std" = "CSI with TY",
+                                                  "b_TY:CSI_TY_std" = "TY presence x CSI with TY",
+                                                  "b_CSI_IT_std" = "CSI with IT",
+                                                  "b_IT:CSI_IT_std" = "IT presence x CSI with IT")))%>% 
+  rename("Explanatory variables"="Parameter") %>% 
+  mutate(across(where(is.numeric), ~sprintf("%.2f", .))) -> table_agg_TYIT_es
+
+table_agg_TYIT_es
+
+write_csv(table_agg_TYIT_es, "tables/table_agg_TYIT_es.csv")
+```
+<br/>  
+
+続いて、非発情メスについては以下のとおりである。  
+```{r, echo = FALSE}
+summary_agg_TYIT_an_rv <- summary(m_agg_TYIT_an_rv)
+
+model_parameters(m_agg_TYIT_an_rv, ci = 0.95,
+                 centrality = "median", ci_method = "hdi") %>% 
+  data.frame() %>% 
+  dplyr::select(1,2,3,5,6, 7,8) %>% 
+  filter(Parameter != "shape") %>% 
+  mutate("Bulk ESS" = summary_agg_TYIT_an_rv$fixed$Bulk_ESS,
+         "Tail ESS" = summary_agg_TYIT_an_rv$fixed$Tail_ESS) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
+  dplyr::select(c(1,2,3, 10), everything()) %>% 
+  dplyr::select(-CI_low, -CI_high) %>% 
+  mutate(pd = str_c(sprintf("%.2f",pd*100))) %>% 
+  rename(PD = pd)  %>% 
+  mutate(Parameter = fct_relevel(Parameter,
+                                 "b_Intercept","b_TY","b_IT",
+                                 "b_CSI_TY_std","b_CSI_IT_std",
+                                 "b_TY:CSI_TY_std",
+                                 "b_IT:CSI_IT_std",
+                                 "b_male_std","b_est_std", 
+                                 "b_prop_std", "b_focal_std",
+                                 "b_study_periodm20", "b_study_periodm21")) %>% 
+  arrange(Parameter) %>% 
+  mutate(Parameter = str_replace_all(Parameter, c("b_Intercept"="切片",
+                                                  "b_study_periodm20" = "Study period(MS20 vs MS18)",
+                                                  "b_study_periodm21" = "Study period(MS21 vs MS18)",
+                                                  "^b_TY$" = "TY presence (Yes vs No)",
+                                                  "^b_IT$" = "IT presence (Yes vs No)",
+                                                  "b_male_std" = "No. of present males",
+                                                  "b_est_std" = "No. of estrous females",
+                                                  "b_prop_std" = "Prop. of present females",
+                                                  "b_focal_std" = "Prop. of time focal sampling", 
+                                                  "b_CSI_TY_std" = "CSI with TY",
+                                                  "b_TY:CSI_TY_std" = "TY presence x CSI with TY",
+                                                  "b_CSI_IT_std" = "CSI with IT",
+                                                  "b_IT:CSI_IT_std" = "IT presence x CSI with IT")))%>% 
+  rename("Explanatory variables"="Parameter") %>% 
+  mutate(across(where(is.numeric), ~sprintf("%.2f", .))) -> table_agg_TYIT_an
+
+table_agg_TYIT_an
+
+write_csv(table_agg_TYIT_an, "tables/table_agg_TYIT_an.csv")
+```
+<br/>  
+
+##### 結果の図示  
+交互作用項の結果について図示する。  
+
+###### 発情メスについて  
+まずは発情メスについて図示します。  
+```{r}
+## TYについて  
+cont_agg_TY_es <- posterior_samples(m_agg_TYIT_es_rv) %>% 
+  select(2, 12) %>% 
+  rename(b_TY = 1,
+         b_int = 2) %>% 
+  expand(CSI_TY_std = seq(-0.86, 2.75, length = 500),
+         nesting(b_TY, b_int)) %>% 
+  mutate(logratio = b_TY + b_int*CSI_TY_std) %>% 
+  group_by(CSI_TY_std) %>% 
+  summarise(median = median(logratio),
+            CI_low = quantile(logratio, 0.025),
+            CI_high = quantile(logratio, 0.975)) %>% 
+  ungroup() %>% 
+  rename(CSI_TY = CSI_TY_std) %>% 
+  mutate(CSI_TY = sd(agg_daily_all_es$CSI_TY)*CSI_TY + mean(agg_daily_all_es$CSI_TY)) %>% 
+  mutate(significance = if_else(CI_low*CI_high > 0,
+                                "Yes", "No")) 
+
+cont_agg_TY_es %>% 
+  ggplot(aes(x = CSI_TY, y = median))+
+  geom_point(data = CSI_TY_combined,
+             aes(x = CSI_TY, y = -2.1),
+             shape = "|",
+             color = "black",
+             size = 3.5)+
+  geom_line(aes(color = significance))+
+  geom_ribbon(aes(ymin = CI_low, ymax = CI_high,
+                  fill = significance),
+              alpha = 0.15)+
+  scale_color_manual(values = c("black", "red3"),
+                     labels = c("No", "Yes")) +
+  scale_fill_manual(values = c("grey32", "red3"),
+                    labels = c("No", "Yes")) +
+  geom_hline(aes(yintercept = 0),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 0.5)+
+  theme_bw(base_size = 12)+
+  theme(aspect.ratio = 1) +
+  labs(y = "Log ratio of aggression frequency<br>(*TY* present vs. absent)",
+       x = "CSI with *TY*",
+       color = "95% CI doesn't include zero", fill = "95% CI doesn't include zero",
+       title = "a")+
+  scale_x_continuous(breaks = seq(0,5.5,0.5))+
+  scale_y_continuous(breaks = seq(-2.5, 8, 0.5))+
+  theme(text = element_text(family = "Times New Roman"),
+        axis.title = element_markdown(hjust = 0.5,
+                                      lineheight = 1.2),
+        axis.text = element_text(size = 12),
+        aspect.ratio = 1,
+        legend.position = "bottom",
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 12),
+        legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(-10,-10,-10,-10)) +
+  guides(color = "none", fill = "none") -> p_cont_agg_TY_es
+
+## ITについて
+cont_agg_IT_es <- posterior_samples(m_agg_TYIT_es_rv) %>% 
+  select(4, 13) %>% 
+  rename(b_IT = 1,
+         b_int = 2) %>% 
+  expand(CSI_IT_std = seq(-0.71, 3.21, length = 500),
+         nesting(b_IT, b_int)) %>% 
+  mutate(logratio = b_IT + b_int*CSI_IT_std) %>% 
+  group_by(CSI_IT_std) %>% 
+  summarise(median = median(logratio),
+            CI_low = quantile(logratio, 0.025),
+            CI_high = quantile(logratio, 0.975)) %>% 
+  ungroup() %>% 
+  rename(CSI_IT = CSI_IT_std) %>% 
+  mutate(CSI_IT = sd(agg_daily_all_es$CSI_IT)*CSI_IT + mean(agg_daily_all_es$CSI_IT)) %>% 
+  mutate(significance = if_else(CI_low*CI_high > 0,
+                                "Yes", "No"))
+
+cont_agg_IT_es %>% 
+  ggplot(aes(x = CSI_IT, y = median))+
+  geom_point(data = CSI_IT_combined,
+             aes(x = CSI_IT, y = -2.3),
+             shape = "|",
+             color = "black",
+             size = 3.5)+
+  geom_line(aes(color = significance))+
+  geom_ribbon(aes(ymin = CI_low, ymax = CI_high,
+                  fill = significance),
+              alpha = 0.15)+
+  scale_color_manual(values = c("black", "red3"),
+                     labels = c("No", "Yes")) +
+  scale_fill_manual(values = c("grey32", "red3"),
+                    labels = c("No", "Yes")) +
+  geom_hline(aes(yintercept = 0),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 0.5)+
+  theme_bw(base_size = 12)+
+  theme(aspect.ratio = 1) +
+  labs(y = "Log ratio of aggression frequency<br>(*IT* present vs. absent)",
+       x = "CSI with *IT*",
+       color = "95% CI doesn't include zero", fill = "95% CI doesn't include zero",
+       title = "b")+
+  scale_x_continuous(breaks = seq(0,5.5,0.5))+
+  scale_y_continuous(breaks = seq(-2.5, 8, 0.5))+
+  theme(text = element_text(family = "Times New Roman"),
+        axis.title = element_markdown(hjust = 0.5,
+                                      lineheight = 1.2),
+        axis.text = element_text(size = 12),
+        aspect.ratio = 1,
+        legend.position = "bottom",
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 12),
+        legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(-12,-12,-12,-12)) -> p_cont_agg_IT_es
+
+
+p_cont_agg_TYIT_es <- p_cont_agg_TY_es + p_cont_agg_IT_es +
+  plot_layout(guides = 'collect') &
+  theme(legend.position = 'bottom')
+
+p_cont_agg_TYIT_es
+
+ggsave("figures/p_cont_agg_TYIT_es.tif", p_cont_agg_TYIT_es,
+       width = 200, height = 120, units = "mm", dpi = 2000)
+```
+<br/>  
+
+推定された被攻撃頻度をプロットすると以下のようになる。  
+```{r}
+## TY  
+CSI_TY_q <- quantile(CSI_TY_combined$CSI_TY,
+                     probs = c(0.1, 0.25, 0.5, 0.75, 0.9))[1:5]
+
+CSI_TY_std_es_q <- (CSI_TY_q - mean(agg_daily_all_es$CSI_TY))/sd(agg_daily_all_es$CSI_TY)
+
+emm_agg_TY_es <- emmeans(m_agg_TYIT_es_rv,
+                         ~TY|CSI_TY_std,
+                         at = list(TY_out = c(0,1),
+                                   CSI_TY_std = CSI_TY_std_es_q),
+                         offset = log(1),
+                         type = "response") 
+
+emm_agg_TY_es %>% 
+  data.frame() %>% 
+  mutate(CSI_TY_cat = factor(CSI_TY_std,
+                             labels = str_c(c("10%\n(", "25%\n(", "Median\n(",
+                                              "75%\n(", "90%\n("),
+                                            sprintf("%.2f", CSI_TY_q),")"))) %>% 
+  mutate(TY = if_else(TY == "1", "present", "absent")) %>% 
+  ggplot(aes(x = CSI_TY_cat, y = prob)) +
+  geom_errorbar(aes(group = TY,
+                    ymin = lower.HPD, ymax = upper.HPD),
+                position = position_dodge(0.85),
+                width = 0.5)+
+  geom_point(aes(fill = TY),
+             position = position_dodge(0.85),
+             shape = 21,
+             size = 2.5) +
+  scale_fill_manual(values = c("white", "black")) +
+  theme_bw(base_size = 12) +
+  theme(aspect.ratio = 0.7,
+        text = element_text(family = "Times New Roman"),
+        axis.title = element_markdown(lineheight = 1.2,
+                                      hjust = 0.5),
+        legend.title = element_markdown()) +
+  labs(x = "CSI with *TY*", y = "Frequency of aggression from males (times/h)",
+       fill = "*TY* presence") -> p_emm_agg_TY_es
+
+ggsave("figures/p_emm_agg_TY_es.tif",
+       p_emm_agg_TY_es,
+       width = 180, height = 110, dpi = 2000, units = "mm")
+
+## IT  
+CSI_IT_q <- quantile(CSI_IT_combined$CSI_IT,
+                     probs = c(0.1, 0.25, 0.5, 0.75, 0.9))[1:5]
+
+CSI_IT_std_es_q <- (CSI_IT_q - mean(agg_daily_all_es$CSI_IT))/sd(agg_daily_all_es$CSI_IT)
+
+emm_agg_IT_es <- emmeans(m_agg_TYIT_es_rv,
+                         ~IT|CSI_IT_std,
+                         at = list(IT_out = c(0,1),
+                                   CSI_IT_std = CSI_IT_std_es_q),
+                         offset = log(1),
+                         type = "response") 
+
+emm_agg_IT_es %>% 
+  data.frame() %>% 
+  mutate(CSI_IT_cat = factor(CSI_IT_std,
+                             labels = str_c(c("10%\n(", "25%\n(", "Median\n(",
+                                              "75%\n(", "90%\n("),
+                                            sprintf("%.2f", CSI_IT_q),")"))) %>% 
+  mutate(IT = if_else(IT == "1", "present", "absent")) %>% 
+  ggplot(aes(x = CSI_IT_cat, y = prob)) +
+  geom_errorbar(aes(group = IT,
+                    ymin = lower.HPD, ymax = upper.HPD),
+                position = position_dodge(0.85),
+                width = 0.5)+
+  geom_point(aes(fill = IT),
+             position = position_dodge(0.85),
+             shape = 21,
+             size = 2.5) +
+  scale_fill_manual(values = c("white", "black")) +
+  theme_bw(base_size = 12) +
+  theme(aspect.ratio = 0.7,
+        text = element_text(family = "Times New Roman"),
+        axis.title = element_markdown(lineheight = 1.2,
+                                      hjust = 0.5),
+        legend.title = element_markdown()) +
+  labs(x = "CSI with *IT*", y = "Frequency of aggression from males (times/h)",
+       fill = "*IT* presence") -> p_emm_agg_IT_es
+
+ggsave("figures/p_emm_agg_IT_es.tif",
+       p_emm_agg_IT_es,
+       width = 180, height = 110, dpi = 2000, units = "mm")
+
+p_emm_agg_TY_es + p_emm_agg_IT_es
+```
+<br/>  
+
+実際の被攻撃頻度をプロットすると以下のようになります。  
+```{r}
+## TY
+emm_agg_TY_es2 <- emmeans(m_agg_TYIT_es_rv,
+                         ~ TY,
+                         at = list(TY = c(0,1)),
+                         type = "response",
+                         offset = log(1)) %>% 
+  data.frame() %>% 
+  mutate(TY = as.factor(TY))
+
+agg_daily_all_es %>% 
+  group_by(femaleID, TY) %>% 
+  summarise(mean = mean(rate_agg),
+            n = n()) %>% 
+  ungroup() %>% 
+  mutate(TY = as.factor(TY)) %>% 
+  ggplot(aes(x = TY, y = mean))+
+  geom_line(aes(group = femaleID),
+            alpha = 0.7)+
+  geom_point(shape = 1,
+             size = 3)+
+  geom_point(data = emm_agg_TY_es2 %>% 
+               filter(TY == "0"),
+             aes(y = prob),
+             position = position_nudge(x = -0.15),
+             size = 3,
+             shape = 16)+
+  geom_errorbar(data = emm_agg_TY_es2 %>% 
+                  filter(TY == "0"),
+                aes(y = prob,
+                    ymin = lower.HPD, ymax = upper.HPD),
+                position = position_nudge(x = -0.15),
+                width = 0.08)+
+  geom_point(data = emm_agg_TY_es2 %>% 
+               filter(TY == "1"),
+             aes(y = prob),
+             position = position_nudge(x = 0.15),
+             size = 3,
+             shape = 16)+
+  geom_errorbar(data = emm_agg_TY_es2 %>% 
+                  filter(TY == "1"),
+                aes(y = prob,
+                    ymin = lower.HPD, ymax = upper.HPD),
+                position = position_nudge(x = 0.15),
+                width = 0.08)+
+  coord_cartesian(xlim = c(1.1,1.8))+
+  theme_bw(base_size = 12)+
+  scale_x_discrete(labels = c("*TY* absent",
+                              "*TY* present"),
+                   expand = c(0.4, 0.3, 0.6, 0.3))+
+  labs(x = "", y = "Frequency of aggression from males (times/h)",
+       title = "a")+
+  theme(text = element_text(family = "Times New Roman"),
+        axis.text = element_markdown(),
+        aspect.ratio = 0.9) -> p_agg_TY_raw_es
+
+## IT  
+emm_agg_IT_es2 <- emmeans(m_agg_TYIT_es_rv,
+                         ~ IT,
+                         at = list(IT = c(0,1)),
+                         type = "response",
+                         offset = log(1)) %>% 
+  data.frame() %>% 
+  mutate(IT = as.factor(IT))
+
+agg_daily_all_es %>% 
+  group_by(femaleID, IT) %>% 
+  summarise(mean = mean(rate_agg),
+            n = n()) %>% 
+  ungroup() %>% 
+  mutate(IT = as.factor(IT)) %>% 
+  ggplot(aes(x = IT, y = mean))+
+  geom_line(aes(group = femaleID),
+            alpha = 0.7)+
+  geom_point(shape = 1,
+             size = 3)+
+  geom_point(data = emm_agg_IT_es2 %>% 
+               filter(IT == "0"),
+             aes(y = prob),
+             position = position_nudge(x = -0.15),
+             size = 3,
+             shape = 16)+
+  geom_errorbar(data = emm_agg_IT_es2 %>% 
+                  filter(IT == "0"),
+                aes(y = prob,
+                    ymin = lower.HPD, ymax = upper.HPD),
+                position = position_nudge(x = -0.15),
+                width = 0.08)+
+  geom_point(data = emm_agg_IT_es2 %>% 
+               filter(IT == "1"),
+             aes(y = prob),
+             position = position_nudge(x = 0.15),
+             size = 3,
+             shape = 16)+
+  geom_errorbar(data = emm_agg_IT_es2 %>% 
+                  filter(IT == "1"),
+                aes(y = prob,
+                    ymin = lower.HPD, ymax = upper.HPD),
+                position = position_nudge(x = 0.15),
+                width = 0.08)+
+  coord_cartesian(xlim = c(1.1,1.8))+
+  theme_bw(base_size = 12)+
+  scale_x_discrete(labels = c("*IT* absent",
+                              "*IT* present"),
+                   expand = c(0.4, 0.3, 0.6, 0.3))+
+  labs(x = "", y = "Frequency of aggression from males (times/h)",
+       title = "b")+
+  theme(text = element_text(family = "Times New Roman"),
+        axis.text = element_markdown(),
+        aspect.ratio = 0.9) -> p_agg_IT_raw_es
+
+p_agg_TYIT_raw_es <- p_agg_TY_raw_es + p_agg_IT_raw_es
+
+p_agg_TYIT_raw_es
+
+ggsave("figures/p_agg_TYIT_raw_es.tif",p_agg_TYIT_raw_es, dpi = 2000, units = "mm",
+        width = 200, height = 120)
+```
+
+
+###### 非発情メスについて  
+続いて、非発情メスについて図示します。  
+```{r}
+## TYについて  
+cont_agg_TY_an <- posterior_samples(m_agg_TYIT_an_rv) %>% 
+  select(2, 12) %>% 
+  rename(b_TY = 1,
+         b_int = 2) %>% 
+  expand(CSI_TY_std = seq(-1, 2.55, length = 500),
+         nesting(b_TY, b_int)) %>% 
+  mutate(logratio = b_TY + b_int*CSI_TY_std) %>% 
+  group_by(CSI_TY_std) %>% 
+  summarise(median = median(logratio),
+            CI_low = quantile(logratio, 0.025),
+            CI_high = quantile(logratio, 0.975)) %>% 
+  ungroup() %>% 
+  rename(CSI_TY = CSI_TY_std) %>% 
+  mutate(CSI_TY = sd(agg_daily_all_an$CSI_TY)*CSI_TY + mean(agg_daily_all_an$CSI_TY)) %>% 
+  mutate(significance = if_else(CI_low*CI_high > 0,
+                                "Yes", "No")) 
+
+cont_agg_TY_an %>% 
+  ggplot(aes(x = CSI_TY, y = median))+
+  geom_point(data = CSI_TY_combined,
+             aes(x = CSI_TY, y = -1.4),
+             shape = "|",
+             color = "black",
+             size = 3.5)+
+  geom_line(aes(color = significance))+
+  geom_ribbon(aes(ymin = CI_low, ymax = CI_high,
+                  fill = significance),
+              alpha = 0.15)+
+  scale_color_manual(values = c("red3", "black"),
+                     labels = c("Yes", "No")) +
+  scale_fill_manual(values = c("red3", "grey32"),
+                    labels = c("Yes", "No")) +
+  geom_hline(aes(yintercept = 0),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 0.5)+
+  theme_bw(base_size = 12)+
+  theme(aspect.ratio = 1) +
+  labs(y = "Log ratio of aggression frequency<br>(*TY* present vs. absent)",
+       x = "CSI with *TY*",
+       color = "95% CI doesn't include zero", fill = "95% CI doesn't include zero",
+       title = "a")+
+  scale_x_continuous(breaks = seq(0,5.5,0.5))+
+  scale_y_continuous(breaks = seq(-2.4, 0, 0.3))+
+  theme(text = element_text(family = "Times New Roman"),
+        axis.title = element_markdown(hjust = 0.5,
+                                      lineheight = 1.2),
+        axis.text = element_text(size = 12),
+        aspect.ratio = 1,
+        legend.position = "bottom",
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 12),
+        legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(-10,-10,-10,-10))+
+  guides(color = "none", fill = "none") -> p_cont_agg_TY_an
+
+## ITについて
+cont_agg_IT_an <- posterior_samples(m_agg_TYIT_an_rv) %>% 
+  select(4, 13) %>% 
+  rename(b_IT = 1,
+         b_int = 2) %>% 
+  expand(CSI_IT_std = seq(-0.71, 3.36, length = 500),
+         nesting(b_IT, b_int)) %>% 
+  mutate(logratio = b_IT + b_int*CSI_IT_std) %>% 
+  group_by(CSI_IT_std) %>% 
+  summarise(median = median(logratio),
+            CI_low = quantile(logratio, 0.025),
+            CI_high = quantile(logratio, 0.975)) %>% 
+  ungroup() %>% 
+  rename(CSI_IT = CSI_IT_std) %>% 
+  mutate(CSI_IT = sd(agg_daily_all_an$CSI_IT)*CSI_IT + mean(agg_daily_all_an$CSI_IT)) %>% 
+  mutate(significance = if_else(CI_low*CI_high > 0,
+                                "Yes", "No"))
+
+cont_agg_IT_an %>% 
+  ggplot(aes(x = CSI_IT, y = median))+
+  geom_point(data = CSI_IT_combined,
+             aes(x = CSI_IT, y = -2.55),
+             shape = "|",
+             color = "black",
+             size = 3.5)+
+  geom_line(aes(color = significance))+
+  geom_ribbon(aes(ymin = CI_low, ymax = CI_high,
+                  fill = significance),
+              alpha = 0.15)+
+  scale_color_manual(values = c("red3", "black"),
+                     labels = c("Yes", "No")) +
+  scale_fill_manual(values = c("red3", "grey32"),
+                    labels = c("Yes", "No")) +
+  geom_hline(aes(yintercept = 0),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 0.5)+
+  theme_bw(base_size = 12)+
+  theme(aspect.ratio = 1) +
+  labs(y = "Log ratio of aggression frequency<br>(*IT* present vs. absent)",
+       x = "CSI with *IT*",
+       color = "95% CI doesn't include zero", fill = "95% CI doesn't include zero",
+       title = "b")+
+  scale_x_continuous(breaks = seq(0,5.5,0.5))+
+  scale_y_continuous(breaks = seq(-2.5, 8, 0.5))+
+  theme(text = element_text(family = "Times New Roman"),
+        axis.title = element_markdown(hjust = 0.5,
+                                      lineheight = 1.2),
+        axis.text = element_text(size = 12),
+        aspect.ratio = 1,
+        legend.position = "bottom",
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 12),
+        legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(-12,-12,-12,-12)) -> p_cont_agg_IT_an
+
+
+p_cont_agg_TYIT_an <- p_cont_agg_TY_an + p_cont_agg_IT_an +
+  plot_layout(guides = 'collect') &
+  theme(legend.position = 'bottom')
+
+p_cont_agg_TYIT_an
+
+ggsave("figures/p_cont_agg_TYIT_an.tif", p_cont_agg_TYIT_an,
+       width = 200, height = 120, units = "mm", dpi = 2000)
+```
+<br/>  
+
+推定された被攻撃頻度をプロットすると以下のようになる。  
+```{r}
+## TY  
+CSI_TY_q <- quantile(CSI_TY_combined$CSI_TY,
+                     probs = c(0.1, 0.25, 0.5, 0.75, 0.9))[1:5]
+
+CSI_TY_std_an_q <- (CSI_TY_q - mean(agg_daily_all_an$CSI_TY))/sd(agg_daily_all_an$CSI_TY)
+
+emm_agg_TY_an <- emmeans(m_agg_TYIT_an_rv,
+                         ~TY|CSI_TY_std,
+                         at = list(TY_out = c(0,1),
+                                   CSI_TY_std = CSI_TY_std_an_q),
+                         offset = log(1),
+                         type = "response") 
+
+emm_agg_TY_an %>% 
+  data.frame() %>% 
+  mutate(CSI_TY_cat = factor(CSI_TY_std,
+                             labels = str_c(c("10%\n(", "25%\n(", "Median\n(",
+                                              "75%\n(", "90%\n("),
+                                            sprintf("%.2f", CSI_TY_q),")"))) %>% 
+  mutate(TY = if_else(TY == "1", "present", "absent")) %>% 
+  ggplot(aes(x = CSI_TY_cat, y = prob)) +
+  geom_errorbar(aes(group = TY,
+                    ymin = lower.HPD, ymax = upper.HPD),
+                position = position_dodge(0.85),
+                width = 0.5)+
+  geom_point(aes(fill = TY),
+             position = position_dodge(0.85),
+             shape = 21,
+             size = 2.5) +
+  scale_fill_manual(values = c("white", "black")) +
+  theme_bw(base_size = 12) +
+  theme(aspect.ratio = 0.7,
+        text = element_text(family = "Times New Roman"),
+        axis.title = element_markdown(lineheight = 1.2,
+                                      hjust = 0.5),
+        legend.title = element_markdown()) +
+  labs(x = "CSI with *TY*", y = "Frequency of aggression from males (times/h)",
+       fill = "*TY* presence") -> p_emm_agg_TY_an
+
+ggsave("figures/p_emm_agg_TY_an.tif",
+       p_emm_agg_TY_an,
+       width = 180, height = 110, dpi = 2000, units = "mm")
+
+## IT  
+CSI_IT_q <- quantile(CSI_IT_combined$CSI_IT,
+                     probs = c(0.1, 0.25, 0.5, 0.75, 0.9))[1:5]
+
+CSI_IT_std_an_q <- (CSI_IT_q - mean(agg_daily_all_an$CSI_IT))/sd(agg_daily_all_an$CSI_IT)
+
+emm_agg_IT_an <- emmeans(m_agg_TYIT_an_rv,
+                         ~IT|CSI_IT_std,
+                         at = list(IT_out = c(0,1),
+                                   CSI_IT_std = CSI_IT_std_an_q),
+                         offset = log(1),
+                         type = "response") 
+
+emm_agg_IT_an %>% 
+  data.frame() %>% 
+  mutate(CSI_IT_cat = factor(CSI_IT_std,
+                             labels = str_c(c("10%\n(", "25%\n(", "Median\n(",
+                                              "75%\n(", "90%\n("),
+                                            sprintf("%.2f", CSI_IT_q),")"))) %>% 
+  mutate(IT = if_else(IT == "1", "present", "absent")) %>% 
+  ggplot(aes(x = CSI_IT_cat, y = prob)) +
+  geom_errorbar(aes(group = IT,
+                    ymin = lower.HPD, ymax = upper.HPD),
+                position = position_dodge(0.85),
+                width = 0.5)+
+  geom_point(aes(fill = IT),
+             position = position_dodge(0.85),
+             shape = 21,
+             size = 2.5) +
+  scale_fill_manual(values = c("white", "black")) +
+  theme_bw(base_size = 12) +
+  theme(aspect.ratio = 0.7,
+        text = element_text(family = "Times New Roman"),
+        axis.title = element_markdown(lineheight = 1.2,
+                                      hjust = 0.5),
+        legend.title = element_markdown()) +
+  labs(x = "CSI with *IT*", y = "Frequency of aggression from males (times/h)",
+       fill = "*IT* presence") -> p_emm_agg_IT_an
+
+ggsave("figures/p_emm_agg_IT_an.tif",
+       p_emm_agg_IT_an,
+       width = 180, height = 110, dpi = 2000, units = "mm")
+
+p_emm_agg_TY_an + p_emm_agg_IT_an
+```
+<br/>  
+
+実際の被攻撃頻度をプロットすると以下のようになります。  
+```{r}
+## TY
+emm_agg_TY_an2 <- emmeans(m_agg_TYIT_an_rv,
+                         ~ TY,
+                         at = list(TY = c(0,1)),
+                         type = "response",
+                         offset = log(1)) %>% 
+  data.frame() %>% 
+  mutate(TY = as.factor(TY))
+
+agg_daily_all_an %>% 
+  group_by(femaleID, TY) %>% 
+  summarise(mean = mean(rate_agg),
+            n = n()) %>% 
+  ungroup() %>% 
+  mutate(TY = as.factor(TY)) %>% 
+  ggplot(aes(x = TY, y = mean))+
+  geom_line(aes(group = femaleID),
+            alpha = 0.7)+
+  geom_point(shape = 1,
+             size = 3)+
+  geom_point(data = emm_agg_TY_an2 %>% 
+               filter(TY == "0"),
+             aes(y = prob),
+             position = position_nudge(x = -0.15),
+             size = 3,
+             shape = 16)+
+  geom_errorbar(data = emm_agg_TY_an2 %>% 
+                  filter(TY == "0"),
+                aes(y = prob,
+                    ymin = lower.HPD, ymax = upper.HPD),
+                position = position_nudge(x = -0.15),
+                width = 0.08)+
+  geom_point(data = emm_agg_TY_an2 %>% 
+               filter(TY == "1"),
+             aes(y = prob),
+             position = position_nudge(x = 0.15),
+             size = 3,
+             shape = 16)+
+  geom_errorbar(data = emm_agg_TY_an2 %>% 
+                  filter(TY == "1"),
+                aes(y = prob,
+                    ymin = lower.HPD, ymax = upper.HPD),
+                position = position_nudge(x = 0.15),
+                width = 0.08)+
+  coord_cartesian(xlim = c(1.1,1.8))+
+  theme_bw(base_size = 12)+
+  scale_x_discrete(labels = c("*TY* absent",
+                              "*TY* present"),
+                   expand = c(0.4, 0.3, 0.6, 0.3))+
+  labs(x = "", y = "Frequency of aggression from males (times/h)",
+       title = "a")+
+  theme(text = element_text(family = "Times New Roman"),
+        axis.text = element_markdown(),
+        aspect.ratio = 0.9) -> p_agg_TY_raw_an
+
+## IT  
+emm_agg_IT_an2 <- emmeans(m_agg_TYIT_an_rv,
+                         ~ IT,
+                         at = list(IT = c(0,1)),
+                         type = "response",
+                         offset = log(1)) %>% 
+  data.frame() %>% 
+  mutate(IT = as.factor(IT))
+
+agg_daily_all_an %>% 
+  group_by(femaleID, IT) %>% 
+  summarise(mean = mean(rate_agg),
+            n = n()) %>% 
+  ungroup() %>% 
+  mutate(IT = as.factor(IT)) %>% 
+  ggplot(aes(x = IT, y = mean))+
+  geom_line(aes(group = femaleID),
+            alpha = 0.7)+
+  geom_point(shape = 1,
+             size = 3)+
+  geom_point(data = emm_agg_IT_an2 %>% 
+               filter(IT == "0"),
+             aes(y = prob),
+             position = position_nudge(x = -0.15),
+             size = 3,
+             shape = 16)+
+  geom_errorbar(data = emm_agg_IT_an2 %>% 
+                  filter(IT == "0"),
+                aes(y = prob,
+                    ymin = lower.HPD, ymax = upper.HPD),
+                position = position_nudge(x = -0.15),
+                width = 0.08)+
+  geom_point(data = emm_agg_IT_an2 %>% 
+               filter(IT == "1"),
+             aes(y = prob),
+             position = position_nudge(x = 0.15),
+             size = 3,
+             shape = 16)+
+  geom_errorbar(data = emm_agg_IT_an2 %>% 
+                  filter(IT == "1"),
+                aes(y = prob,
+                    ymin = lower.HPD, ymax = upper.HPD),
+                position = position_nudge(x = 0.15),
+                width = 0.08)+
+  coord_cartesian(xlim = c(1.1,1.8))+
+  theme_bw(base_size = 12)+
+  scale_x_discrete(labels = c("*IT* absent",
+                              "*IT* present"),
+                   expand = c(0.4, 0.3, 0.6, 0.3))+
+  labs(x = "", y = "Frequency of aggression from males (times/h)",
+       title = "b")+
+  theme(text = element_text(family = "Times New Roman"),
+        axis.text = element_markdown(),
+        aspect.ratio = 0.9) -> p_agg_IT_raw_an
+
+p_agg_TYIT_raw_an <- p_agg_TY_raw_an + p_agg_IT_raw_an
+
+p_agg_TYIT_raw_an
+
+ggsave("figures/p_agg_TYIT_raw_an.tif",p_agg_TYIT_raw_an, dpi = 2000, units = "mm",
+        width = 200, height = 120)
+```
+
+#### 2019~2020交尾期 + TYの有無 + ITの有無    
+続いて2019~2020交尾期のデータを用い、TYとITの有無両方を考慮したモデルを考える。  
+
+##### データの加工  
+TYとITが3時間以上確認されたか、一度も確認されていない日だけを抽出する。  
+```{r}
+agg_daily_all_bf21_es <- agg_daily_all %>% 
+  filter(TY != 2 & IT != 2) %>% 
+  filter(study_period != "m21") %>% 
+  filter(rs2 == "1") %>% 
+  mutate(logdur = log(dur/60)) %>% 
+  mutate(date = as.factor(date)) %>% 
+  drop_na(CSI_TY) %>% 
+  mutate(CSI_TY_std = standardize(CSI_TY),
+         CSI_IT_std = standardize(CSI_IT),
+         est_std = standardize(no_est),
+         male_std = standardize(no_male),
+         rank_std = standardize(rank_scaled),
+         age_std = standardize(age),
+         prop_std = standardize(prop_female),
+         focal_std = standardize(prop_focal)) 
+
+agg_daily_all_bf21_an <- agg_daily_all %>% 
+  filter(TY != 2 & IT != 2) %>% 
+  filter(study_period != "m21") %>% 
+  filter(rs2 == "0") %>% 
+  mutate(logdur = log(dur/60)) %>% 
+  mutate(date = as.factor(date)) %>% 
+  drop_na(CSI_TY) %>% 
+  mutate(CSI_TY_std = standardize(CSI_TY),
+         CSI_IT_std = standardize(CSI_IT),
+         est_std = standardize(no_est),
+         male_std = standardize(no_male),
+         rank_std = standardize(rank_scaled),
+         age_std = standardize(age),
+         prop_std = standardize(prop_female),
+         focal_std = standardize(prop_focal)) 
+```
+
+##### モデリング      
+モデルの概要は以下の通り。データは各観察日におけるそれぞれのメスのデータである。    
+
+- 応答変数: オスからの被攻撃回数  
+- 説明変数: 発情の有無、TYの有無、TYとのCSI、発情の有無×TYの有無、TYとのCSI×TYの有無、発情メス数、確認オス数、調査期間、年齢、順位  
+- オフセット項: 群れの追跡時間  
+- 分布: 負の二項分布  
+- リンク関数: log関数  
+- 事前分布: 関数にある通り弱情報分布  
+
+```{r}
+m_agg_TYIT_bf21_es_rv <- brm(no_agg ~ TY*CSI_TY_std +  IT*CSI_IT_std +
+                            est_std + male_std +  prop_std + focal_std + 
+                            study_period + offset(logdur) +
+                            (1|femaleID) + (1|date),
+                          family = negbinomial,
+                          iter = 11000, warmup = 1000, seed = 133,
+                          prior = c(prior(student_t(4,0,15), class = "b"),
+                                    prior(student_t(4,0,15), class = "Intercept"),
+                                    prior(student_t(4,0,10), class = "sd"),
+                                    prior(gamma(0.01,0.01), class = "shape")),
+                          control=list(adapt_delta = 0.999, max_treedepth = 20),
+                          backend = "cmdstanr",
+                          data = agg_daily_all_bf21_es,
+                          file = "model/m_agg_TYIT_bf21_es_rv.rds")
+
+m_agg_TYIT_bf21_an_rv <- brm(no_agg ~ TY*CSI_TY_std + IT*CSI_IT_std +
+                            est_std + male_std + prop_std + focal_std + 
+                            study_period + offset(logdur) +
+                            (1|femaleID) + (1|date),
+                          family = "negbinomial",
+                          iter = 11000, warmup = 1000, seed = 11,
+                          prior = c(prior(student_t(4,0,15), class = "b"),
+                                    prior(student_t(4,0,15), class = "Intercept"),
+                                    prior(student_t(4,0,10), class = "sd"),
+                                    prior(gamma(0.01,0.01), class = "shape")),
+                          control=list(adapt_delta = 0.99, max_treedepth = 20),
+                          backend = "cmdstanr",
+                          data = agg_daily_all_bf21_an,
+                          file = "model/m_agg_TYIT_bf21_an_rv.rds")
+```
+
+###### モデルのチェック  
+DHARMaパッケージ[@Hartig2022]とDHARMa.helperパッケージ[@Francisco2023]でモデルの前提が満たされているかを確認する。どちらのモデルも特に問題はないよう。 
+```{r, fig.height = 4}
+dh_m_agg_TYIT_bf21_es_rv <- dh_check_brms(m_agg_TYIT_bf21_es_rv, quantreg = TRUE)
+dh_m_agg_TYIT_bf21_an_rv <- dh_check_brms(m_agg_TYIT_bf21_an_rv, quantreg = TRUE)
+```
+<br/>  
+
+Rhatにも問題はなく、収束の問題はないよう。  
+```{r, fig.dim = c(8,4)}
+data.frame(Rhat = brms::rhat(m_agg_TYIT_bf21_es_rv)) %>% 
+  ggplot(aes(x = Rhat))+
+  geom_histogram(fill = "white",
+                 color = "black")+
+  theme_bw()+
+  theme(aspect.ratio = 1) 
+
+data.frame(Rhat = brms::rhat(m_agg_TYIT_bf21_an_rv)) %>% 
+  ggplot(aes(x = Rhat))+
+  geom_histogram(fill = "white",
+                 color = "black")+
+  theme_bw()+
+  theme(aspect.ratio = 1) 
+```
+<br/>  
+
+bayesplotパッケージ[@Gabry2022]の`pp_check`関数で、事後分布からの予測分布と実測値の分布を比較しても大きな乖離はない。   
+```{r, fig.height = 4.5}
+## 全個体への攻撃  
+pp_check(m_agg_TYIT_bf21_es_rv, ndraws = 100)+
+  theme_bw()+
+  theme(aspect.ratio = 0.9)
+
+pp_check(m_agg_TYIT_bf21_es_rv, ndraws = 100)+
+  theme_bw()+
+  theme(aspect.ratio = 0.9)
+```  
+<br/>  
+
+多重共線性のチェックも行ったが、VIFに問題はない。  
+```{r}
+check_collinearity(m_agg_TYIT_bf21_es_rv)
+check_collinearity(m_agg_TYIT_bf21_an_rv)
+```
+<br/>  
+
+ゼロ過剰の問題もない。  
+```{r}
+testZeroInflation(dh_m_agg_TYIT_bf21_es_rv)
+testZeroInflation(dh_m_agg_TYIT_bf21_an_rv)
+```
+<br/>  
+
+##### 結果の確認  
+結果は以下の通り。太字になっている変数は95%確信区間が0をまたいでおらず、有意な影響があるといえる。まずは発情メスについては、発情メス数のみが有意な影響を持っていた。      
+```{r, echo = FALSE}
+summary_agg_TYIT_bf21_es_rv <- summary(m_agg_TYIT_bf21_es_rv)
+
+model_parameters(m_agg_TYIT_bf21_es_rv, ci = 0.95,
+                 centrality = "median", ci_method = "hdi") %>% 
+  data.frame() %>% 
+  dplyr::select(1,2,3,5,6, 7,8) %>% 
+  filter(Parameter != "shape") %>% 
+  mutate("Bulk ESS" = summary_agg_TYIT_bf21_es_rv$fixed$Bulk_ESS,
+         "Tail ESS" = summary_agg_TYIT_bf21_es_rv$fixed$Tail_ESS) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
+  dplyr::select(c(1,2,3, 10), everything()) %>% 
+  dplyr::select(-CI_low, -CI_high) %>% 
+  mutate(pd = str_c(sprintf("%.2f",pd*100))) %>% 
+  rename(PD = pd)  %>% 
+  mutate(Parameter = fct_relevel(Parameter,
+                                 "b_Intercept","b_TY","b_IT",
+                                 "b_CSI_TY_std","b_CSI_IT_std",
+                                 "b_TY:CSI_TY_std",
+                                 "b_IT:CSI_IT_std",
+                                 "b_male_std","b_est_std", 
+                                 "b_prop_std", "b_focal_std",
+                                 "b_study_periodm20")) %>% 
+  arrange(Parameter) %>% 
+  mutate(Parameter = str_replace_all(Parameter, c("b_Intercept"="切片",
+                                                  "b_study_periodm20" = "Study period(MS20 vs MS18)",
+                                                  "b_study_periodm21" = "Study period(MS21 vs MS18)",
+                                                  "^b_TY$" = "TY presence (Yes vs No)",
+                                                  "^b_IT$" = "IT presence (Yes vs No)",
+                                                  "b_male_std" = "No. of present males",
+                                                  "b_est_std" = "No. of estrous females",
+                                                  "b_prop_std" = "Prop. of present females",
+                                                  "b_focal_std" = "Prop. of time focal sampling", 
+                                                  "b_CSI_TY_std" = "CSI with TY",
+                                                  "b_TY:CSI_TY_std" = "TY presence x CSI with TY",
+                                                  "b_CSI_IT_std" = "CSI with IT",
+                                                  "b_IT:CSI_IT_std" = "IT presence x CSI with IT")))%>% 
+  rename("Explanatory variables"="Parameter") %>% 
+  mutate(across(where(is.numeric), ~sprintf("%.2f", .))) -> table_agg_TYIT_bf21_es
+
+table_agg_TYIT_bf21_es
+
+write_csv(table_agg_TYIT_bf21_es, "tables/table_agg_TYIT_bf21_es.csv")
+```
+<br/>  
+
+続いて、非発情メスについては以下のとおりである。  
+```{r, echo = FALSE}
+summary_agg_TYIT_bf21_an_rv <- summary(m_agg_TYIT_bf21_an_rv)
+
+model_parameters(m_agg_TYIT_bf21_an_rv, ci = 0.95,
+                 centrality = "median", ci_method = "hdi") %>% 
+  data.frame() %>% 
+  dplyr::select(1,2,3,5,6, 7,8) %>% 
+  filter(Parameter != "shape") %>% 
+  mutate("Bulk ESS" = summary_agg_TYIT_bf21_an_rv$fixed$Bulk_ESS,
+         "Tail ESS" = summary_agg_TYIT_bf21_an_rv$fixed$Tail_ESS) %>% 
+  mutate("95%CI" = str_c("[",sprintf("%.2f",CI_low),",",sprintf("%.2f",CI_high),"]")) %>% 
+  dplyr::select(c(1,2,3, 10), everything()) %>% 
+  dplyr::select(-CI_low, -CI_high) %>% 
+  mutate(pd = str_c(sprintf("%.2f",pd*100))) %>% 
+  rename(PD = pd)  %>% 
+  mutate(Parameter = fct_relevel(Parameter,
+                                 "b_Intercept","b_TY","b_IT",
+                                 "b_CSI_TY_std","b_CSI_IT_std",
+                                 "b_TY:CSI_TY_std",
+                                 "b_IT:CSI_IT_std",
+                                 "b_male_std","b_est_std", 
+                                 "b_prop_std", "b_focal_std",
+                                 "b_study_periodm20")) %>% 
+  arrange(Parameter) %>% 
+  mutate(Parameter = str_replace_all(Parameter, c("b_Intercept"="切片",
+                                                  "b_study_periodm20" = "Study period(MS20 vs MS18)",
+                                                  "b_study_periodm21" = "Study period(MS21 vs MS18)",
+                                                  "^b_TY$" = "TY presence (Yes vs No)",
+                                                  "^b_IT$" = "IT presence (Yes vs No)",
+                                                  "b_male_std" = "No. of present males",
+                                                  "b_est_std" = "No. of estrous females",
+                                                  "b_prop_std" = "Prop. of present females",
+                                                  "b_focal_std" = "Prop. of time focal sampling", 
+                                                  "b_CSI_TY_std" = "CSI with TY",
+                                                  "b_TY:CSI_TY_std" = "TY presence x CSI with TY",
+                                                  "b_CSI_IT_std" = "CSI with IT",
+                                                  "b_IT:CSI_IT_std" = "IT presence x CSI with IT")))%>% 
+  rename("Explanatory variables"="Parameter") %>% 
+  mutate(across(where(is.numeric), ~sprintf("%.2f", .))) -> table_agg_TYIT_bf21_an
+
+table_agg_TYIT_bf21_an
+
+write_csv(table_agg_TYIT_bf21_an, "tables/table_agg_TYIT_bf21_an.csv")
+```
+<br/>  
+
+##### 結果の図示  
+交互作用項の結果について図示する。*IT*についてのみ作図する。    
+```{r}
+## 発情メス
+cont_agg_IT_bf21_es <- posterior_samples(m_agg_TYIT_bf21_es_rv) %>% 
+  select(4, 12) %>% 
+  rename(b_IT = 1,
+         b_int = 2) %>% 
+  expand(CSI_IT_std = seq(-0.7, 3, length = 500),
+         nesting(b_IT, b_int)) %>% 
+  mutate(logratio = b_IT + b_int*CSI_IT_std) %>% 
+  group_by(CSI_IT_std) %>% 
+  summarise(median = median(logratio),
+            CI_low = quantile(logratio, 0.025),
+            CI_high = quantile(logratio, 0.975)) %>% 
+  ungroup() %>% 
+  rename(CSI_IT = CSI_IT_std) %>% 
+  mutate(CSI_IT = sd(agg_daily_all_bf21_es$CSI_IT)*CSI_IT + mean(agg_daily_all_bf21_es$CSI_IT)) %>% 
+  mutate(significance = if_else(CI_low*CI_high > 0,
+                                "Yes", "No"))
+
+cont_agg_IT_bf21_es %>% 
+  ggplot(aes(x = CSI_IT, y = median))+
+  geom_point(data = CSI_IT_combined,
+             aes(x = CSI_IT, y = -2.5),
+             shape = "|",
+             color = "black",
+             size = 3.5)+
+  geom_line(aes(color = significance))+
+  geom_ribbon(aes(ymin = CI_low, ymax = CI_high,
+                  fill = significance),
+              alpha = 0.15)+
+  scale_color_manual(values = c("black", "red3"),
+                     labels = c("No", "Yes")) +
+  scale_fill_manual(values = c("grey32", "red3"),
+                    labels = c("No", "Yes")) +
+  geom_hline(aes(yintercept = 0),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 0.5)+
+  theme_bw(base_size = 12)+
+  theme(aspect.ratio = 1) +
+  labs(y = "Log ratio of aggression frequency<br>(*IT* present vs. absent)",
+       x = "CSI with *IT*",
+       color = "95% CI doesn't include zero", fill = "95% CI doesn't include zero",
+       title = "b")+
+  scale_x_continuous(breaks = seq(0,5.5,0.5))+
+  scale_y_continuous(breaks = seq(-2.5, 8, 0.5))+
+  theme(text = element_text(family = "Times New Roman"),
+        axis.title = element_markdown(hjust = 0.5,
+                                      lineheight = 1.2),
+        axis.text = element_text(size = 12),
+        aspect.ratio = 1,
+        legend.position = "bottom",
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 12),
+        legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(-12,-12,-12,-12)) -> p_cont_agg_IT_bf21_es
+
+## 発情メス
+cont_agg_IT_bf21_an <- posterior_samples(m_agg_TYIT_bf21_an_rv) %>% 
+  select(4, 12) %>% 
+  rename(b_IT = 1,
+         b_int = 2) %>% 
+  expand(CSI_IT_std = seq(-0.7, 3.4, length = 500),
+         nesting(b_IT, b_int)) %>% 
+  mutate(logratio = b_IT + b_int*CSI_IT_std) %>% 
+  group_by(CSI_IT_std) %>% 
+  summarise(median = median(logratio),
+            CI_low = quantile(logratio, 0.025),
+            CI_high = quantile(logratio, 0.975)) %>% 
+  ungroup() %>% 
+  rename(CSI_IT = CSI_IT_std) %>% 
+  mutate(CSI_IT = sd(agg_daily_all_bf21_an$CSI_IT)*CSI_IT + mean(agg_daily_all_bf21_an$CSI_IT)) %>% 
+  mutate(significance = if_else(CI_low*CI_high > 0,
+                                "Yes", "No"))
+
+cont_agg_IT_bf21_an %>% 
+  ggplot(aes(x = CSI_IT, y = median))+
+  geom_point(data = CSI_IT_combined,
+             aes(x = CSI_IT, y = -2.45),
+             shape = "|",
+             color = "black",
+             size = 3.5)+
+  geom_line(aes(color = significance))+
+  geom_ribbon(aes(ymin = CI_low, ymax = CI_high,
+                  fill = significance),
+              alpha = 0.15)+
+  scale_color_manual(values = c("red3", "black"),
+                     labels = c("Yes", "No")) +
+  scale_fill_manual(values = c("red3", "grey32"),
+                    labels = c("Yes", "No")) +
+  geom_hline(aes(yintercept = 0),
+             linetype = "dashed",
+             color = "grey30",
+             linewidth = 0.5)+
+  theme_bw(base_size = 12)+
+  theme(aspect.ratio = 1) +
+  labs(y = "Log ratio of aggression frequency<br>(*IT* present vs. absent)",
+       x = "CSI with *IT*",
+       color = "95% CI doesn't include zero", fill = "95% CI doesn't include zero",
+       title = "a")+
+  scale_x_continuous(breaks = seq(0,5.5,0.5))+
+  scale_y_continuous(breaks = seq(-2.5, 8, 0.5))+
+  theme(text = element_text(family = "Times New Roman"),
+        axis.title = element_markdown(hjust = 0.5,
+                                      lineheight = 1.2),
+        axis.text = element_text(size = 12),
+        aspect.ratio = 1,
+        legend.position = "bottom",
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 12),
+        legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(-12,-12,-12,-12)) +
+  guides(color = "none", fill = "none") -> p_cont_agg_IT_bf21_an
+
+
+p_cont_agg_IT_bf21 <-  p_cont_agg_IT_bf21_an +  p_cont_agg_IT_bf21_es +
+  plot_layout(guides = 'collect') &
+  theme(legend.position = 'bottom')
+
+p_cont_agg_IT_bf21
+
+ggsave("figures/p_cont_agg_IT_bf21.tif", p_cont_agg_IT_bf21,
+       width = 200, height = 120, units = "mm", dpi = 2000)
+```
+<br/>  
+
+推定された被攻撃頻度をプロットすると以下のようになる。  
+```{r}
+## 発情メス
+CSI_IT_q <- quantile(CSI_IT_combined$CSI_IT,
+                     probs = c(0.1, 0.25, 0.5, 0.75, 0.9))[1:5]
+
+CSI_IT_std_bf21_es_q <- (CSI_IT_q - mean(agg_daily_all_bf21_es$CSI_IT))/sd(agg_daily_all_bf21_es$CSI_IT)
+
+emm_agg_IT_bf21_es <- emmeans(m_agg_TYIT_es_rv,
+                              ~IT|CSI_IT_std,
+                              at = list(IT_out = c(0,1),
+                                        CSI_IT_std = CSI_IT_std_bf21_es_q),
+                              offset = log(1),
+                              type = "response") 
+
+emm_agg_IT_bf21_es %>% 
+  data.frame() %>% 
+  mutate(CSI_IT_cat = factor(CSI_IT_std,
+                             labels = str_c(c("10%\n(", "25%\n(", "Median\n(",
+                                              "75%\n(", "90%\n("),
+                                            sprintf("%.2f", CSI_IT_q),")"))) %>% 
+  mutate(IT = if_else(IT == "1", "Yes", "No")) %>% 
+  ggplot(aes(x = CSI_IT_cat, y = prob)) +
+  geom_errorbar(aes(group = IT,
+                    ymin = lower.HPD, ymax = upper.HPD),
+                position = position_dodge(0.85),
+                width = 0.5)+
+  geom_point(aes(fill = IT),
+             position = position_dodge(0.85),
+             shape = 21,
+             size = 2.5) +
+  scale_fill_manual(values = c("white", "black")) +
+  theme_bw(base_size = 12) +
+  theme(aspect.ratio = 0.7,
+        text = element_text(family = "Times New Roman"),
+        axis.title = element_markdown(lineheight = 1.2,
+                                      hjust = 0.5),
+        legend.title = element_markdown()) +
+  labs(x = "CSI with *IT*", y = "Frequency of aggression from males (times/h)",
+       fill = "*IT* presence") -> p_emm_agg_IT_bf21_es
+
+ggsave("figures/p_emm_agg_IT_bf21_es.tif",
+       p_emm_agg_IT_bf21_es,
+       width = 180, height = 110, dpi = 2000, units = "mm")
+
+## 非発情メス
+CSI_IT_std_bf21_an_q <- (CSI_IT_q - mean(agg_daily_all_bf21_an$CSI_IT))/sd(agg_daily_all_bf21_an$CSI_IT)
+
+emm_agg_IT_bf21_an <- emmeans(m_agg_TYIT_an_rv,
+                              ~IT|CSI_IT_std,
+                              at = list(IT_out = c(0,1),
+                                        CSI_IT_std = CSI_IT_std_bf21_an_q),
+                              offset = log(1),
+                              type = "response") 
+
+emm_agg_IT_bf21_an %>% 
+  data.frame() %>% 
+  mutate(CSI_IT_cat = factor(CSI_IT_std,
+                             labels = str_c(c("10%\n(", "25%\n(", "Median\n(",
+                                              "75%\n(", "90%\n("),
+                                            sprintf("%.2f", CSI_IT_q),")"))) %>% 
+  mutate(IT = if_else(IT == "1", "Yes", "No")) %>% 
+  ggplot(aes(x = CSI_IT_cat, y = prob)) +
+  geom_errorbar(aes(group = IT,
+                    ymin = lower.HPD, ymax = upper.HPD),
+                position = position_dodge(0.85),
+                width = 0.5)+
+  geom_point(aes(fill = IT),
+             position = position_dodge(0.85),
+             shape = 21,
+             size = 2.5) +
+  scale_fill_manual(values = c("white", "black")) +
+  theme_bw(base_size = 12) +
+  theme(aspect.ratio = 0.7,
+        text = element_text(family = "Times New Roman"),
+        axis.title = element_markdown(lineheight = 1.2,
+                                      hjust = 0.5),
+        legend.title = element_markdown()) +
+  labs(x = "CSI with *IT*", y = "Frequency of aggression from males (times/h)",
+       fill = "*IT* presence") -> p_emm_agg_IT_bf21_an
+
+ggsave("figures/p_emm_agg_IT_bf21_an.tif",
+       p_emm_agg_IT_bf21_an,
+       width = 180, height = 110, dpi = 2000, units = "mm")
+
+p_emm_agg_IT_bf21_es + p_emm_agg_IT_bf21_an
+```
+<br/>  
+
+実際の被攻撃頻度をプロットすると以下のようになります。  
+```{r}
+## 発情メス
+emm_agg_IT_bf21_es2 <- emmeans(m_agg_TYIT_bf21_es_rv,
+                         ~ IT,
+                         at = list(IT = c(0,1)),
+                         type = "response",
+                         offset = log(1)) %>% 
+  data.frame() %>% 
+  mutate(IT = as.factor(IT))
+
+agg_daily_all_bf21_es %>% 
+  group_by(femaleID, IT) %>% 
+  summarise(mean = mean(rate_agg),
+            n = n()) %>% 
+  ungroup() %>% 
+  mutate(IT = as.factor(IT)) %>% 
+  ggplot(aes(x = IT, y = mean))+
+  geom_line(aes(group = femaleID),
+            alpha = 0.7)+
+  geom_point(shape = 1,
+             size = 3)+
+  geom_point(data = emm_agg_IT_bf21_es2 %>% 
+               filter(IT == "0"),
+             aes(y = prob),
+             position = position_nudge(x = -0.15),
+             size = 3,
+             shape = 16)+
+  geom_errorbar(data = emm_agg_IT_bf21_es2 %>% 
+                  filter(IT == "0"),
+                aes(y = prob,
+                    ymin = lower.HPD, ymax = upper.HPD),
+                position = position_nudge(x = -0.15),
+                width = 0.08)+
+  geom_point(data = emm_agg_IT_bf21_es2 %>% 
+               filter(IT == "1"),
+             aes(y = prob),
+             position = position_nudge(x = 0.15),
+             size = 3,
+             shape = 16)+
+  geom_errorbar(data = emm_agg_IT_bf21_es2 %>% 
+                  filter(IT == "1"),
+                aes(y = prob,
+                    ymin = lower.HPD, ymax = upper.HPD),
+                position = position_nudge(x = 0.15),
+                width = 0.08)+
+  coord_cartesian(xlim = c(1.1,1.8))+
+  theme_bw(base_size = 12)+
+  scale_x_discrete(labels = c("*IT* absent",
+                              "*IT* present"),
+                   expand = c(0.4, 0.3, 0.6, 0.3))+
+  labs(x = "", y = "Frequency of aggression from males (times/h)",
+       title = "b")+
+  theme(text = element_text(family = "Times New Roman"),
+        axis.text = element_markdown(),
+        aspect.ratio = 0.9) -> p_agg_IT_raw_bf21_es
+
+## 非発情メス  
+emm_agg_IT_bf21_an2 <- emmeans(m_agg_TYIT_bf21_an_rv,
+                         ~ IT,
+                         at = list(IT = c(0,1)),
+                         type = "response",
+                         offset = log(1)) %>% 
+  data.frame() %>% 
+  mutate(IT = as.factor(IT))
+
+agg_daily_all_bf21_an %>% 
+  group_by(femaleID, IT) %>% 
+  summarise(mean = mean(rate_agg),
+            n = n()) %>% 
+  ungroup() %>% 
+  mutate(IT = as.factor(IT)) %>% 
+  ggplot(aes(x = IT, y = mean))+
+  geom_line(aes(group = femaleID),
+            alpha = 0.7)+
+  geom_point(shape = 1,
+             size = 3)+
+  geom_point(data = emm_agg_IT_bf21_an2 %>% 
+               filter(IT == "0"),
+             aes(y = prob),
+             position = position_nudge(x = -0.15),
+             size = 3,
+             shape = 16)+
+  geom_errorbar(data = emm_agg_IT_bf21_an2 %>% 
+                  filter(IT == "0"),
+                aes(y = prob,
+                    ymin = lower.HPD, ymax = upper.HPD),
+                position = position_nudge(x = -0.15),
+                width = 0.08)+
+  geom_point(data = emm_agg_IT_bf21_an2 %>% 
+               filter(IT == "1"),
+             aes(y = prob),
+             position = position_nudge(x = 0.15),
+             size = 3,
+             shape = 16)+
+  geom_errorbar(data = emm_agg_IT_bf21_an2 %>% 
+                  filter(IT == "1"),
+                aes(y = prob,
+                    ymin = lower.HPD, ymax = upper.HPD),
+                position = position_nudge(x = 0.15),
+                width = 0.08)+
+  coord_cartesian(xlim = c(1.1,1.8))+
+  theme_bw(base_size = 12)+
+  scale_x_discrete(labels = c("*IT* absent",
+                              "*IT* present"),
+                   expand = c(0.4, 0.3, 0.6, 0.3))+
+  labs(x = "", y = "Frequency of aggression from males (times/h)",
+       title = "a")+
+  theme(text = element_text(family = "Times New Roman"),
+        axis.text = element_markdown(),
+        aspect.ratio = 0.9) -> p_agg_IT_raw_bf21_an
+
+p_agg_IT_raw_bf21 <- p_agg_IT_raw_bf21_an + p_agg_IT_raw_bf21_es
+
+p_agg_IT_raw_bf21
+
+ggsave("figures/p_agg_IT_raw_bf21.tif",p_agg_IT_raw_bf21, dpi = 2000, units = "mm",
+        width = 200, height = 120)
+```

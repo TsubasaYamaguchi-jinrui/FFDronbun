@@ -1,5 +1,5 @@
 # メスが群れを離れるメカニズム {#c10}    
-前章までの分析により、*TY*と*IT*が群れを出入りすることが群れ本体における確認メス割合に影響している可能背うが高いことが分かった。それでは、実際にそれぞれのメスはどのようなメカニズムで群れを出るか否かを決めているのだろうか?  
+前章までの分析により、*TY*と*IT*が群れを出入りすることが群れ本体における確認メス割合に影響している可能性が高いことが分かった。それでは、実際にそれぞれのメスはどのようなメカニズムで群れを出るか否かを決めているのだろうか?  
 
 以下では、メスの毎日の確認状況のデータからメスが群れを離れる要因を探る(図\@ref(fig:female-out))。オスの出入りの他、彼らとの親密度、アカンボウの有無、発情の有無、オスの攻撃などの要因を検討する。  
 
@@ -1375,9 +1375,9 @@ model_parameters(m_female_out_an_TYstate, dispersion = TRUE, ci = 0.95) %>%
 
 table_female_out_an_TYstate
 
-save_as_image(table_female_out_an_TYstate,
-              "tables/table_female_out_an_TYstate.tiff",
-              res = 600)
+# save_as_image(table_female_out_an_TYstate,
+#               "tables/table_female_out_an_TYstate.tiff",
+#               res = 600)
 ```
 <br/>  
 

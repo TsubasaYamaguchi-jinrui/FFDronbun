@@ -1,6 +1,31 @@
 # 基本情報  
 以下では、基本的な情報をまとめる。  
 
+## 全調査日  
+全調査日の日数。調査を1分でも行った日がすべて含まれている。    
+
+期間ごとは以下の通り。
+```{r}
+Study_days <- base_all %>% 
+  filter(duration > 0,
+         !date %in% c("2019-11-22", "2019-11-23")) %>% 
+  distinct(date, .keep_all = TRUE) %>% 
+  left_join(group_all %>% 
+              distinct(date, .keep_all = TRUE) %>% 
+              select(date, study_period)) %>% 
+  mutate(study_period = if_else(date == "2019-02-13", "nm19", study_period)) %>% 
+  group_by(study_period) %>% 
+  summarise(Days = n()) 
+
+Study_days  
+```
+<br/>  
+
+全日数。
+```{r}
+sum(Study_days$Days)
+```
+
 ## 追跡時間と観察日数  
 240分以上かつ50%のメス(>5)が観察された日のみを含む。   
 ```{r}
@@ -56,11 +81,53 @@ no_female_over0.5 %>%
   align(j=2:7,part = "all",align = "center")-> table_dur_wide
 
 table_dur_wide
- 
-# save_as_image(table_dur, "tables/table_dur.tiff",
-#               res = 600)
+```
 
-# save_as_image(table_dur_wide, "tables/table_dur_wide.tiff",
-#               res = 600)
+## オスとの近接時間割合  
+```{r}
+focal_combined %>%
+  filter(activity %in% c("R", "G", "F") & T_G == "G") %>% 
+  left_join(female_all,
+            by = c("subject" = "femaleID", "date")) %>% 
+  filter(is.na(rs2) | rs2 == 0) %>% 
+  mutate(
+    TY_3m = case_when(
+      str_detect(x0_1m, "TY") | str_detect(x1_3m, "TY") ~ 1,
+      .default = 0
+    ),
+    IT_3m = case_when(
+      str_detect(x0_1m, "IT") | str_detect(x1_3m, "IT") ~ 1,
+      .default = 0
+    ),
+    LK_3m = case_when(
+      str_detect(x0_1m, "LK") | str_detect(x1_3m, "LK") ~ 1,
+      .default = 0
+    ),
+    KR_3m = case_when(
+      str_detect(x0_1m, "KR") | str_detect(x1_3m, "KR") ~ 1,
+      .default = 0
+    ),
+    KM_3m = case_when(
+      str_detect(x0_1m, "KM") | str_detect(x1_3m, "KM") ~ 1,
+      .default = 0
+    ),
+    TG_3m = case_when(
+      str_detect(x0_1m, "TG") | str_detect(x1_3m, "TG") ~ 1,
+      .default = 0
+    )) %>% 
+  pivot_longer(TY_3m:TG_3m,
+               names_to = "ID",
+               values_to = "proximity") %>% 
+  group_by(study_period, ID) %>% 
+  summarise(prop = mean(proximity)) %>% 
+  pivot_wider(names_from = study_period,
+              values_from = prop) %>% 
+  mutate(ID = str_replace_all(ID, "_3m",""))
+```
+
+## 個体追跡時間  
+```{r}
+focal_combined %>% 
+  group_by(study_period, subject)
 ```
 
