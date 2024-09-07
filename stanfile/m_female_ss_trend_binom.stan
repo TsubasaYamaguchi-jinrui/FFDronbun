@@ -13,7 +13,6 @@ parameters {
   vector[D] b;   
   real<lower=0> s_t;   
   vector[N-2] mu_err;    
-  real<lower=0> phi;   
 }
 
 transformed parameters {
@@ -26,10 +25,10 @@ transformed parameters {
   mu[i] = 2*mu[i-1] - mu[i-2] + mu_err[i-2]*s_t; 
   }
 
-  vector[N] p;  
+  vector[len_obs] logit_p;  
   
   for (i in 1:len_obs){
-    p[obs_no[i]] = inv_logit(mu[obs_no[i]] + X[i]*b);
+    logit_p[i] = mu[obs_no[i]] + X[i]*b;
   }
   
 }
@@ -40,12 +39,10 @@ model {
   mu_err ~ normal(0,1); 
   
   for(i in 1:len_obs){
-    no_female[i] ~ beta_binomial(max_female[i], p[obs_no[i]]*phi + 1.0E-10, phi*(1-p[obs_no[i]]) + 1.0E-10);
+    no_female[i] ~ binomial_logit(max_female[i], logit_p[i]);
   }
   
   b ~ student_t(4,0,5);
-  
-  phi ~ gamma(0.01, 0.01); 
   
   s_t ~ student_t(4,0,2.5);
   
